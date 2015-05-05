@@ -5,39 +5,39 @@
 
 int ign = 0;
 int n = 0;
+bool leave_hall;
 
 binary action raise_hand, ack_q, ign_q;
-binary action ask_q, stop_asking, answer_q, leave_hall;
+binary action ask_q, stop_asking, answer_q;
 
+property PrLeave = Pmax(<> (leave_hall));
 
 process Student() {
-    do {
-        :: when(ign < 3) raise_hand!;
-            alt {
-                :: ack_q?; {= n = 0, ign = 0 =}; do {
-                    palt {
-                        :1: ask_q!; answer_q?; {= n = n + 1=}
-                        :n: stop_asking!; break
-                    }
-                }
-                :: ign_q?; {= ign = ign+1 =} 
+    alt {
+    :: when(ign < 3) raise_hand!;
+        alt {
+        :: ack_q? {= n = 0, ign = 0 =}; do {
+            palt {
+            :1: ask_q!; answer_q? {= n = n + 1=}
+            :n: stop_asking!; break
             }
-        :: when(ign >= 3) leave_hall!; break
+        }
+        :: ign_q? {= ign = ign+1 =} 
+        }; Student()
+    :: when(ign >= 3) {= leave_hall = true =}
     }
 }
 
 process Lecturer() {
-    do {
-        raise_hand?;
-        palt {
-        :1: ack_q!; 
-            do {
-                :: ask_q?; answer_q!
-                :: stop_asking?; break
-            }
-        :3: ign_q!
+    raise_hand?;
+    palt {
+    :1: ack_q!; 
+        do {
+            :: ask_q?; answer_q!
+            :: stop_asking?; break
         }
-    }
+    :3: ign_q!
+    }; Lecturer()
 }
 
 par {
