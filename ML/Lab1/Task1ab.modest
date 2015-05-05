@@ -1,0 +1,46 @@
+/*
+    n := number of questions asked in a row
+    ign := number of ignores in a row
+*/
+
+int ign = 0;
+int n = 0;
+
+binary action raise_hand, ack_q, ign_q;
+binary action ask_q, stop_asking, answer_q, leave_hall;
+
+
+process Student() {
+    do {
+        :: when(ign < 3) raise_hand!;
+            alt {
+                :: ack_q?; {= n = 0, ign = 0 =}; do {
+                    palt {
+                        :1: ask_q!; answer_q?; {= n = n + 1=}
+                        :n: stop_asking!; break
+                    }
+                }
+                :: ign_q?; {= ign = ign+1 =} 
+            }
+        :: when(ign >= 3) leave_hall!; break
+    }
+}
+
+process Lecturer() {
+    do {
+        raise_hand?;
+        palt {
+        :1: ack_q!; 
+            do {
+                :: ask_q?; answer_q!
+                :: stop_asking?; break
+            }
+        :3: ign_q!
+        }
+    }
+}
+
+par {
+:: Student()
+:: Lecturer()
+}
