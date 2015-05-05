@@ -1,0 +1,21 @@
+/*
+
+
+*/
+
+binary action request;
+
+const real T_ARRIVAL = 1.0;
+
+int queue_length = 0;
+
+
+par {
+:: do { request? {= queue_length = queue_length + 1 =} }
+:: do {
+    :: when (queue_length > 0) delay(2) tau {= queue_length = queue_length - 1 =}
+    }
+:: do { 
+    delay(T_ARRIVAL) request!
+   }
+}
