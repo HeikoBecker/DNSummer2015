@@ -1,21 +1,32 @@
 /*
-
+    a) CMD: mosta Task2ab.modest -X -S -E -O out.dot -D png out.png --no-invariants -F
 
 */
 
-binary action request;
+action request;
 
 const real T_ARRIVAL = 1.0;
 
 int queue_length = 0;
 
+property ExLength100 = Xmax(queue_length | time == 100);
+property ExLength200 = Xmax(queue_length | time == 200);
+property ExLength400 = Xmax(queue_length | time == 400);
+property ExLength800 = Xmax(queue_length | time == 800);
+property ExLength1600 = Xmax(queue_length | time == 1600);
+
+process Worker() {
+    alt {
+    :: when (queue_length > 0) delay(2) tau {= queue_length = queue_length - 1 =}
+    :: when (queue_length != 0) tau 
+    }; Worker()
+}
+
+process Queue() {
+    delay(T_ARRIVAL) request {= queue_length = queue_length + 1 =}; Queue()
+}
 
 par {
-:: do { request? {= queue_length = queue_length + 1 =} }
-:: do {
-    :: when (queue_length > 0) delay(2) tau {= queue_length = queue_length - 1 =}
-    }
-:: do { 
-    delay(T_ARRIVAL) request!
-   }
+:: Worker()
+:: Queue()
 }
