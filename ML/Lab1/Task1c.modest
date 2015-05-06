@@ -1,19 +1,12 @@
 /*
-    a) CMD: mosta Task1ab.modest -X -S -E -O out.dot -D png out.png --no-invariants -F
-    b) CMD: modes Task1ab.modest -S ASAP -R Uniform
+    c) CMD: modes Task1ab.modest -S ASAP -R Uniform
     
     n       := number of questions asked in a row
     ign     := number of ignores in a row
     total   := total number of questions asked in a run
     
-    
-a)  Students initiates: wishing to ask a question (raise_hand), asking a question; stop asking
-    Lecturer initiates: answering a question
-    
-b)  (PrLeave) Eventually leaves: 1 = 100% (which is clear, because with infinite time, there will always be three ignores in a row)
-    (PrMin5Q) At least five questions are asked: 0.2 = 20%
-    (ExQuestions) Number of questions till student leaves: 2.5
-    
+    c)  ExTimeToLeave: 213.17s
+        ExTimeToLeaveOr5Q: 150.17s
 */
 
 int ign = 0;
@@ -24,10 +17,9 @@ bool leave_hall;
 action raise_hand, ack_q, ign_q;
 action ask_q, stop_asking, answer_q;
 
-// Task b)
-property PrLeave = Pmax(<> (leave_hall));
-property PrMin5Q = Pmax(<> (leave_hall && total >= 5));
-property ExQuestions = Xmax(total | leave_hall);
+// Task c)
+property ExTimeToLeave = Xmax(time | leave_hall);
+property ExTimeToLeaveOr5Q = Xmax(time | (leave_hall || total >= 5));
 
 process Student() {
     alt {
@@ -36,12 +28,12 @@ process Student() {
         :: ack_q {= n = 0, ign = 0 =};
             do {
                 palt {
-                :1: ask_q; answer_q {= n = n + 1, total = total + 1 =}
+                :1: ask_q; delay(Uniform(30, 120)) answer_q {= n = n + 1, total = total + 1 =}
                 :n: stop_asking; break
                 }
             }
         :: ign_q {= ign = ign+1 =} 
-        }; Student()
+        }; delay(Exponential(1/300)) Student() // the student should leave immediately???
     :: when(ign >= 3) {= leave_hall = true =}
     }
 }
