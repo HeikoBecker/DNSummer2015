@@ -3,7 +3,7 @@
 
 */
 
-action request;
+action request, idle, busy;
 
 const real T_ARRIVAL = 1.0;
 
@@ -16,14 +16,11 @@ property ExLength800 = Xmax(queue_length | time == 800);
 property ExLength1600 = Xmax(queue_length | time == 1600);
 
 process Worker() {
-    alt {
-    :: when (queue_length > 0) delay(2) tau {= queue_length = queue_length - 1 =}
-    :: when (queue_length != 0) tau 
-    }; Worker()
+    idle; when (queue_length > 0) delay(2) busy {= queue_length = queue_length - 1 =}; Worker()
 }
 
 process Queue() {
-    delay(T_ARRIVAL) request {= queue_length = queue_length + 1 =}; Queue()
+    urgent delay(T_ARRIVAL) request {= queue_length = queue_length + 1 =}; Queue()
 }
 
 par {
