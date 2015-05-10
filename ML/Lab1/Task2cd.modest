@@ -17,13 +17,13 @@ property ExLength1600 = Xmax(queue_length | time == 1600);
 
 process Worker() {
     alt {
-    :: when (queue_length > 0) delay(2) tau {= queue_length = queue_length - 1 =}
+    :: when (queue_length > 0) delay(Exp(1/2)) tau {= queue_length = queue_length - 1 =}
     :: when (queue_length != 0) tau 
     }; Worker()
 }
 
 process Queue() {
-    delay(T_ARRIVAL) request {= queue_length = queue_length + 1 =}; Queue()
+    delay(Exp(1/T_ARRIVAL)) request {= queue_length = queue_length + 1 =}; Queue()
 }
 
 par {
