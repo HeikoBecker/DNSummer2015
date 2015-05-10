@@ -1,12 +1,28 @@
 /*
     a) CMD: mosta Task2ab.modest -X -S -E -O out.dot -D png out.png --no-invariants -F
-            modes Task2ab.modest
-
+            
+    b) CMD: modes Task2ab.modest -R Uniform
+    
+        T_ARR := Time to next arrival (in seconds)
+        I_TRA := Traffic intensity
+        QL(t) := Queue length at time t
+        
+        +-------+-------+---------+----------+----------+----------+-----------+
+        | T_ARR | I_TRA | QL(100) | QL (200) | QL (400) | QL (800) | QL (1600) | 
+        +-------+-------+---------+----------+----------+----------+-----------+
+        |   4.0 |   50% |       0 |        0 |        0 |        0 |         0 | 
+        |   2.5 |   80% |       0 |        0 |        0 |        0 |         0 | 
+        |   2.2 |   90% |       0 |        0 |        0 |        0 |         0 | 
+        |   2.1 |   95% |       0 |        0 |        0 |        0 |         0 |
+        |   2.0 |  100% |       0 |        0 |        0 |        0 |         0 |
+        |   1.6 |  125% |      12 |       25 |       50 |      100 |       200 | 
+        |   1.0 |  200% |      50 |      100 |      200 |      400 |       800 | 
+        +-------+-------+---------+----------+----------+----------+-----------+
 */
 
 action request, busy;
 
-const real T_ARRIVAL = 1.0;
+const real T_ARRIVAL = 2.0;
 
 int queue_length = 0;
 
