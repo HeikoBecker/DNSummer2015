@@ -36,8 +36,8 @@ process Student() {
         :: ack_q {= n = 0, ign = 0 =};
             do {
                 palt {
-                :1: ask_q; answer_q {= n = n + 1, total = total + 1 =}
-                :n: stop_asking; break
+                :1: ask_q; answer_q {= n = n + 1, total = total + 1 =} // (1/ n+1) probability to continue asking
+                :n: stop_asking; break  // (n/n+1) probability to stop asking questions
                 }
             }
         :: ign_q {= ign = ign+1 =} 
