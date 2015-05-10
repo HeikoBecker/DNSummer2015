@@ -1,9 +1,10 @@
 /*
     a) CMD: mosta Task2ab.modest -X -S -E -O out.dot -D png out.png --no-invariants -F
+            modes Task2ab.modest
 
 */
 
-action request, idle, busy;
+action request, busy;
 
 const real T_ARRIVAL = 1.0;
 
@@ -16,11 +17,11 @@ property ExLength800 = Xmax(queue_length | time == 800);
 property ExLength1600 = Xmax(queue_length | time == 1600);
 
 process Worker() {
-    idle; when (queue_length > 0) delay(2) busy {= queue_length = queue_length - 1 =}; Worker()
+    when (queue_length > 0) delay(2) busy {= queue_length = queue_length - 1 =}; Worker()
 }
 
 process Queue() {
-    urgent delay(T_ARRIVAL) request {= queue_length = queue_length + 1 =}; Queue()
+    delay(T_ARRIVAL) request {= queue_length = queue_length + 1 =}; Queue()
 }
 
 par {
