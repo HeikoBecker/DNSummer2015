@@ -1,29 +1,63 @@
 ﻿/*
     e) CMD: modes Task2e.modest 
+    
+        T_ARR := Time to next arrival (in seconds)
+        I_TRA := Traffic intensity
+        DP(t) := Probability of one drop at time t
+        DC(t) := Drop count at time t
+        
+        DROP PROBABILITY
+        +-------+-------+---------+----------+----------+----------+-----------+
+        | T_ARR | I_TRA | DP(100) | DP (200) | DP (400) | DP (800) | DP (1600) | 
+        +-------+-------+---------+----------+----------+----------+-----------+
+        |   4.0 |   50% |    0.00 |     0.01 |     0.02 |     0.05 |      0.11 | 
+        |   2.5 |   80% |    0.44 |     1.12 |     2.53 |     5.52 |     11.48 | 
+        |   2.2 |   90% |    1.25 |     3.41 |     7.84 |    16.31 |     33.51 | 
+        |   2.1 |   95% |    1.68 |     4.55 |    10.52 |    22.63 |     46.73 |
+        |   2.0 |  100% |    2.25 |     6.36 |    14.91 |    31.59 |     65.09 |
+        |   1.6 |  125% |    8.57 |    21.81 |    48.77 |   102.45 |    209.82 | 
+        +-------+-------+---------+----------+----------+----------+-----------+
+        
+        DROP COUNT
+        +-------+-------+---------+----------+----------+----------+-----------+
+        | T_ARR | I_TRA | DC(100) | DC (200) | DC (400) | DC (800) | DC (1600) | 
+        +-------+-------+---------+----------+----------+----------+-----------+
+        |   4.0 |   50% |    0.00 |     0.00 |     0.01 |     0.02 |      0.05 | 
+        |   2.5 |   80% |    0.12 |     0.27 |     0.49 |     0.75 |      0.95 | 
+        |   2.2 |   90% |    0.29 |     0.54 |     0.82 |     0.97 |      0.99 | 
+        |   2.1 |   95% |    0.34 |     0.62 |     0.88 |     0.99 |      1.00 |
+        |   2.0 |  100% |    0.42 |     0.74 |     0.94 |     0.99 |      1.00 |
+        |   1.6 |  125% |    0.83 |     0.98 |     1.00 |     1.00 |      1.00 | 
+        +-------+-------+---------+----------+----------+----------+-----------+
 */
 
 action request, busy;
 
-const real T_ARRIVAL = 1.5;
+const real T_ARRIVAL = 4.0;
 
 int queue_length = 0;
 int dropped = 0;
 
-property ExLength100 = Xmax(dropped | time == 100);
-property ExLength200 = Xmax(dropped | time == 200);
-property ExLength400 = Xmax(dropped | time == 400);
-property ExLength800 = Xmax(dropped | time == 800);
-property ExLength1600 = Xmax(dropped | time == 1600);
+clock global_clock;
+
+const int experiment_duration = 1800;
+
+property DropCount100 = Xmax(dropped | time == 100);
+property DropCount200 = Xmax(dropped | time == 200);
+property DropCount400 = Xmax(dropped | time == 400);
+property DropCount800 = Xmax(dropped | time == 800);
+property DropCount1600 = Xmax(dropped | time == 1600);
 
 
-property DropLength100  = Pmax(<> (dropped >= 1) && time <= 100);
-property DropLength200  = Pmax(<> (dropped >= 1) && time = 200);
-property DropLength400  = Pmax(<> (dropped >= 1) && time = 400);
-property DropLength800  = Pmax(<> (dropped >= 1) && time = 800);
-property DropLength1600 = Pmax(<> (dropped >= 1) && time = 1600);
+property DropProb100  = Pmax(<> (dropped >= 1 && time <= 100));
+property DropProb200  = Pmax(<> (dropped >= 1 && time <= 200));
+property DropProb400  = Pmax(<> (dropped >= 1 && time <= 400));
+property DropProb800  = Pmax(<> (dropped >= 1 && time <= 800));
+property DropProb1600 = Pmax(<> (dropped >= 1 && time <= 1600));
 
 process Worker() {
-    when (queue_length > 0) delay(Exp(1/2)) busy {= queue_length = queue_length - 1 =}; Worker()
+    when (queue_length > 0) delay(Exp(1/2)) busy {= queue_length = queue_length - 1 =};
+    when (global_clock <= experiment_duration) Worker()    
 }
 
 process Queue() {
@@ -31,7 +65,8 @@ process Queue() {
     alt{
     :: when (queue_length < 10) request {= queue_length = queue_length + 1 =}
     :: when (queue_length >= 10) tau {= dropped = dropped + 1 =}
-    }; Queue()
+    };
+    when (global_clock <= experiment_duration) Queue()
 }
 
 par {
