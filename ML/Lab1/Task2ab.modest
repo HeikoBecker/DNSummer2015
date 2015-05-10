@@ -1,5 +1,4 @@
-<<<<<<< Updated upstream
-/*
+﻿/*
     a) CMD: mosta Task2ab.modest -X -S -E -O out.dot -D png out.png --no-invariants -F
             
     b) CMD: modes Task2ab.modest -R Uniform
@@ -47,35 +46,3 @@ par {
 :: Worker()
 :: Queue()
 }
-=======
-﻿/*
-    a) CMD: mosta Task2ab.modest -X -S -E -O out.dot -D png out.png --no-invariants -F
-            modes Task2ab.modest
-
-*/
-
-action request, busy;
-
-const real T_ARRIVAL = 2.0;
-
-int queue_length = 0;
-
-property ExLength100 = Xmax(queue_length | time == 100);
-property ExLength200 = Xmax(queue_length | time == 200);
-property ExLength400 = Xmax(queue_length | time == 400);
-property ExLength800 = Xmax(queue_length | time == 800);
-property ExLength1600 = Xmax(queue_length | time == 1600);
-
-process Worker() {
-    when (queue_length > 0) delay(2) busy {= queue_length = queue_length - 1 =}; Worker()
-}
-
-process Queue() {
-    delay(T_ARRIVAL) request {= queue_length = queue_length + 1 =}; Queue()
-}
-
-par {
-:: Worker()
-:: Queue()
-}
->>>>>>> Stashed changes

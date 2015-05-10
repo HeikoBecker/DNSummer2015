@@ -1,12 +1,15 @@
-/*
+﻿/*
     c) CMD: modes Task1ab.modest -S ASAP -R Uniform
     
     n       := number of questions asked in a row
     ign     := number of ignores in a row
     total   := total number of questions asked in a run
     
-    c)  ExTimeToLeave: 213.17s
-        ExTimeToLeaveOr5Q: 150.17s
+    c)  ExTimeToLeave: 587.02s
+        ExTimeToLeaveOr5Q: 413.33s
+
+    Except for added delays, modelling equivalent to Task1ab.
+    Please see Task1ab.modest for modelling information.
 */
 
 int ign = 0;
@@ -28,13 +31,12 @@ process Student() {
         :: ack_q {= n = 0, ign = 0 =};
             do {
                 palt {
-                :1: ask_q; delay(Uniform(30, 120)) answer_q {= n = n + 1, total = total + 1 =}
-                :n: stop_asking; break
+                :1: ask_q; answer_q {= n = n + 1, total = total + 1 =}
+                :n: stop_asking; delay(Exponential(1/300)) break //after stopping there is a delay
                 }
-            }
+            } 
         :: ign_q {= ign = ign+1 =} 
-        }; delay(Exponential(1/300)) Student() // the student should leave immediately???
-    :: when(ign >= 3) {= leave_hall = true =}
+        }; Student()     :: when(ign >= 3) {= leave_hall = true =}
     }
 }
 
@@ -43,7 +45,7 @@ process Lecturer() {
     palt {
     :1: ack_q; 
         do {
-            :: ask_q; answer_q
+            :: ask_q; delay(Uniform(30, 120)) answer_q //answering a question takes uniformly between 30 and 120 seconds
             :: stop_asking; break
         }
     :3: ign_q

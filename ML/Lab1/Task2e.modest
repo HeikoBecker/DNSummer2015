@@ -1,40 +1,39 @@
-/*
+﻿/*
     a) CMD: mosta Task2ab.modest -X -S -E -O out.dot -D png out.png --no-invariants -F
 
+    b) CMD: modes Task2e.modest 
 */
 
-action request;
+action request, busy;
 
-const real T_ARRIVAL = 1.0;
+const real T_ARRIVAL = 1.5;
 
 int queue_length = 0;
 int dropped = 0;
 
-property ExLength100 = Xmax(queue_length | time == 100);
-property ExLength200 = Xmax(queue_length | time == 200);
-property ExLength400 = Xmax(queue_length | time == 400);
-property ExLength800 = Xmax(queue_length | time == 800);
-property ExLength1600 = Xmax(queue_length | time == 1600);
+property ExLength100 = Xmax(dropped | time == 100);
+property ExLength200 = Xmax(dropped | time == 200);
+property ExLength400 = Xmax(dropped | time == 400);
+property ExLength800 = Xmax(dropped | time == 800);
+property ExLength1600 = Xmax(dropped | time == 1600);
 
-//TODO
-//property DropLength100  = Pmax(dropped >= 1 | time == 100);
-//property DropLength200  = Pmax(dropped >= 1 | time == 200);
-//property DropLength400  = Pmax(dropped >= 1 | time == 400);
-//property DropLength800  = Pmax(dropped >= 1 | time == 800);
-//property DropLength1600 = Pmax(dropped >= 1 | time == 1600);
+
+property DropLength100  = Pmax(<> (dropped >= 1 && time <= 100));
+property DropLength200  = Pmax(<> (dropped >= 1 && time <= 200));
+property DropLength400  = Pmax(<> (dropped >= 1 && time <= 400));
+property DropLength800  = Pmax(<> (dropped >= 1 && time <= 800));
+property DropLength1600 = Pmax(<> (dropped >= 1 && time <= 1600));
 
 process Worker() {
-    alt {
-    :: when (queue_length > 0) delay(Exp(1/2)) tau {= queue_length = queue_length - 1 =}
-    :: when (queue_length == 0) tau 
-    }; Worker()
+    when (queue_length > 0) delay(Exp(1/2)) busy {= queue_length = queue_length - 1 =}; Worker()
 }
 
 process Queue() {
+    delay(Exp(1/T_ARRIVAL))
     alt{
-    :: when (queue_length < 10) delay(Exp(1/T_ARRIVAL)) request {= queue_length = queue_length + 1 =}; Queue()
-    :: when (queue_length >= 10) tau {= dropped = dropped + 1 =}; Queue()
-    }
+    :: when (queue_length < 10) request {= queue_length = queue_length + 1 =}
+    :: when (queue_length >= 10) tau {= dropped = dropped + 1 =}
+    };Queue()
 }
 
 par {
