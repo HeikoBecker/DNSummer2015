@@ -1,7 +1,5 @@
 ﻿/*
-    a) CMD: mosta Task2ab.modest -X -S -E -O out.dot -D png out.png --no-invariants -F
-
-    b) CMD: modes Task2e.modest 
+    e) CMD: modes Task2e.modest 
 */
 
 action request, busy;
@@ -18,11 +16,11 @@ property ExLength800 = Xmax(dropped | time == 800);
 property ExLength1600 = Xmax(dropped | time == 1600);
 
 
-property DropLength100  = Pmax(<> (dropped >= 1 && time <= 100));
-property DropLength200  = Pmax(<> (dropped >= 1 && time <= 200));
-property DropLength400  = Pmax(<> (dropped >= 1 && time <= 400));
-property DropLength800  = Pmax(<> (dropped >= 1 && time <= 800));
-property DropLength1600 = Pmax(<> (dropped >= 1 && time <= 1600));
+property DropLength100  = Pmax(<> (dropped >= 1) && time <= 100);
+property DropLength200  = Pmax(<> (dropped >= 1) && time = 200);
+property DropLength400  = Pmax(<> (dropped >= 1) && time = 400);
+property DropLength800  = Pmax(<> (dropped >= 1) && time = 800);
+property DropLength1600 = Pmax(<> (dropped >= 1) && time = 1600);
 
 process Worker() {
     when (queue_length > 0) delay(Exp(1/2)) busy {= queue_length = queue_length - 1 =}; Worker()
@@ -33,7 +31,7 @@ process Queue() {
     alt{
     :: when (queue_length < 10) request {= queue_length = queue_length + 1 =}
     :: when (queue_length >= 10) tau {= dropped = dropped + 1 =}
-    };Queue()
+    }; Queue()
 }
 
 par {
