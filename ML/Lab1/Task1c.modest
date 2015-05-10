@@ -1,12 +1,16 @@
 ﻿/*
-    c) CMD: modes Task1ab.modest -S ASAP -R Uniform
+    c) CMD: modes Task1c.modest -S ASAP
     
     n       := number of questions asked in a row
     ign     := number of ignores in a row
     total   := total number of questions asked in a run
     
-    c)  ExTimeToLeave: 587.02s
-        ExTimeToLeaveOr5Q: 413.33s
+    Note: We are using the ASAP schedule to eliminate temporal non-determinism. 
+    This advises the simulator to execute actions as soon as possible. As we have placed
+    proper delays and want all other actions to be executed immediately, this is valid.
+    
+    c)  ExTimeToLeave: 570.37s
+        ExTimeToLeaveOr5Q: 409.14s
 
     Except for added delays, modelling equivalent to Task1ab.
     Please see Task1ab.modest for modelling information.
@@ -36,7 +40,8 @@ process Student() {
                 }
             } 
         :: ign_q {= ign = ign+1 =} 
-        }; Student()     :: when(ign >= 3) {= leave_hall = true =}
+        }; Student()
+    :: when(ign >= 3) {= leave_hall = true =}
     }
 }
 

@@ -2,6 +2,8 @@
     a) CMD: mosta Task1ab.modest -X -S -E -O out.dot -D png out.png --no-invariants -F
     b) CMD: modes Task1ab.modest -S ASAP -R Uniform
     
+    Note: we are using Uniform, because we have structural non-determinism, which is in fact two times the identical path, but branches due to semantics. It does not make a difference that we use it here, as both paths lead to the same behaviour. We can use ASAP to eliminate temporal non-determinism, as we are not dealing with time in this model at all.
+    
     n       := number of questions asked in a row
     ign     := number of ignores in a row
     total   := total number of questions asked in a run
@@ -11,7 +13,7 @@ a)  Students initiates: wishing to ask a question (raise_hand), asking a questio
     Lecturer initiates: answering a question
     
 b)  (PrLeave) Eventually leaves: 1 = 100% (which is clear, because with infinite time, there will always be three ignores in a row)
-    (PrMin5Q) At least five questions are asked: 0.81 ~ approx. 80%
+    (PrMin5Q) Less than five questions are asked before leave: 0.81 ~ approx. 80%
     (ExQuestions) Number of questions till student leaves: 2.33 ~ approx 2.5
     
 */
