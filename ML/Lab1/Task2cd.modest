@@ -22,6 +22,11 @@
         probabilistic scenario, the idle times of the worker are larger than previously.
         In the previous task, the request came uniformly distributed and thereby the worker
         could be busy all the time.
+    
+        Except for added distributions, modelling equivalent to Task2ab.
+        Please see Task2ab.modest for modelling information.
+
+
 */
 
 action request, busy;
