@@ -35,6 +35,10 @@
         The clock has no other use.
         
         See: https://dcms.cs.uni-saarland.de/dn/forum/viewtopic.php?f=3&t=49
+
+        Modelling is similar to Task2cd and Task2ab.
+        Differences are explained. 
+        Otherwise see Task2ab.modest .
 */
 
 action request, busy;
@@ -62,17 +66,18 @@ property DropProb800  = Pmax(<> (dropped >= 1 && time <= 800));
 property DropProb1600 = Pmax(<> (dropped >= 1 && time <= 1600));
 
 process Worker() {
-    when (queue_length > 0) delay(Exp(1/2)) busy {= queue_length = queue_length - 1 =};
-    when (global_clock <= experiment_duration) Worker()    
+    when (queue_length > 0) delay(Exp(1/2)) busy {= queue_length = queue_length - 1 =}; //analogous to Task2cd.modest
+    when (global_clock <= experiment_duration) Worker() // constraint the process such that the process only executes if the clock is less than the experiment duration time
 }
 
 process Queue() {
     delay(Exp(1/T_ARRIVAL))
-    alt{
-    :: when (queue_length < 10) request {= queue_length = queue_length + 1 =}
-    :: when (queue_length >= 10) tau {= dropped = dropped + 1 =}
+    alt{ //Alternatives for wether queue is full or not
+    :: when (queue_length < 10) request {= queue_length = queue_length + 1 =} //add element only if queue has space left
+    :: when (queue_length >= 10) tau {= dropped = dropped + 1 =} //add no element if queue is full and count this
     };
-    when (global_clock <= experiment_duration) Queue()
+    when (global_clock <= experiment_duration) Queue() // constraint the process such that the process only executes if the clock is less than the experiment duration time
+
 }
 
 par {
