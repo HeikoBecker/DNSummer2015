@@ -1,7 +1,7 @@
 /*
-    a) CMD: mosta Task2cd.modest -X -S -E -O out.dot -D png out.png --no-invariants -F
+    c) CMD: mosta Task2cd.modest -X -S -E -O out.dot -D png out.png --no-invariants -F
             
-    b) CMD: modes Task2cd.modest -R Uniform -N 5000
+    d) CMD: modes Task2cd.modest -R Uniform -N 5000
     
         T_ARR := Time to next arrival (in seconds)
         I_TRA := Traffic intensity
@@ -23,10 +23,8 @@
         In the previous task, the request came uniformly distributed and thereby the worker
         could be busy all the time.
     
-        Except for added distributions, modelling equivalent to Task2ab.
+        Except for added distributions, modelling is equivalent to Task2ab.
         Please see Task2ab.modest for modelling information.
-
-
 */
 
 action request, busy;

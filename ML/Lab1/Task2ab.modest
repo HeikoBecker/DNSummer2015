@@ -24,7 +24,7 @@
 
 action request, busy;
 
-const real T_ARRIVAL = 2.0;
+const real T_ARRIVAL = 1.0;
 
 int queue_length = 0;
 
@@ -35,16 +35,16 @@ property ExLength800 = Xmax(queue_length | time == 800);
 property ExLength1600 = Xmax(queue_length | time == 1600);
 
 process Worker() {
-    when (queue_length > 0) //when there are elements in the queue
-        delay(2) //2 time units delay
-            busy {= queue_length = queue_length - 1 =}; //action busy to signal that something changes as we decrement the queue
-            Worker() //continue as a Worker
+    when (queue_length > 0)                                 // when there are elements in the queue
+        delay(2)                                            // 2 time units delay
+            busy {= queue_length = queue_length - 1 =};     // action busy to signal that something changes as we decrement the queue
+            Worker()                                        // continue as a Worker
 }
 
 process Queue() {
-    delay(T_ARRIVAL) //always have the defined delay
-         request {= queue_length = queue_length + 1 =}; //action to signal that queue size increases
-         Queue() //contiunue as a Queue
+    delay(T_ARRIVAL)                                        // always have the defined delay
+         request {= queue_length = queue_length + 1 =};     // action to signal that queue size increases
+         Queue()                                            // continue as a Queue
 }
 
 //Process is parallel execution of Worker and Queue

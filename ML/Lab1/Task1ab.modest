@@ -2,7 +2,7 @@
     a) CMD: mosta Task1ab.modest -X -S -E -O out.dot -D png out.png --no-invariants -F
     b) CMD: modes Task1ab.modest -S ASAP -R Uniform
     
-    Note: we are using Uniform, because we have structural non-determinism, which is in fact two times the identical path, but branches due to semantics. It does not make a difference that we use it here, as both paths lead to the same behaviour. We can use ASAP to eliminate temporal non-determinism, as we are not dealing with time in this model at all.
+    Note: we are using Uniform, because we have structural non-determinism, which is in fact two times the identical path, but branches due to loop semantics. It does not make a difference that we use it here, as both paths lead to the same behaviour. We can use ASAP to eliminate temporal non-determinism, as we are not dealing with time in this model at all.
     
     n       := number of questions asked in a row
     ign     := number of ignores in a row
@@ -18,10 +18,10 @@ b)  (PrLeave) Eventually leaves: 1 = 100% (which is clear, because with infinite
     
 */
 
-int ign = 0;        //number of ignores in a row
-int n = 0;          //number of questions asked in a row
-int total = 0;      //number of total questions asked
-bool leave_hall;    //true <=> Student left the lecture hall
+int ign = 0;        // number of ignores in a row
+int n = 0;          // number of questions asked in a row
+int total = 0;      // number of total questions asked
+bool leave_hall;    // true <=> Student left the lecture hall
 
 // Actions for the protocol, in order: Raising the Hand, Acknowledge Question,
 // Ignore Question, Ask a question, Stop Asking Questions, Answer a question
@@ -34,7 +34,7 @@ action ask_q, stop_asking, answer_q;
 // Probability, that leave_hall will become true --> that the student will eventually leave
 property PrLeave = Pmax(<> (leave_hall));
 
-// Probability, that leave_hall = true and more than 5 questions asked --> student eventually leaves before 5 questions have been asked
+// Probability, that leave_hall = true and less than 5 questions asked --> student eventually leaves before 5 questions have been asked
 property PrMin5Q = Pmax(<> (leave_hall && total < 5));
 
 // the expected number of total under the condition that leave_hall = true --> expected number of questions when student leaves
@@ -44,29 +44,29 @@ process Student() {
     alt {                                                       // Student either raises it's hand or leaves when 3 times ignored
     :: when(ign < 3) raise_hand;
         alt {                                                   // If the student raises its hand, either 
-        :: ack_q {= n = 0, ign = 0 =};                          //sync with lecturer and reset values
+        :: ack_q {= n = 0, ign = 0 =};                          // sync with lecturer and reset values
             do {
-                palt {                                          //ask question with probability from sheet
-                :1: ask_q; answer_q {= n = n + 1, total = total + 1 =} // (1/ n+1) probability to continue asking
-                :n: stop_asking; break                          // (n/n+1) probability to stop asking questions
+                palt {                                          // ask question with probability from sheet
+                :1: ask_q; answer_q {= n = n + 1, total = total + 1 =} // (1/(n+1)) probability to continue asking
+                :n: stop_asking; break                          // (n/(n+1)) probability to stop asking questions
                 }
             }
         :: ign_q {= ign = ign+1 =}                             // or get ignored and increment counter
-        }; Student()                                           //continue afterwards
+        }; Student()                                           // continue afterwards
     :: when(ign >= 3) {= leave_hall = true =}
     }
 }
 
 process Lecturer() {
-    raise_hand;                                                 //synchronize with student raising it's hand
-    palt {                                                      //probabilistic decision wether acknowledging or ignoring question
-    :1: ack_q;                                                  // (1/4)  acknowledge and continue
+    raise_hand;                     // synchronize with student raising its hand
+    palt {                          // probabilistic decision whether acknowledging or ignoring question
+    :1: ack_q;                      // (1/4) acknowledge and continue
         do {
-            :: ask_q; answer_q                          //synchronize with asked question and answer
-            :: stop_asking; break                       //synchronize with stopping asking and break out of loop
+            :: ask_q; answer_q      // synchronize with asked question and answer
+            :: stop_asking; break   // synchronize with stopping asking and break out of loop
         }
-    :3: ign_q                                                   // (3/4) ignore question
-    }; Lecturer()                                           //continue afterwards
+    :3: ign_q                       // (3/4) ignore question
+    }; Lecturer()                   // continue afterwards
 }
 
 // Process = Student and Lecturer

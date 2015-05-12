@@ -39,7 +39,7 @@ process Student() {
             do {
                 palt {
                 :1: ask_q; answer_q {= n = n + 1, total = total + 1 =}
-                :n: stop_asking; delay(Exponential(1/300)) break //after stopping there is a delay
+                :n: stop_asking; delay(Exponential(1/300)) break // after stopping there is a delay
                 }
             } 
         :: ign_q {= ign = ign+1 =} 
@@ -53,7 +53,7 @@ process Lecturer() {
     palt {
     :1: ack_q; 
         do {
-            :: ask_q; delay(Uniform(30, 120)) answer_q //answering a question takes uniformly between 30 and 120 seconds
+            :: ask_q; delay(Uniform(30, 120)) answer_q // answering a question takes uniformly between 30 and 120 seconds
             :: stop_asking; break
         }
     :3: ign_q
