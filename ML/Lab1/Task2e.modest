@@ -29,6 +29,12 @@
         |   2.0 |  100% |    0.42 |     0.74 |     0.94 |     0.99 |      1.00 |
         |   1.6 |  125% |    0.83 |     0.98 |     1.00 |     1.00 |      1.00 | 
         +-------+-------+---------+----------+----------+----------+-----------+
+        
+        Note: we use a global clock to terminate the model. Thereby, it can be ensured
+        that the system enters a deterministic cycle and the properties work.
+        The clock has no other use.
+        
+        See: https://dcms.cs.uni-saarland.de/dn/forum/viewtopic.php?f=3&t=49
 */
 
 action request, busy;

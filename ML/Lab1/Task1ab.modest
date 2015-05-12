@@ -25,19 +25,19 @@ bool leave_hall;    //true <=> Student left the lecture hall
 
 // Actions for the protocol, in order: Raising the Hand, Acknowledge Question,
 // Ignore Question, Ask a question, Stop Asking Questions, Answer a question
-//Actions initiated by Student: raise_hand, ask_q, stop_asking
-//Actions initiated by lecturer: ack_q, ign_q, answer_q
+// Actions initiated by Student: raise_hand, ask_q, stop_asking
+// Actions initiated by lecturer: ack_q, ign_q, answer_q
 action raise_hand, ack_q, ign_q;
 action ask_q, stop_asking, answer_q;
 
 // Task b)
-//Probability, that leave_hall will become true --> that the student will eventually leave
+// Probability, that leave_hall will become true --> that the student will eventually leave
 property PrLeave = Pmax(<> (leave_hall));
 
-//Probability, that leave_hall = true and more than 5 questions asked --> student eventually leaves before 5 questions have been asked
+// Probability, that leave_hall = true and more than 5 questions asked --> student eventually leaves before 5 questions have been asked
 property PrMin5Q = Pmax(<> (leave_hall && total < 5));
 
-//the expected number of total under the condition that leave_hall = true --> expected number of questions when student leaves
+// the expected number of total under the condition that leave_hall = true --> expected number of questions when student leaves
 property ExQuestions = Xmax(total | leave_hall);
 
 process Student() {

@@ -16,7 +16,7 @@
     Therefore Exp(1/300) is equivalent to an exponentially distributed 5 Minutes 
     delay.
     Except for added delays, modelling equivalent to Task1ab.
-    Please see Task1ab.modest for modelling information.
+    Please see Task1ab.modest for additional comments on modelling information.
 */
 
 int ign = 0;
