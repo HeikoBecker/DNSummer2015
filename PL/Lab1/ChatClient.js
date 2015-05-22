@@ -2,6 +2,7 @@
 
 var socket = null;
 var userId = 0;
+var msgId = 0;
 
 function main() {
     document.getElementById("groupid").textContent = "Group " + groupNumber;
@@ -26,7 +27,7 @@ function parseMessage(raw) {
 
     return {
         command: firstLine[0],
-        reference:  parseInt(firstLine[1], 10),
+        reference: parseInt(firstLine[1], 10),
         lines: lines.slice(1)
     };
 }
@@ -46,36 +47,60 @@ function connectButtonPressed() {
     socket.onmessage = onMessage;
 }
 
-function onMessage (event) {
+function onMessage(event) {
     var msg = parseMessage(event.data);
 
     if (!isLoggedIn) {
-        switch(msg.command) {
+        switch (msg.command) {
             case "OKAY":
-                userId = msg.reference;
-                onLoginSuccess();
+                if (userId == msg.reference) {
+                    onLoginSuccess();
+                } else {
+                    onLoginFailed();
+                }
                 break;
             case "FAIL":
-                onLoginFailed();
+                console.error("FAILED TO AUTH");
+                console.error(msg);
                 break;
             default:
                 console.error(msg);
                 break;
         }
     } else {
-        switch(msg.command) {
+        switch (msg.command) {
             case "ARRV":
-                // TODO: is group number the description???
                 addUser(msg.reference, msg.lines[0], msg.lines[1]);
                 break;
+            case "LEFT":
+                removeUser(msg.reference);
+                break;
+            case "SEND":
+                // TODO: implement receiving messages from others
+                console.error(msg);
+                console.error("NOT YET IMPLEMENTED");
+                break;
+            case "ACKN":
+                markMessageAcknowledged(msg.reference, findUserName(parseInt(msg.lines[0], 10)));
+                break;
+            case "OKAY":
+                if(msgId == msg.reference) {
+                    markMessageConfirmed(msgId);
+                }
+                break;
+            case "FAIL":
+                console.error(msg);
+                console.error("NOT YET IMPLEMENTED");
+                break;
             default:
-                console.log(msg);
+                console.error(msg);
+                console.error("NOT YET IMPLEMENTED");
                 break;
         }
     }
 }
 
-function onerror (event) {
+function onerror(event) {
     console.error(event);
 }
 
@@ -102,7 +127,8 @@ function loginButtonPressed() {
     document.getElementById("login").disabled = true;
     setStatusBarText("Authenticating...");
 
-    sendMessage("AUTH", getRandomInt(), [name, password]);
+    userId = getRandomInt();
+    sendMessage("AUTH", userId, [name, password]);
 }
 
 // Called when the "Send" button is pressed
@@ -127,7 +153,9 @@ function sendButtonPressed() {
     document.getElementById("messageInput").value = "";
     setStatusBarText("Sending message...");
 
-    // TODO: Insert your code here to send <message> to <to>
+    msgId = getRandomInt();
+    sendMessage("SEND", msgId, [to, message]);
+    addChatMessage(msgId, userId, message, true);
 }
 
 // Use this function to get random integers for use with the Chat protocol
@@ -175,6 +203,7 @@ function onDisconnected() {
 
 // Call this function when the connection to the server fails (i.e. you get an error)
 function onConnectionFailed() {
+    // TODO: call this function somewhere
     setStatusBarText("Connection failed.");
     suppressStatusBarUpdate = true; // onDisconnected should also get called
 }
