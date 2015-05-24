@@ -12,7 +12,7 @@ function main() {
 }
 
 function sendMessage(command, number, lines) {
-    var msg = command + " " + number; //+ "\r\n";
+    var msg = command + " " + number; 
     if (lines != null){
         msg += "\r\n";
         for (var i = 0; i < lines.length; i++) {
@@ -72,8 +72,7 @@ function onMessage(event) {
                 }
                 break;
             case "FAIL":
-                console.error("FAILED TO AUTH");
-                console.error(msg);
+                handleAuthFail(msg);
                 break;
             default:
                 console.log(" Unhandled Command received from server:")
@@ -89,7 +88,6 @@ function onMessage(event) {
                 removeUser(msg.reference);
                 break;
             case "SEND":
-                // TODO: implement receiving messages from others
                 messageReceived(msg);
                 break;
             case "ACKN":
@@ -101,8 +99,7 @@ function onMessage(event) {
                 }
                 break;
             case "FAIL":
-                console.error(msg);
-                console.error("NOT YET IMPLEMENTED");
+                handleFail(msg);
                 break;
             default:
                 console.log(" Unhandled Command received from server:")
@@ -188,6 +185,36 @@ function messageReceived(msg){
     sendMessage("ACKN",msgId,null);
 }
 
+function handleAuthFail(msg){
+    switch (msg.lines[0]) {
+        case "NAME":
+            setStatusBarText("Username already in use. Please use a different one.");
+            break;
+        case "PASSWORD":
+            setStatusBarText("Sorry. Wrong password.");
+            break;
+        case "NUMBER":
+            setStatusBarText("Internal Error. Please retry.");
+            break;
+        default:
+           console.error("Unhandled Failure for Authentication");
+           console.error(msg);
+    }
+}
+
+function handleFail(msg){
+    switch (msg.lines[0]) {
+        case "NUMBER":
+            setStatusBarText("Internal Error. Please retry.")
+            break;
+        case "LENGTH":
+            setStatusBarText("Message is too long. Please consider removing some characters.");
+            break;
+        default:
+            console.error("Unhandled Failure");
+           console.error(msg);
+    }
+}
 // The remaining functions in this file are helper functions to update
 // the user interface when certain actions are performed (e.g. a message
 // is sent and should be displayed in the message list) or certain
