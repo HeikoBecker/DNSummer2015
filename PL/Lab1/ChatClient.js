@@ -101,6 +101,9 @@ function onMessage(event) {
             case "FAIL":
                 handleFail(msg);
                 break;
+            case "INVD":
+                recoverFromFatalError();
+                break;
             default:
                 console.log(" Unhandled Command received from server:")
                 console.error(msg);
@@ -214,6 +217,16 @@ function handleFail(msg){
             console.error("Unhandled Failure");
            console.error(msg);
     }
+}
+
+function recoverFromFatalError(){
+    setStatusBarText("Internal Error occurred. This means that something went wrong while communicating. Recovering...");
+    isLoggedIn=false;
+    name= "";
+    socket = null;
+    userId = 0;
+    msgId = 0;
+    document.getElementById("connect").disabled=false;
 }
 // The remaining functions in this file are helper functions to update
 // the user interface when certain actions are performed (e.g. a message
