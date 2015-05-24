@@ -12,8 +12,9 @@ function main() {
 }
 
 function sendMessage(command, number, lines) {
-    var msg = command + " " + number + "\r\n";
+    var msg = command + " " + number; //+ "\r\n";
     if (lines != null){
+        msg += "\r\n";
         for (var i = 0; i < lines.length; i++) {
             msg += lines[i];
             if (i < lines.length - 1) {
@@ -21,7 +22,6 @@ function sendMessage(command, number, lines) {
             }
         }
     }
-    console.log(msg);
     socket.send(msg);
 }
 
@@ -176,7 +176,6 @@ function getRandomInt() {
 }
 
 function messageReceived(msg){
-    console.log(msg);
     var senderId = msg.lines[0];
     var senderName = findUserName(senderId);
     var msgId = msg.reference;
@@ -184,10 +183,8 @@ function messageReceived(msg){
     for (var i = 1; i < msg.lines.length; i++){
         txt = txt + msg.lines[i];
     }
-    console.log(senderId + " " + senderName + " " + msgId + " " + txt);
     addChatMessage(msgId, senderName, txt, false);
     //Acknowledge message receipt
-    console.log("Acknowledging msg for " + msgId)
     sendMessage("ACKN",msgId,null);
 }
 
