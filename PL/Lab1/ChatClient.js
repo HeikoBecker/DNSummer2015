@@ -1,5 +1,6 @@
 ﻿var groupNumber = 25; // replace by your group number
 
+var name= "";
 var socket = null;
 var userId = 0;
 var msgId = 0;
@@ -12,12 +13,15 @@ function main() {
 
 function sendMessage(command, number, lines) {
     var msg = command + " " + number + "\r\n";
-    for (var i = 0; i < lines.length; i++) {
-        msg += lines[i];
-        if (i < lines.length - 1) {
-            msg += "\r\n";
+    if (lines != null){
+        for (var i = 0; i < lines.length; i++) {
+            msg += lines[i];
+            if (i < lines.length - 1) {
+                msg += "\r\n";
+            }
         }
     }
+    console.log(msg);
     socket.send(msg);
 }
 
@@ -36,9 +40,12 @@ function parseMessage(raw) {
 function connectButtonPressed() {
     var server = document.getElementById("serverInput").value;
     document.getElementById("connect").disabled = true;
+    document.getElementById("disconnect").disabled=false;
     setStatusBarText("Connecting to " + server + "...");
 
+    //Establish a WebSocket connection to server
     socket = new WebSocket("ws://" + server);
+    //and set the methods used for handling events
     socket.onclose = onClose;
     socket.onerror = onerror;
     socket.onopen = function () {
@@ -47,6 +54,11 @@ function connectButtonPressed() {
     socket.onmessage = onMessage;
 }
 
+/*
+ * Message handler function
+ * First parses the message from the server.
+ * Action must be taken depending on wether client is logged in or not.
+ */
 function onMessage(event) {
     var msg = parseMessage(event.data);
 
@@ -64,6 +76,7 @@ function onMessage(event) {
                 console.error(msg);
                 break;
             default:
+                console.log(" Unhandled Command received from server:")
                 console.error(msg);
                 break;
         }
@@ -77,8 +90,7 @@ function onMessage(event) {
                 break;
             case "SEND":
                 // TODO: implement receiving messages from others
-                console.error(msg);
-                console.error("NOT YET IMPLEMENTED");
+                messageReceived(msg);
                 break;
             case "ACKN":
                 markMessageAcknowledged(msg.reference, findUserName(parseInt(msg.lines[0], 10)));
@@ -93,8 +105,8 @@ function onMessage(event) {
                 console.error("NOT YET IMPLEMENTED");
                 break;
             default:
+                console.log(" Unhandled Command received from server:")
                 console.error(msg);
-                console.error("NOT YET IMPLEMENTED");
                 break;
         }
     }
@@ -122,7 +134,7 @@ function disconnectButtonPressed() {
 
 // Called when the "Log in" button is pressed
 function loginButtonPressed() {
-    var name = document.getElementById("nameInput").value;
+    name = document.getElementById("nameInput").value;
     var password = document.getElementById("passwordInput").value;
     document.getElementById("login").disabled = true;
     setStatusBarText("Authenticating...");
@@ -155,12 +167,28 @@ function sendButtonPressed() {
 
     msgId = getRandomInt();
     sendMessage("SEND", msgId, [to, message]);
-    addChatMessage(msgId, userId, message, true);
+    addChatMessage(msgId, name, message, true);
 }
 
 // Use this function to get random integers for use with the Chat protocol
 function getRandomInt() {
     return Math.floor(Math.random() * 9007199254740991);
+}
+
+function messageReceived(msg){
+    console.log(msg);
+    var senderId = msg.lines[0];
+    var senderName = findUserName(senderId);
+    var msgId = msg.reference;
+    var txt = "";
+    for (var i = 1; i < msg.lines.length; i++){
+        txt = txt + msg.lines[i];
+    }
+    console.log(senderId + " " + senderName + " " + msgId + " " + txt);
+    addChatMessage(msgId, senderName, txt, false);
+    //Acknowledge message receipt
+    console.log("Acknowledging msg for " + msgId)
+    sendMessage("ACKN",msgId,null);
 }
 
 // The remaining functions in this file are helper functions to update
