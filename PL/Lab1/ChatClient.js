@@ -244,6 +244,7 @@ function onConnected(server) {
     document.getElementById("disconnect").style.display = "flex";
     document.getElementById("connect").disabled = false;
     document.getElementById("login").disabled = false;
+    document.getElementById("loginButton").disabled=false;
     setStatusBarText("Connected.");
 }
 
@@ -278,6 +279,7 @@ function onLoginSuccess() {
     setStatusBarText("Successfully logged in.");
     document.getElementById("message").disabled = false;
     document.getElementById("userlist").disabled = false;
+    document.getElementById("loginButton").disabled=true;
     addInfoMessage("Session started, now receiving messages.");
     isLoggedIn = true;
 }
