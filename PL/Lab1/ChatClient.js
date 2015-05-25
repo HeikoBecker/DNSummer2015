@@ -1,19 +1,18 @@
 ﻿var groupNumber = 25; // replace by your group number
 
-var name= "";
+var name = "";
 var socket = null;
 var userId = 0;
 var msgId = 0;
 
 function main() {
     document.getElementById("groupid").textContent = "Group " + groupNumber;
-
-    // Insert any initialisation code here
+    document.getElementById("loginButton").disabled = true;
 }
 
 function sendMessage(command, number, lines) {
-    var msg = command + " " + number; 
-    if (lines != null){
+    var msg = command + " " + number;
+    if (lines != null) {
         msg += "\r\n";
         for (var i = 0; i < lines.length; i++) {
             msg += lines[i];
@@ -40,14 +39,14 @@ function parseMessage(raw) {
 function connectButtonPressed() {
     var server = document.getElementById("serverInput").value;
     document.getElementById("connect").disabled = true;
-    document.getElementById("disconnect").disabled=false;
+    document.getElementById("disconnect").disabled = false;
     setStatusBarText("Connecting to " + server + "...");
 
     //Establish a WebSocket connection to server
     socket = new WebSocket("ws://" + server);
     //and set the methods used for handling events
     socket.onclose = onClose;
-    socket.onerror = onerror;
+    socket.onerror = onError;
     socket.onopen = function () {
         onConnected(server);
     };
@@ -57,7 +56,7 @@ function connectButtonPressed() {
 /*
  * Message handler function
  * First parses the message from the server.
- * Action must be taken depending on wether client is logged in or not.
+ * Action must be taken depending on whether client is logged in or not.
  */
 function onMessage(event) {
     var msg = parseMessage(event.data);
@@ -75,7 +74,7 @@ function onMessage(event) {
                 handleAuthFail(msg);
                 break;
             default:
-                console.log(" Unhandled Command received from server:")
+                console.log(" Unhandled Command received from server:");
                 console.error(msg);
                 break;
         }
@@ -94,8 +93,12 @@ function onMessage(event) {
                 markMessageAcknowledged(msg.reference, findUserName(parseInt(msg.lines[0], 10)));
                 break;
             case "OKAY":
-                if(msgId == msg.reference) {
+                if (msgId == msg.reference) {
                     markMessageConfirmed(msgId);
+                    setStatusBarText("Message sent.");
+                } else {
+                    console.log(" Unhandled case where server response does not contain the number (" + msgId + ") sent previously:");
+                    console.error(msg);
                 }
                 break;
             case "FAIL":
@@ -105,19 +108,22 @@ function onMessage(event) {
                 recoverFromFatalError();
                 break;
             default:
-                console.log(" Unhandled Command received from server:")
+                console.log(" Unhandled Command received from server:");
                 console.error(msg);
                 break;
         }
     }
 }
 
-function onerror(event) {
+function onError(event) {
     console.error(event);
+    onConnectionFailed();
 }
 
-function onClose(event) {
-    console.log(event);
+function onClose() {
+    document.getElementById("loginButton").disabled = true;
+    document.getElementById("sendButton").disabled = true;
+    socket = null;
     onDisconnected();
 }
 
@@ -128,8 +134,6 @@ function disconnectButtonPressed() {
     setStatusBarText("Disconnecting...");
 
     socket.close();
-    socket = null;
-    onDisconnected();
 }
 
 // Called when the "Log in" button is pressed
@@ -175,20 +179,20 @@ function getRandomInt() {
     return Math.floor(Math.random() * 9007199254740991);
 }
 
-function messageReceived(msg){
+function messageReceived(msg) {
     var senderId = msg.lines[0];
     var senderName = findUserName(senderId);
     var msgId = msg.reference;
     var txt = "";
-    for (var i = 1; i < msg.lines.length; i++){
+    for (var i = 1; i < msg.lines.length; i++) {
         txt = txt + msg.lines[i];
     }
     addChatMessage(msgId, senderName, txt, false);
     //Acknowledge message receipt
-    sendMessage("ACKN",msgId,null);
+    sendMessage("ACKN", msgId, null);
 }
 
-function handleAuthFail(msg){
+function handleAuthFail(msg) {
     switch (msg.lines[0]) {
         case "NAME":
             setStatusBarText("Username already in use. Please use a different one.");
@@ -200,33 +204,33 @@ function handleAuthFail(msg){
             setStatusBarText("Internal Error. Please retry.");
             break;
         default:
-           console.error("Unhandled Failure for Authentication");
-           console.error(msg);
+            console.error("Unhandled Failure for Authentication");
+            console.error(msg);
     }
 }
 
-function handleFail(msg){
+function handleFail(msg) {
     switch (msg.lines[0]) {
         case "NUMBER":
-            setStatusBarText("Internal Error. Please retry.")
+            setStatusBarText("Internal Error. Please retry.");
             break;
         case "LENGTH":
             setStatusBarText("Message is too long. Please consider removing some characters.");
             break;
         default:
             console.error("Unhandled Failure");
-           console.error(msg);
+            console.error(msg);
     }
 }
 
-function recoverFromFatalError(){
+function recoverFromFatalError() {
     setStatusBarText("Internal Error occurred. This means that something went wrong while communicating. Recovering...");
-    isLoggedIn=false;
-    name= "";
+    isLoggedIn = false;
+    name = "";
     socket = null;
     userId = 0;
     msgId = 0;
-    document.getElementById("connect").disabled=false;
+    document.getElementById("connect").disabled = false;
 }
 // The remaining functions in this file are helper functions to update
 // the user interface when certain actions are performed (e.g. a message
@@ -244,7 +248,7 @@ function onConnected(server) {
     document.getElementById("disconnect").style.display = "flex";
     document.getElementById("connect").disabled = false;
     document.getElementById("login").disabled = false;
-    document.getElementById("loginButton").disabled=false;
+    document.getElementById("loginButton").disabled = false;
     setStatusBarText("Connected.");
 }
 
@@ -269,7 +273,6 @@ function onDisconnected() {
 
 // Call this function when the connection to the server fails (i.e. you get an error)
 function onConnectionFailed() {
-    // TODO: call this function somewhere
     setStatusBarText("Connection failed.");
     suppressStatusBarUpdate = true; // onDisconnected should also get called
 }
@@ -279,7 +282,8 @@ function onLoginSuccess() {
     setStatusBarText("Successfully logged in.");
     document.getElementById("message").disabled = false;
     document.getElementById("userlist").disabled = false;
-    document.getElementById("loginButton").disabled=true;
+    document.getElementById("loginButton").disabled = true;
+    document.getElementById("sendButton").disabled = false;
     addInfoMessage("Session started, now receiving messages.");
     isLoggedIn = true;
 }
