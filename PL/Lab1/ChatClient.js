@@ -62,7 +62,10 @@ function connectButtonPressed() {
 function onMessage(event) {
     var msg = parseMessage(event.data);
 
-    if (!isLoggedIn) {
+    if (msg.command === "INVD") {
+        recoverFromFatalError();
+    }
+    else if (!isLoggedIn) {
         switch (msg.command) {
             case "OKAY":
                 if (userId == msg.reference) {
@@ -105,9 +108,6 @@ function onMessage(event) {
                 break;
             case "FAIL":
                 handleFail(msg);
-                break;
-            case "INVD":
-                recoverFromFatalError();
                 break;
             default:
                 console.log(" Unhandled Command received from server:");
@@ -231,6 +231,7 @@ function handleFail(msg) {
 
 function recoverFromFatalError() {
     setStatusBarText("Internal Error occurred. This means that something went wrong while communicating. Recovering...");
+    suppressStatusBarUpdate = true;
     isLoggedIn = false;
     name = "";
     socket = null;
