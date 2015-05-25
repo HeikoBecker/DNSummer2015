@@ -232,12 +232,7 @@ function handleFail(msg) {
 function recoverFromFatalError() {
     setStatusBarText("Internal Error occurred. This means that something went wrong while communicating. Recovering...");
     suppressStatusBarUpdate = true;
-    isLoggedIn = false;
-    name = "";
-    socket = null;
-    userId = 0;
-    msgId = 0;
-    document.getElementById("connect").disabled = false;
+    // onDisconnected will be called automatically afterwards
 }
 // The remaining functions in this file are helper functions to update
 // the user interface when certain actions are performed (e.g. a message
@@ -276,6 +271,10 @@ function onDisconnected() {
     if (isLoggedIn) addInfoMessage("Session ended, no more messages will be received.");
     clearUsers();
     isLoggedIn = false;
+    name = "";
+    socket = null;
+    userId = 0;
+    msgId = 0;
 }
 
 // Call this function when the connection to the server fails (i.e. you get an error)
