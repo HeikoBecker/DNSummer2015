@@ -268,8 +268,8 @@ function onDisconnected() {
     document.getElementById("connect").disabled = false;
     document.getElementById("disconnect").disabled = false;
     document.getElementById("login").disabled = true;
-    document.getElementById("message").disabled = true;
-    document.getElementById("userlist").disabled = true;
+    document.getElementById("message").setAttribute("disabled", "true");
+    document.getElementById("userlist").setAttribute("disabled", "true");
     if (!suppressStatusBarUpdate) setStatusBarText("Disconnected.");
     suppressStatusBarUpdate = false;
     if (isLoggedIn) addInfoMessage("Session ended, no more messages will be received.");
@@ -286,8 +286,8 @@ function onConnectionFailed() {
 // Call this function when login was successful
 function onLoginSuccess() {
     setStatusBarText("Successfully logged in.");
-    document.getElementById("message").disabled = false;
-    document.getElementById("userlist").disabled = false;
+    document.getElementById("message").removeAttribute("disabled");
+    document.getElementById("userlist").removeAttribute("disabled");
     document.getElementById("loginButton").disabled = true;
     document.getElementById("sendButton").disabled = false;
     addInfoMessage("Session started, now receiving messages.");
