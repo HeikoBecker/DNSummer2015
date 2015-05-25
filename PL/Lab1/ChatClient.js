@@ -4,6 +4,7 @@ var name = "";
 var socket = null;
 var userId = 0;
 var msgId = 0;
+var msgText = "";
 
 function main() {
     document.getElementById("groupid").textContent = "Group " + groupNumber;
@@ -94,8 +95,9 @@ function onMessage(event) {
                 break;
             case "OKAY":
                 if (msgId == msg.reference) {
+                    addChatMessage(msgId, name, msgText, true);
                     markMessageConfirmed(msgId);
-                    setStatusBarText("Message sent.");
+                    afterSuccessfulSend();
                 } else {
                     console.log(" Unhandled case where server response does not contain the number (" + msgId + ") sent previously:");
                     console.error(msg);
@@ -166,12 +168,16 @@ function sendButtonPressed() {
     }
     message = message.trim();
     if (message == "") return;
-    document.getElementById("messageInput").value = "";
     setStatusBarText("Sending message...");
 
     msgId = getRandomInt();
+    msgText = message;
     sendMessage("SEND", msgId, [to, message]);
-    addChatMessage(msgId, name, message, true);
+}
+
+function afterSuccessfulSend() {
+    document.getElementById("messageInput").value = "";
+    setStatusBarText("Message sent.");
 }
 
 // Use this function to get random integers for use with the Chat protocol
