@@ -1,5 +1,8 @@
 ﻿var groupNumber = 25; // replace by your group number
 
+/*
+ * Gloabl Variables 
+ */
 var name = "";
 var socket = null;
 var userId = 0;
@@ -11,10 +14,18 @@ function main() {
     document.getElementById("loginButton").disabled = true;
 }
 
+/* 
+ * Function to sned a single command.
+ * First argument must be the 4 letter command.
+ * The second argument is the number that is necessary as specified in the protocol
+ * The thrid argument are the optional lines for the message
+ */
 function sendMessage(command, number, lines) {
-    var msg = command + " " + number;
-    if (lines != null) {
-        msg += "\r\n";
+    var msg = command + " " + number; //construct message header
+    if (lines != null) { //construct body only if there are any lines given
+        msg += "\r\n"; //next line in the message
+        // iterate over all given lines and construct body by separating each by
+        // "\r\n"
         for (var i = 0; i < lines.length; i++) {
             msg += lines[i];
             if (i < lines.length - 1) {
@@ -22,12 +33,18 @@ function sendMessage(command, number, lines) {
             }
         }
     }
+    //Send out the message
     socket.send(msg);
 }
 
+/*
+ * Message parser
+ * Takes the raw input and returns an object with the command, the reference
+ * number and the lines in the body
+ */
 function parseMessage(raw) {
-    var lines = raw.split("\r\n");
-    var firstLine = lines[0].split(" ");
+    var lines = raw.split("\r\n"); //"\r\n" is the line separator --> use it for splitting
+    var firstLine = lines[0].split(" "); // the number and command are separated by a space
 
     return {
         command: firstLine[0],
@@ -58,14 +75,15 @@ function connectButtonPressed() {
  * Message handler function
  * First parses the message from the server.
  * Action must be taken depending on whether client is logged in or not.
+ * Forwards each action to a specified handler method.
  */
 function onMessage(event) {
     var msg = parseMessage(event.data);
 
     if (msg.command === "INVD") {
-        recoverFromFatalError();
+        recoverFromFatalError(); //Recover from internal error
     }
-    else if (!isLoggedIn) {
+    else if (!isLoggedIn) { //not in authenticated state
         switch (msg.command) {
             case "OKAY":
                 if (userId == msg.reference) {
@@ -77,12 +95,14 @@ function onMessage(event) {
             case "FAIL":
                 handleAuthFail(msg);
                 break;
+            //default case only syntactically needed by switch case,
+            //protocol allows no other commands here
             default:
                 console.log(" Unhandled Command received from server:");
                 console.error(msg);
                 break;
         }
-    } else {
+    } else { //successfully authenticated before
         switch (msg.command) {
             case "ARRV":
                 addUser(msg.reference, msg.lines[0], msg.lines[1]);
@@ -109,6 +129,8 @@ function onMessage(event) {
             case "FAIL":
                 handleFail(msg);
                 break;
+            //default case only syntactically needed by switch case,
+            //protocol allows no other commands here
             default:
                 console.log(" Unhandled Command received from server:");
                 console.error(msg);
@@ -117,11 +139,18 @@ function onMessage(event) {
     }
 }
 
+/*
+ * Socket error handler function
+ * Logs the error and calls function for connection fails
+ */
 function onError(event) {
     console.error(event);
     onConnectionFailed();
 }
-
+/*
+ * Connetion Close handler, called when socket is closed.
+ * Disables login button and send button, cleares global socket variable
+ */
 function onClose() {
     document.getElementById("loginButton").disabled = true;
     document.getElementById("sendButton").disabled = true;
@@ -134,7 +163,7 @@ function disconnectButtonPressed() {
     document.getElementById("disconnect").disabled = true;
     document.getElementById("login").disabled = true;
     setStatusBarText("Disconnecting...");
-
+    //Close socket on disconnect
     socket.close();
 }
 
@@ -144,8 +173,9 @@ function loginButtonPressed() {
     var password = document.getElementById("passwordInput").value;
     document.getElementById("login").disabled = true;
     setStatusBarText("Authenticating...");
-
+    //Set the global user id variable to a valid random number
     userId = getRandomInt();
+    //send login message
     sendMessage("AUTH", userId, [name, password]);
 }
 
@@ -170,11 +200,16 @@ function sendButtonPressed() {
     if (message == "") return;
     setStatusBarText("Sending message...");
 
+    //Send the message as specified in the protocol
     msgId = getRandomInt();
     msgText = message;
     sendMessage("SEND", msgId, [to, message]);
 }
 
+/*
+ * Function to notify user that message sending was successfull, used by
+ * Command handler method onMessage
+ */
 function afterSuccessfulSend() {
     document.getElementById("messageInput").value = "";
     setStatusBarText("Message sent.");
@@ -184,7 +219,12 @@ function afterSuccessfulSend() {
 function getRandomInt() {
     return Math.floor(Math.random() * 9007199254740991);
 }
-
+i
+/*
+ * Message receiver function
+ * Displays a message, by extracting the values
+ * Sends Acknowledge Command for the message to the server
+ */
 function messageReceived(msg) {
     var senderId = msg.lines[0];
     var senderName = findUserName(senderId);
@@ -198,6 +238,10 @@ function messageReceived(msg) {
     sendMessage("ACKN", msgId, null);
 }
 
+/*
+ * Authentication Fail handler
+ * Prints failures in the status bar based on the server returned failure
+ */
 function handleAuthFail(msg) {
     switch (msg.lines[0]) {
         case "NAME":
@@ -209,12 +253,18 @@ function handleAuthFail(msg) {
         case "NUMBER":
             setStatusBarText("Internal Error. Please retry.");
             break;
+        //default case that should not occur and is only inserted for 
+        //syntactical purposes
         default:
             console.error("Unhandled Failure for Authentication");
             console.error(msg);
     }
 }
 
+/*
+ * Message failure handler
+ * Prints failure in the status bar based on the server returned failure
+ */
 function handleFail(msg) {
     switch (msg.lines[0]) {
         case "NUMBER":
@@ -223,6 +273,8 @@ function handleFail(msg) {
         case "LENGTH":
             setStatusBarText("Message is too long. Please consider removing some characters.");
             break;
+        //default case that should not occur and is only inserted for 
+        //syntactical purposes
         default:
             console.error("Unhandled Failure");
             console.error(msg);
@@ -272,6 +324,7 @@ function onDisconnected() {
     clearUsers();
     isLoggedIn = false;
     name = "";
+    //clear our variables too
     socket = null;
     userId = 0;
     msgId = 0;
