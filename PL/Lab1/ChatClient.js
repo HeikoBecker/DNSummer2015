@@ -15,10 +15,10 @@ function main() {
 }
 
 /* 
- * Function to sned a single command.
+ * Function to send a single command.
  * First argument must be the 4 letter command.
  * The second argument is the number that is necessary as specified in the protocol
- * The thrid argument are the optional lines for the message
+ * The third argument are the optional lines for the message
  */
 function sendMessage(command, number, lines) {
     var msg = command + " " + number; //construct message header
@@ -83,7 +83,7 @@ function onMessage(event) {
     if (msg.command === "INVD") {
         recoverFromFatalError(); //Recover from internal error
     }
-    else if (!isLoggedIn) { //not in authenticated state
+    else if (!isLoggedIn) { // not in authenticated, but in connected state
         switch (msg.command) {
             case "OKAY":
                 if (userId == msg.reference) {
@@ -95,14 +95,15 @@ function onMessage(event) {
             case "FAIL":
                 handleAuthFail(msg);
                 break;
-            //default case only syntactically needed by switch case,
-            //protocol allows no other commands here
+            // default case only syntactically needed by switch case,
+            // protocol allows no other commands here
+            // ensures that future changes to the protocol will get noticed
             default:
                 console.log(" Unhandled Command received from server:");
                 console.error(msg);
                 break;
         }
-    } else { //successfully authenticated before
+    } else { // successfully authenticated before
         switch (msg.command) {
             case "ARRV":
                 addUser(msg.reference, msg.lines[0], msg.lines[1]);
@@ -129,8 +130,9 @@ function onMessage(event) {
             case "FAIL":
                 handleFail(msg);
                 break;
-            //default case only syntactically needed by switch case,
-            //protocol allows no other commands here
+            // default case only syntactically needed by switch case,
+            // protocol allows no other commands here
+            // ensures that future changes to the protocol will get noticed
             default:
                 console.log(" Unhandled Command received from server:");
                 console.error(msg);
@@ -163,7 +165,7 @@ function disconnectButtonPressed() {
     document.getElementById("disconnect").disabled = true;
     document.getElementById("login").disabled = true;
     setStatusBarText("Disconnecting...");
-    //Close socket on disconnect
+    // Close socket on disconnect
     socket.close();
 }
 
@@ -173,9 +175,9 @@ function loginButtonPressed() {
     var password = document.getElementById("passwordInput").value;
     document.getElementById("login").disabled = true;
     setStatusBarText("Authenticating...");
-    //Set the global user id variable to a valid random number
+    // Set the global user id variable to a valid random number
     userId = getRandomInt();
-    //send login message
+    // Send login message
     sendMessage("AUTH", userId, [name, password]);
 }
 
@@ -200,7 +202,7 @@ function sendButtonPressed() {
     if (message == "") return;
     setStatusBarText("Sending message...");
 
-    //Send the message as specified in the protocol
+    // Send the message as specified in the protocol
     msgId = getRandomInt();
     msgText = message;
     sendMessage("SEND", msgId, [to, message]);
@@ -219,7 +221,7 @@ function afterSuccessfulSend() {
 function getRandomInt() {
     return Math.floor(Math.random() * 9007199254740991);
 }
-i
+
 /*
  * Message receiver function
  * Displays a message, by extracting the values
@@ -234,7 +236,7 @@ function messageReceived(msg) {
         txt = txt + msg.lines[i];
     }
     addChatMessage(msgId, senderName, txt, false);
-    //Acknowledge message receipt
+    // Acknowledge message receipt
     sendMessage("ACKN", msgId, null);
 }
 
@@ -253,8 +255,9 @@ function handleAuthFail(msg) {
         case "NUMBER":
             setStatusBarText("Internal Error. Please retry.");
             break;
-        //default case that should not occur and is only inserted for 
-        //syntactical purposes
+        // default case that should not occur and is only inserted for
+        // syntactical purposes
+        // ensures that future changes to the protocol will get noticed
         default:
             console.error("Unhandled Failure for Authentication");
             console.error(msg);
@@ -273,8 +276,9 @@ function handleFail(msg) {
         case "LENGTH":
             setStatusBarText("Message is too long. Please consider removing some characters.");
             break;
-        //default case that should not occur and is only inserted for 
-        //syntactical purposes
+        // default case that should not occur and is only inserted for
+        // syntactical purposes
+        // ensures that future changes to the protocol will get noticed
         default:
             console.error("Unhandled Failure");
             console.error(msg);
@@ -324,7 +328,7 @@ function onDisconnected() {
     clearUsers();
     isLoggedIn = false;
     name = "";
-    //clear our variables too
+    // clear our variables too
     socket = null;
     userId = 0;
     msgId = 0;
