@@ -1,0 +1,21 @@
+[1 points]
+
+Task 1.
+a)
+b)
+c)
+  No waiting after an ignore [-0.5]
+
+Task 2.
+- no explanation for non-default settings [-0.5 points]
+
+a) - modelling error - dequeue AFTER processing [-0.5 points]
+
+
+
+
+e) - no description of results [-0.5 points]
+
+
+
+
