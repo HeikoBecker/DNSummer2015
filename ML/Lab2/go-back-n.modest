@@ -68,6 +68,8 @@ process Sender()
 {
     int send_base = 1;
     int next_seqnum = 1;
+    int retransmit_index = 0;
+    int retransmit_length = 0;
     
     bool timer_on = false;
 
@@ -77,24 +79,32 @@ process Sender()
     // TODO !!!!!!!!!!!!!!!!!!!!
     
     do {
-        ::  urgent rdt_snd;         // receive call from upper layer
+        ::  urgent rdt_snd         // receive call from upper layer
             {=
                 next_pkt = packet { seqnum: next_seqnum, data: usdata},
                 pl = append(pl, next_pkt),
                 scpacket = next_pkt, 
                 next_seqnum = next_seqnum+1 
             =};
-            udt_snd_s; 
-            udt_snd_s_done
-        :: urgent udt_snd_r_done;   // receive data from lower layer
-            {= send_base = cspacket.seqnum =};
+            urgent udt_snd_s; 
+            urgent udt_snd_s_done
+        :: urgent rdt_rcv_s   // receive data from lower layer
+            {= pl = remove(pl, cspacket.seqnum - send_base), send_base = cspacket.seqnum =};
             alt {
                 :: when urgent (send_base == next_seqnum) {= timer_on = false =}
                 :: when urgent (send_base < next_seqnum) tau
             }
-        /*:: urgent timeout;
-            // retransmit starting from sendbase
-            tau*/
+        /*:: urgent timeout
+            {=
+                retransmit_index = 0,
+                retransmit_length = next_seqnum - send_base
+            =};
+            do {
+                :: when urgent (retransmit_index < retransmit_length) {= scpacket = at(pl, retransmit_index) =};
+                    urgent udt_snd_s; 
+                    urgent udt_snd_s_done
+                :: when urgent (retransmit_index == retransmit_length) break
+            }*/
             
     }
 }
@@ -169,23 +179,23 @@ process ChannelRS()
 packet crpacket; // data buffer from channel to receiver
 process Receiver()
 {
-    int expected_seqnum = 0;
+    int received_seqnum = 0;
     
     // TODO !!!!!!!!!!!!!!!!!!!!
     do {
-        ::  urgent rdt_rcv_r;                          // get the data from the channel
-            when (crpacket.seqnum == expected_seqnum)  // expected sequence number
-                {= rudata = crpacket.data, expected_seqnum = crpacket.seqnum =}; 
-                deliver_data; 
-                deliver_data_done {= rcpacket = packet { seqnum: expected_seqnum } =};
-                udt_snd_r;
-                udt_snd_r_done;
-            when (crpacket.seqnum > expected_seqnum)  // unexpected number
-                {= rcpacket = packet { seqnum: expected_seqnum } =};
-                udt_snd_r;
-                udt_snd_r_done
+        ::  urgent rdt_rcv_r;      // get the data from the channel
+            alt {
+            ::  when urgent (crpacket.seqnum == received_seqnum + 1)  // expected sequence number
+                    urgent deliver_data {= rudata = crpacket.data, received_seqnum = crpacket.seqnum =}; 
+                    urgent deliver_data_done
+            ::  when urgent (crpacket.seqnum > received_seqnum + 1)  // unexpected number
+                    // DROP THE PACKET
+                    {= rcpacket = packet { seqnum: received_seqnum } =}
+            };
+            urgent {= rcpacket = packet { seqnum: received_seqnum } =};
+            urgent udt_snd_r;
+            urgent udt_snd_r_done
     }
-
 }
 
 // Upper layers on receiver side: count packets and make sure there is no duplicate data
