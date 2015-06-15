@@ -1,4 +1,3 @@
-import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.net.ServerSocket;
@@ -12,19 +11,20 @@ public class Main {
 
         ServerSocket welcomeSocket;
         Socket clientSocket;
-        DataInputStream is;
         PrintStream os;
         String line;
+        MsgParser parser;
         try {
             welcomeSocket = new ServerSocket(port);
             System.out.println("Socket bound on port " + port + ".");
             clientSocket = welcomeSocket.accept();
-            is = new DataInputStream(clientSocket.getInputStream());
+            parser = new MsgParser(clientSocket.getInputStream());
             os = new PrintStream(clientSocket.getOutputStream());
             System.out.println("Incoming socket!");
             while (true) {
                 System.out.println("Waiting for messages");
-                line = is.readLine();
+                //readLine() was deprecated --> removed
+                line = parser.getMsg();
                 System.out.println(line);
                 os.println(line);
             }
