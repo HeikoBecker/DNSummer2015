@@ -12,6 +12,7 @@ public class MsgParser {
     private static final String ACCENC = "Accept-Encoding";
     private static final String COOKIE = "Cookie";
     private static final String DNT = "DNT";
+    private static final String GET = "GET / HTTP/1.1";
     private static final String SECWS = "Sec-WebSocket-Version";
     private static final String ORIGIN = "Origin";
     private static final String SECWSEXT = "Sec-WebSocket-Extensions";
@@ -24,17 +25,19 @@ public class MsgParser {
     private static final String SPLIT = ": ";
 
     private BufferedReader inputBuffer;
+    private InputStreamReader sr;
+    private InputStream is;
 
     public MsgParser(InputStream is) {
-        this.inputBuffer = new BufferedReader(new InputStreamReader(new DataInputStream(is)));
+        this.is = is;
+        this.sr = new InputStreamReader(new DataInputStream(is));
+        this.inputBuffer = new BufferedReader(this.sr);
     }
 
-    public Message getMsg() throws IOException, InterruptedException {
-
+    public Message getHTTPMessage() throws IOException, InterruptedException {
         String input;
         String[] lines;
         Message msg = new Message();
-        System.out.println(inputBuffer.ready());
         while (inputBuffer.ready()) {
             input = inputBuffer.readLine();
             System.out.println(input);
@@ -47,6 +50,8 @@ public class MsgParser {
                 case MsgParser.SECWSKEY:
                     msg.WebSocketKey = lines[1];
                     break;
+                case MsgParser.SECWSEXT:
+                    msg.WebSocketExtensions = lines[1];
                 case MsgParser.HOST:
                 case MsgParser.USRAGENT:
                 case MsgParser.COOKIE:
@@ -56,7 +61,6 @@ public class MsgParser {
                 case MsgParser.DNT:
                 case MsgParser.SECWS:
                 case MsgParser.ORIGIN:
-                case MsgParser.SECWSEXT:
                 case MsgParser.CONN:
                 case MsgParser.PRAGMA:
                 case MsgParser.CC:
@@ -68,8 +72,54 @@ public class MsgParser {
             }
         }
         //for debugging :D
-        Thread.sleep(1000);
         return msg;
     }
 
+    public Message getWebsocketMessage() throws IOException {
+        Message msg = new Message();
+        msg.Type = "Websocket";
+
+        int count = 0;
+        int c;
+        int payloadlength = 125;
+        int maskingKey = 0;
+        int idx = 0;
+        int opcode = -1;
+
+        byte[] payload = new byte[payloadlength];
+
+        while ((c = is.read()) != -1 && count <= payloadlength) {
+            count++;
+            if (count == 1) {
+                opcode = c & 0x0F;
+                System.out.println(opcode);
+            } else if (count == 2) {
+                payloadlength = c & 0x7F;
+                payload = new byte[payloadlength];
+            } else if (count == 11) {
+                maskingKey |= c << 25;
+            } else if (count == 12) {
+                maskingKey |= c << 16;
+            } else if (count == 13) {
+                maskingKey |= c << 8;
+            } else if (count == 14) {
+                maskingKey |= c;
+            } else {
+                payload[payloadlength - idx - 1] = (byte) c;
+                idx++;
+            }
+        }
+        switch (opcode) {
+            case 1:
+                String text = new String(payload, "UTF-8");
+                System.out.println("A TEXT FRAME");
+                System.out.println(text);
+                break;
+            default:
+                System.out.println("Unknown opcode: " + opcode);
+                break;
+        }
+        System.out.println("READ COMPLETE MESSAGE");
+        return null;
+    }
 }

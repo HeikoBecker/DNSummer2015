@@ -5,12 +5,14 @@ public class Message {
 
     public int Id;
     public String Type;
+    public String WebSocketExtensions;
+    public String WebSocketKey;
+    public String Verb;
 
     public Message() {
         Id = rnd.nextInt();
     }
 
-    public String WebSocketKey;
 
     @Override
     public String toString() {
