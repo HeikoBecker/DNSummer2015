@@ -52,8 +52,16 @@ int deliveredPacketCount;
 property ProbError = Pmax(<> (hasError || lastDelivered && deliveredPacketCount != PKT_COUNT));
 property DeliveredPackets = Xmax(deliveredPacketCount | lastDelivered);
 
+bool recvPkt;
+bool dropPkt;
+bool doneRecv;
+bool retransmit;
+
 // Properties
-// TODO: Insert your properties here
+property ReceivedPkt = Pmax(<> recvPkt);
+property DroppedPkt = Pmax(<> dropPkt);
+property DoneRecv = Pmax(<> doneRecv);
+property Retransmit = Pmax(<> retransmit);
 
 // Upper layers on sender side
 // Do not modify this process
@@ -76,50 +84,40 @@ process Sender()
     int send_base = 1;
     int next_seqnum = 1;
     int retransmit_index = 0;
-    int retransmit_length = 0;
-    clock c;
-    
+    clock d;
+
     bool timer_on = false;
 
-    packetlist option pl = packetlist { };
-    packet next_pkt;
+    packetlist option packets;
     
     // TODO !!!!!!!!!!!!!!!!!!!!
     
     do {
-        ::  urgent rdt_snd         // receive call from upper layer
+        // receive call from upper layer
+        ::  when urgent (next_seqnum - send_base < N) rdt_snd         
             {=
-                next_pkt = packet { seqnum: next_seqnum, data: usdata },
-                pl = append(pl, next_pkt),
-                scpacket = next_pkt
+                scpacket = packet { seqnum: next_seqnum, data: usdata },
+                packets = append(packets, scpacket)
             =};
             alt {
-                :: when urgent (send_base == next_seqnum) urgent {= c = 0, timer_on = true =}
+                :: when urgent (send_base == next_seqnum) {= d = 0, timer_on = true =}
                 :: when urgent (send_base > next_seqnum) tau
             };
-            {= next_seqnum = next_seqnum + 1  =};
-            urgent udt_snd_s; 
+            urgent udt_snd_s {= next_seqnum++ =};
             urgent udt_snd_s_done
-        :: urgent rdt_rcv_s   // receive data from lower layer
-            {= pl = remove(pl, cspacket.seqnum - send_base) =};
+        // receive data from lower layer
+        :: urgent rdt_rcv_s {= packets = remove(packets, cspacket.seqnum - send_base), send_base = cspacket.seqnum + 1, doneRecv = true =};
             alt {
-                :: when urgent (length(pl) == 0) {=  timer_on = false, pl = packetlist{ } =}
-                :: when urgent (length(pl) > 0) tau
-            };
-            urgent {= send_base = cspacket.seqnum + 1 =}
-        :: when urgent (c >= TIMEOUT && timer_on)
-            {=
-                retransmit_index = 0,
-                retransmit_length = length(pl)
-            =};
+                :: when urgent (length(packets) == 0) {=  timer_on = false =}
+                :: when urgent (length(packets) > 0) tau
+            }
+        :: when urgent (d >= TIMEOUT && timer_on)
             do {
-                :: when urgent (retransmit_index < retransmit_length)
-                    {= scpacket = at(pl, retransmit_index) =};
-                    urgent udt_snd_s; 
+                :: when urgent (retransmit_index < length(packets))
+                    urgent udt_snd_s {= scpacket = at(packets, retransmit_index), retransmit_index++ =}; 
                     urgent udt_snd_s_done
-                :: when urgent (retransmit_index == retransmit_length)
-                    tau {= c = 0 =};
-                    break
+                :: when urgent (retransmit_index >= length(packets))
+                    break {= d = 0, retransmit_index = 0 =}
             }
     }
 }
@@ -195,20 +193,21 @@ packet crpacket; // data buffer from channel to receiver
 process Receiver()
 {
     int received_seqnum = 0;
-    
-    // TODO !!!!!!!!!!!!!!!!!!!!
     do {
-        ::  urgent rdt_rcv_r;      // get the data from the channel
-            alt {
-            ::  when urgent (crpacket.seqnum == received_seqnum + 1)  // expected sequence number
-                    urgent deliver_data {= rudata = crpacket.data, received_seqnum = crpacket.seqnum =}; 
-                    urgent deliver_data_done
-            ::  when urgent (crpacket.seqnum > received_seqnum + 1) tau  // unexpected number
-                    // DROP THE PACKET
-            };
-            urgent {= rcpacket = packet { seqnum: received_seqnum } =};
-            urgent udt_snd_r;
-            urgent udt_snd_r_done
+        urgent rdt_rcv_r;       // get the data from the channel
+        alt {
+            // expected sequence number
+            ::  when urgent (crpacket.seqnum == received_seqnum + 1)
+                    deliver_data {= 
+                        rudata = crpacket.data, 
+                        received_seqnum = crpacket.seqnum
+                    =};
+                    urgent deliver_data_done {= recvPkt = true =}
+            // unexpected number
+            ::  when urgent (crpacket.seqnum > received_seqnum + 1) drop_data {= dropPkt = true =}
+        };
+        urgent udt_snd_r {= rcpacket = packet { seqnum: received_seqnum + 1 } =};
+        urgent udt_snd_r_done
     }
 }
 
