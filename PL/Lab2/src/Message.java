@@ -1,3 +1,6 @@
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.net.Socket;
 import java.util.Random;
 
 public class Message {
@@ -18,4 +21,9 @@ public class Message {
     public String toString() {
         return Type + " " + Id;
     }
+
+//TODO: Make this abstract and have specialized msgs!
+	public void execute(PrintWriter pr, Socket clientSocket) throws IOException {
+		return;
+	}
 }

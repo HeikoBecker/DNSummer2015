@@ -18,10 +18,11 @@ public class Main {
         MsgParser msgParser;
 
         try {
+    
             welcomeSocket = new ServerSocket(port);
             System.out.println("[WS] Socket bound on port " + port + ".");
             clientSocket = welcomeSocket.accept();
-            InputStreamReader sr = new InputStreamReader(new DataInputStream(clientSocket.getInputStream()));
+            //InputStreamReader sr = new InputStreamReader(new DataInputStream(clientSocket.getInputStream()));
             pr = new PrintWriter(clientSocket.getOutputStream(), true);
             System.out.println("[WS] Incoming socket!");
             msgParser = new MsgParser(clientSocket.getInputStream());
@@ -42,10 +43,11 @@ public class Main {
 
             System.out.println("[WS] Handshake complete!");
 
-            while(true) {
+            while(! clientSocket.isClosed()) {
                 Message message2 = msgParser.getWebsocketMessage();
                 System.out.println(message2);
-                Thread.sleep(1000);
+                //Let new message execute, resp. send messages on socket
+                message2.execute(pr, clientSocket);
             }
         } catch (IOException e) {
             System.out.println(e);

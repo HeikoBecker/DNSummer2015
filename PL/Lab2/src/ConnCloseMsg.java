@@ -1,3 +1,7 @@
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.net.Socket;
+
 
 public class ConnCloseMsg extends Message {
 	
@@ -29,5 +33,18 @@ public class ConnCloseMsg extends Message {
 	 */
 	public ConnCloseMsg(int reason){
 		this.reason = reason;
+	}
+	
+	@Override
+	public void execute(PrintWriter pr, Socket clientSocket) throws IOException{
+		//TODO: Reply needed?
+		//FIN = 1?
+		// Reserved Bytes
+		// Conn Close OPCODE
+		// THEN?
+		pr.print(FrameFactory.CloseFrame());
+		clientSocket.shutdownInput();
+		clientSocket.shutdownOutput();
+		clientSocket.close();
 	}
 }

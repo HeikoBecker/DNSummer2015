@@ -24,12 +24,12 @@ public class MsgParser {
     private static final String EMPTY = "";
     private static final String SPLIT = ": ";
     
-    private static final int CONT = 0;
-    private static final int TEXT = 1;
-    private static final int BIN = 2;
-    private static final int CONNCLOSE = 8;
-    private static final int PING=9;
-    private static final int PONG=10;
+    public static final int CONT = 0;
+    public static final int TEXT = 1;
+    public static final int BIN = 2;
+    public static final int CONNCLOSE = 8;
+    public static final int PING=9;
+    public static final int PONG=10;
 
     private BufferedReader inputBuffer;
     private InputStreamReader sr;
@@ -132,6 +132,7 @@ public class MsgParser {
             	System.out.println("TODO: Handle binary frame!");
             	break;
             case CONNCLOSE:
+            	System.out.println("A CONNECTION CLOSE");
             	if (opcode == -1)
             		return new ConnCloseMsg();
             	else
@@ -141,9 +142,10 @@ public class MsgParser {
             	//TODO: Server must close first
             case PING:
             	System.out.println("TODO: Handle PING frame!");
-            	break;
+            	return new PingMsg();
             case PONG:
             	System.out.println("TODO: Handle Pong frame!");
+            	return new PongMsg();
             //TODO: Find out what to do for unspecified opcodes
             default:
                 System.out.println("Unknown opcode: " + opcode);
