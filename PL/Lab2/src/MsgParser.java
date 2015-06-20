@@ -23,6 +23,13 @@ public class MsgParser {
     private static final String UPG = "Upgrade";
     private static final String EMPTY = "";
     private static final String SPLIT = ": ";
+    
+    private static final int CONT = 0;
+    private static final int TEXT = 1;
+    private static final int BIN = 2;
+    private static final int CONNCLOSE = 8;
+    private static final int PING=9;
+    private static final int PONG=10;
 
     private BufferedReader inputBuffer;
     private InputStreamReader sr;
@@ -110,11 +117,34 @@ public class MsgParser {
             }
         }
         switch (opcode) {
-            case 1:
+        	//Continuation Frame according to RFC (opcode is 0, Page 32++)
+        	//Cleanly close conn in this case
+        	case CONT:
+        		System.out.println("TODO: Close connection on Continuation!");
+        		return new ConnCloseMsg(1007); //INV PAYLOAD DATA (Sec. 11.7, Page 64)
+            case TEXT:
                 String text = new String(payload, "UTF-8");
                 System.out.println("A TEXT FRAME");
                 System.out.println(text);
                 break;
+            
+            case BIN:
+            	System.out.println("TODO: Handle binary frame!");
+            	break;
+            case CONNCLOSE:
+            	if (opcode == -1)
+            		return new ConnCloseMsg();
+            	else
+            		//TODO: Check for correctness of opcode
+            		return new ConnCloseMsg(opcode);
+            	//TODO: Finally you must close the connection
+            	//TODO: Server must close first
+            case PING:
+            	System.out.println("TODO: Handle PING frame!");
+            	break;
+            case PONG:
+            	System.out.println("TODO: Handle Pong frame!");
+            //TODO: Find out what to do for unspecified opcodes
             default:
                 System.out.println("Unknown opcode: " + opcode);
                 break;

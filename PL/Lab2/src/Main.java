@@ -8,6 +8,7 @@ import javax.xml.bind.DatatypeConverter;
 public class Main {
 
     public static void main(String[] args) throws InterruptedException, NoSuchAlgorithmException {
+    	//TODO: Make this a parameter? Research in specification
         int port = 4711;
         System.out.println("dnChat is getting started!");
 
@@ -26,6 +27,8 @@ public class Main {
             msgParser = new MsgParser(clientSocket.getInputStream());
 
             Message handshake = msgParser.getHTTPMessage();
+            
+            //TODO: Maybe make this a factory!
             String base64Token = getSecToken(handshake.WebSocketKey);
             String welcomeMsg = "HTTP/1.1 101 Switching Protocols\n" +
                     "Upgrade: websocket\n" +
@@ -41,13 +44,17 @@ public class Main {
 
             while(true) {
                 Message message2 = msgParser.getWebsocketMessage();
-
+                System.out.println(message2);
+                Thread.sleep(1000);
             }
         } catch (IOException e) {
             System.out.println(e);
         }
     }
 
+    /*
+     * TODO: What does this method do?
+     */
     private static String getSecToken(String token) throws NoSuchAlgorithmException, UnsupportedEncodingException {
         token += "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
         MessageDigest cript = MessageDigest.getInstance("SHA-1");
