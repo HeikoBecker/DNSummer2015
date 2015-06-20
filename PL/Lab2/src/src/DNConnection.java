@@ -1,3 +1,5 @@
+import java.io.BufferedOutputStream;
+import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
@@ -14,6 +16,7 @@ public class DNConnection {
 	private Socket clientSocket;
 	PrintWriter pr;
 	MsgParser parser;
+	private BufferedOutputStream bw;
 
 	public DNConnection(int port) {
 		try {
@@ -21,6 +24,7 @@ public class DNConnection {
 			System.out.println("[WS] Socket bound on port " + port + ".");
 			this.clientSocket = welcomeSocket.accept();
 			this.pr = new PrintWriter(clientSocket.getOutputStream(), true);
+			this.bw = new BufferedOutputStream(clientSocket.getOutputStream());
 			System.out.println("[WS] Incoming socket!");
 			this.parser = new MsgParser(clientSocket.getInputStream());
 		} catch (IOException e) {
@@ -48,19 +52,21 @@ public class DNConnection {
 			System.out.println("[WS] Handshake complete!");
 			
 			System.out.println("Testing message sending");
-			char[] testText = FrameFactory.testText();
+			byte[] testText = FrameFactory.testText();
 			byte[] closeText = FrameFactory.CloseFrame();
 			for (int i = 0; i < testText.length; i++){
 				System.out.println(testText[i]);
 			}
 			//System.out.println(testText);
 			//System.out.println(closeText);
-			pr.write(testText);
-			pr.flush();	
-			if (pr.checkError())
-				System.out.println("NO error");
+			//pr.write(testText);
+			//pr.flush();	
+			//if (pr.checkError())
+			//	System.out.println("NO error");
 			//pr.print(closeText);
 			//pr.flush();
+			bw.write(testText,0,testText.length);
+			bw.flush();
 			while (!clientSocket.isClosed()) {
 				Message message2 = parser.getWebsocketMessage();
 				//System.out.println(message2);
