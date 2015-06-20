@@ -42,7 +42,7 @@ public class ConnCloseMsg extends Message {
 		// Reserved Bytes
 		// Conn Close OPCODE
 		// THEN?
-		pr.print(FrameFactory.CloseFrame());
+		pr.print(FrameFactory.CloseFrame(this.reason));
 		clientSocket.shutdownInput();
 		clientSocket.shutdownOutput();
 		clientSocket.close();

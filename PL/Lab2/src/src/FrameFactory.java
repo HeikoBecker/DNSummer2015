@@ -1,25 +1,24 @@
 
 public class FrameFactory {
 
+	public static byte FIN = (byte) 0b10000000;
+	
 	public static byte[] PongFrame () {
-		byte[] result = {0,0,0,0,MsgParser.PONG};
+		byte[] result = {addFIN(MsgParser.PONG)};
 		return result;
 	}
 	
-	public static byte[] CloseFrame() {
-		byte[] result = {1,0,0,0,MsgParser.CONNCLOSE};
+	public static byte[] CloseFrame(int reason) {
+		byte[] result = {addFIN(MsgParser.CONNCLOSE), (byte) (reason << 16), (byte) reason};
 		return result;
 	}
 
 	public static byte[] testText() {
-//		char[] header = {0x0,0x0,0x0,0x0,MsgParser.TEXT};
-//		char[] msg = {'H','e','l','l','o',' ','f','r','o','m',' ','S','e','r','v','e','r'};
-//		char[] result = new char[header.length + msg.length];
-//		System.arraycopy(header, 0, result, 0, header.length);
-//		System.arraycopy(msg, 0, result, header.length, msg.length);
-//		return result;
-		byte[] result = { (byte) 129, 0x05, 'H','e','l','l','o'};// 0x05, 0x48, 0x65, 0x6c, 0x6f};
+		byte[] result = { addFIN (MsgParser.TEXT), 0x05, 'H','e','l','l','o'};// 0x05, 0x48, 0x65, 0x6c, 0x6f};
 		return result;
 	}
 	
+	private static byte addFIN (byte OPCode) {
+		return (byte) (FIN + OPCode);
+	}
 }

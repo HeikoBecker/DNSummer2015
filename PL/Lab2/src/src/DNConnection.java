@@ -52,26 +52,20 @@ public class DNConnection {
 			System.out.println("[WS] Handshake complete!");
 			
 			System.out.println("Testing message sending");
-			byte[] testText = FrameFactory.testText();
-			byte[] closeText = FrameFactory.CloseFrame();
-			for (int i = 0; i < testText.length; i++){
-				System.out.println(testText[i]);
-			}
-			//System.out.println(testText);
-			//System.out.println(closeText);
-			//pr.write(testText);
-			//pr.flush();	
-			//if (pr.checkError())
-			//	System.out.println("NO error");
-			//pr.print(closeText);
-			//pr.flush();
-			bw.write(testText,0,testText.length);
-			bw.flush();
+//			byte[] testText = FrameFactory.testText();
+//			byte[] closeText = FrameFactory.CloseFrame(ConnCloseMsg.NOSTATUS);
+//			for (int i = 0; i < testText.length; i++){
+//				System.out.println(testText[i]);
+//			}
+//			bw.write(testText);
+//			bw.flush();
+//			bw.write(closeText);
+//			bw.flush();
 			while (!clientSocket.isClosed()) {
 				Message message2 = parser.getWebsocketMessage();
 				//System.out.println(message2);
 				// Let new message execute, resp. send messages on socket
-				message2.execute(pr, clientSocket);
+				//message2.execute(pr, clientSocket);
 			}
 		} catch (IOException e) {
 			System.out.println(e);
