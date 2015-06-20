@@ -1,5 +1,5 @@
 ﻿/*
-    mosta go-back-n.modest -X -S -E -O out.dot -D png out.png --no-invariants -F
+    mosta go-back-n.modest -X -S -E -O out.dot -D png out.png --no-invariants
     modes go-back-n.modest -E "N=5"
     
     TODO: 
@@ -49,16 +49,7 @@ int deliveredPacketCount;
 property ProbError = Pmax(<> (hasError || lastDelivered && deliveredPacketCount != PKT_COUNT));
 property DeliveredPackets = Xmax(deliveredPacketCount | lastDelivered);
 
-bool recvPkt;
-bool dropPkt;
-bool doneRecv;
-bool retransmit;
-
 // Properties
-property ReceivedPkt = Pmax(<> recvPkt);
-property DroppedPkt = Pmax(<> dropPkt);
-property DoneRecv = Pmax (<> doneRecv);
-property Retransmit = Pmax(<> retransmit);
 
 // Upper layers on sender side
 // Do not modify this process
@@ -97,22 +88,20 @@ process Sender()
             =};
             urgent udt_snd_s_done
         // receive data from lower layer
-        :: urgent rdt_rcv_s {= doneRecv = true =};
+        :: urgent rdt_rcv_s;
             urgent tau {=
-                doneRecv = true,
                 packets = remove(packets, cspacket.seqnum - send_base), 
                 timer_on = (length(packets) == 0) ? false : timer_on,
                 send_base = cspacket.seqnum + 1
             =}
-        :: when urgent (timer_on && retr_timer >= TIMEOUT && retr_idx < length(packets))
-            urgent tau {= doneRecv = true =};
+        :: when (timer_on && retr_timer >= TIMEOUT && retr_idx < length(packets))
             urgent udt_snd_s
             {= 
                 scpacket = at(packets, retr_idx),
                 retr_idx++
             =}; 
             urgent udt_snd_s_done
-        :: when urgent (timer_on && retr_timer >= TIMEOUT && retr_idx >= length(packets))
+        :: when (timer_on && retr_timer >= TIMEOUT && retr_idx >= length(packets))
             urgent tau {= retr_timer = 0, retr_idx = 0 =}
     }
 }
