@@ -12,17 +12,14 @@ import javax.xml.bind.DatatypeConverter;
 
 public class DNConnection {
 
-	private ServerSocket welcomeSocket;
 	private Socket clientSocket;
 	PrintWriter pr;
 	MsgParser parser;
 	private BufferedOutputStream bw;
 
-	public DNConnection(int port) {
+	public DNConnection(Socket clientSocket) {
 		try {
-			this.welcomeSocket = new ServerSocket(port);
-			System.out.println("[WS] Socket bound on port " + port + ".");
-			this.clientSocket = welcomeSocket.accept();
+			this.clientSocket = clientSocket;
 			this.pr = new PrintWriter(clientSocket.getOutputStream(), true);
 			this.bw = new BufferedOutputStream(clientSocket.getOutputStream());
 			System.out.println("[WS] Incoming socket!");
