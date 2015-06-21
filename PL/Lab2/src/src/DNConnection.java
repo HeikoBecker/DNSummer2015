@@ -16,6 +16,7 @@ public class DNConnection {
 	PrintWriter pr;
 	MsgParser parser;
 	private BufferedOutputStream bw;
+	private boolean serverShutdown;
 
 	public DNConnection(Socket clientSocket) {
 		try {
@@ -24,6 +25,7 @@ public class DNConnection {
 			this.bw = new BufferedOutputStream(clientSocket.getOutputStream());
 			System.out.println("[WS] Incoming socket!");
 			this.parser = new MsgParser(clientSocket.getInputStream());
+			this.serverShutdown = false;
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -58,7 +60,7 @@ public class DNConnection {
 //			bw.flush();
 //			bw.write(closeText);
 //			bw.flush();
-			while (!clientSocket.isClosed()) {
+			while (!clientSocket.isClosed() || this.serverShutdown) {
 				Message message2 = parser.getWebsocketMessage();
 				//System.out.println(message2);
 				// Let new message execute, resp. send messages on socket
@@ -75,6 +77,12 @@ public class DNConnection {
 		}
 	}
 
+	public void tellShutdown() {
+		synchronized(this){
+			this.serverShutdown = true;
+		}
+	}
+	
     /*
      * TODO: What does this method do?
      */

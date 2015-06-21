@@ -18,18 +18,23 @@ public class Main {
 			while (true) {
 				final Socket clientSocket = socket.accept();
 				Thread conn = new Thread(){
+					
+					DNConnection connection;
+					
 					@Override
 					public void run(){
-						DNConnection connection = new DNConnection(clientSocket);
+						connection = new DNConnection(clientSocket);
 						connection.run();
+					}
+					
+					public void tellShutdown(){
+						this.connection.tellShutdown();
 					}
 				};
 				conn.start();
 				connections.add(conn);
 			}
 		} catch (IOException e) {
-			
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
     }
