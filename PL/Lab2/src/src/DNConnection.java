@@ -84,7 +84,8 @@ public class DNConnection {
 	}
 	
     /*
-     * TODO: What does this method do?
+     * The Sec-Websocket-Key is processed and converted as stated in RFC6455. Therefore it is concatenated,
+     * the SHA-1 hash is taken and the resulting bytes are converted to base64.
      */
 	private static String getSecToken(String token)
 			throws NoSuchAlgorithmException, UnsupportedEncodingException {
