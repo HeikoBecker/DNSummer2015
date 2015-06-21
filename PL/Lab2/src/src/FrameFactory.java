@@ -14,7 +14,7 @@ public class FrameFactory {
 	}
 
 	public static byte[] testText() {
-		byte[] result = { addFIN (MsgParser.TEXT), 0x05, 'H','e','l','l','o'};// 0x05, 0x48, 0x65, 0x6c, 0x6f};
+		byte[] result = { addFIN (MsgParser.TEXT), 0x05, 'H','e','l','l','o'};
 		return result;
 	}
 	

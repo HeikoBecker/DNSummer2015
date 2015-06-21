@@ -1,3 +1,4 @@
+import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.Socket;
@@ -23,7 +24,7 @@ public class Message {
     }
 
 //TODO: Make this abstract and have specialized msgs!
-	public void execute(PrintWriter pr, Socket clientSocket) throws IOException {
+	public void execute(BufferedOutputStream bw, PrintWriter pr, Socket clientSocket) throws IOException {
 		return;
 	}
 }

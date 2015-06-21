@@ -189,10 +189,8 @@ public class MsgParser {
 			// TODO: Finally you must close the connection
 			// TODO: Server must close first
 		case PING:
-			System.out.println("TODO: Handle PING frame!");
 			return new PingMsg();
 		case PONG:
-			System.out.println("TODO: Handle Pong frame!");
 			return new PongMsg();
 			// TODO: Find out what to do for unspecified opcodes
 		default:
