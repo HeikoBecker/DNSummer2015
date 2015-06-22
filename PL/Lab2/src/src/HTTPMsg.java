@@ -8,6 +8,7 @@ public class HTTPMsg extends Message {
     public String WebSocketExtensions;
     public String WebSocketKey;
     public String Verb;
+    public boolean isCorrectProtocol;
 
     @Override
     public void execute(BufferedOutputStream bw, PrintWriter pr, Socket clientSocket) throws IOException {

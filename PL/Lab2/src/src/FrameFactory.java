@@ -21,6 +21,9 @@ public class FrameFactory {
 	}
 
 	public static byte[] TextFrame(String text) throws UnsupportedEncodingException {
+        // TODO: handle fragmentation
+        // TODO: handle longer messages where additional payloadlength fields are used
+
         byte opcode = addFIN(MsgParser.TEXT);
         byte length = (byte) text.length();
         String frame = opcode + "" + length;

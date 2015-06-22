@@ -47,7 +47,10 @@ public class MsgParser {
 		HTTPMsg msg = new HTTPMsg();
 		while (inputBuffer.ready()) {
 			input = inputBuffer.readLine();
-			System.out.println(input);
+            if(input.equals(MsgParser.GET)) {
+                msg.isCorrectProtocol = true;
+                continue;
+            }
 			lines = input.split(MsgParser.SPLIT);
 			String key = lines[0];
 			switch (key) {
@@ -100,23 +103,13 @@ public class MsgParser {
 		}
 		System.out.println(line);
 		while (count - 5 <= payloadlength && (c = is.read()) != -1) {
-			System.out.println("Loop");
 			count++;
 			switch (count) {
 			case 1:
 				opcode = c & 0x0F;
 				break;
 			case 2:
-				System.out.println("Masking " + c);
-				int tmp = c & 0b10000000;
-				byte mask = (byte) tmp;
-				System.out.println(mask);
-				if (mask == -128)
-					System.out.println("Masking incorporated");
-				else
-					System.out.println("No masking");
 				payloadlength = c & 0b01111111;
-				
 				// TODO: 126 --> 7+16 bits (as unsigned integer)
 				//Unsigned done with:https://stackoverflow.com/questions/9854166/declaring-an-unsigned-int-in-java
 				if (payloadlength == 126){
@@ -136,30 +129,23 @@ public class MsgParser {
 					payloadlength = payloadlength | c;
 				} 
 				payload = new byte[payloadlength]; //TODO: Does this need to be a long for unsigned?
-
-				System.out.println("Payload length " + payloadlength);
 				break;
 			case 3:
 				maskingKey[0] = (byte) c;
-				System.out.println("Mask1 read");
 				break;
 			case 4:
 				maskingKey[1] = (byte) c;
-				System.out.println("Mask2 read");
 				break;
 			case 5:
 				maskingKey[2] = (byte) c;
-				System.out.println("Mask3 read");
 				break;
 			case 6:
 				maskingKey[3] = (byte) c;
-				System.out.println("Mask4 read");
 				break;
 			default:
 				// TODO: Hier muss das entmaskieren aus dem RFC hin
 				payload[idx] = (byte) ((byte) c ^ maskingKey[idx % 4]);
 				idx++;
-				System.out.println("Payload " + idx + " read");
 				break;
 			}
 		}

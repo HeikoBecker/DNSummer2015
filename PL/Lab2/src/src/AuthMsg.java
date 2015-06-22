@@ -4,9 +4,10 @@ import java.io.PrintWriter;
 import java.net.Socket;
 
 public class AuthMsg extends Message {
+    private static final String groupPassword = "3YnnafwB";
+
     private boolean validPassword = false;
     private String name;
-    private String groupPassword = "3YnnafwB";
 
     public AuthMsg(Long id, String name, String password) {
         this.Id = id;

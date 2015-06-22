@@ -1,10 +1,10 @@
 import java.io.IOException;
 import java.net.ServerSocket;
-import java.net.Socket;
 import java.util.LinkedList;
 
 public class WelcomeThread implements Runnable {
-    LinkedList<ConnectionThread> connections = new LinkedList<ConnectionThread>();
+    LinkedList<ConnectionThread> connections = new LinkedList<>();
+
 
     public void tellShutdown() {
         for (ConnectionThread t : this.connections) {
@@ -21,8 +21,7 @@ public class WelcomeThread implements Runnable {
             System.out.println("[WS] Welcome Socket bound on port " + port + ".");
 
             while (true) {
-                final Socket clientSocket = socket.accept();
-                ConnectionThread conn = new ConnectionThread(clientSocket);
+                ConnectionThread conn = new ConnectionThread(socket.accept());
                 conn.start();
                 this.connections.add(conn);
             }
