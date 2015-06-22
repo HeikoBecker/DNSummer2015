@@ -1,3 +1,4 @@
+import java.io.IOException;
 import java.net.Socket;
 
 public class ConnectionThread extends Thread {
@@ -11,8 +12,12 @@ public class ConnectionThread extends Thread {
 
     @Override
     public void run() {
-        connection = new DNConnection(clientSocket);
-        connection.run();
+        try {
+            connection = new DNConnection(clientSocket);
+            connection.run();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public void tellShutdown() {

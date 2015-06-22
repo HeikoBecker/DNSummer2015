@@ -19,11 +19,15 @@ public class DNChat {
         return instance;
     }
 
-    public void addConnection(String id, DNConnection senderConnection) throws IOException {
+    public boolean isNameTaken(String userName) {
+        boolean result = false;
         for (DNConnection existingConnection : connections.values()) {
-            existingConnection.sendArrv(id, senderConnection.getUserName());
+            if(existingConnection.getUserName().equals(userName)) {
+                result = true;
+                break;
+            }
         }
-        connections.put(id, senderConnection);
+        return result;
     }
 
     public void sendMessage(SendMsg msg, DNConnection senderConnection) throws IOException {
@@ -47,6 +51,14 @@ public class DNChat {
                 recipientConnection.sendAckn(msg, senderConnection.getUserId());
             }
         }
+    }
+
+    public void addConnection(String id, DNConnection senderConnection) throws IOException {
+        for (DNConnection existingConnection : connections.values()) {
+            existingConnection.sendArrv(id, senderConnection.getUserName());
+            senderConnection.sendArrv(existingConnection.getUserId(), existingConnection.getUserName());
+        }
+        connections.put(id, senderConnection);
     }
 
     public void closeConnection(String userId) throws IOException {

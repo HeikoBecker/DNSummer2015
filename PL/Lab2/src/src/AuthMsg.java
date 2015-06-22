@@ -19,18 +19,19 @@ public class AuthMsg extends Message {
 
     @Override
     public void execute(DNConnection connection, BufferedOutputStream bw, Socket clientSocket) throws IOException {
-        // TODO: check for untaken username
-
         if (!this.validPassword) {
             bw.write(FrameFactory.TextFrame(ChatMsgFactory.createResponse("FAIL", this.id, new String[]{"PASSWORD"})));
+        } else if(DNChat.getInstance().isNameTaken(name)) {
+            bw.write(FrameFactory.TextFrame(ChatMsgFactory.createResponse("FAIL", this.id, new String[]{"NAME"})));
         } else {
             bw.write(FrameFactory.TextFrame(ChatMsgFactory.createResponse("OKAY", this.id, new String[] {})));
+
+            connection.setUserId(this.id);
+            connection.setUserName(this.name);
+
+            DNChat.getInstance().addConnection(this.id, connection);
+
         }
         bw.flush();
-
-        connection.setUserId(this.id);
-        connection.setUserName(this.name);
-
-        DNChat.getInstance().addConnection(this.id, connection);
     }
 }

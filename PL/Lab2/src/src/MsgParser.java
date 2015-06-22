@@ -153,12 +153,7 @@ public class MsgParser {
 			return new ConnCloseMsg(1007); // INV PAYLOAD DATA (Sec. 11.7, Page
 											// 64)
 		case TEXT:
-			String text = new String(payload, "UTF-8");
-			System.out.println("[WS] Text Frame received:");
-            System.out.println("------------------------");
-			System.out.println(text);
-            System.out.println("------------------------");
-            return ChatMsgFactory.createClientMessage(text, userId);
+            return ChatMsgFactory.createClientMessage(new String(payload, "UTF-8"), userId);
 		case BIN:
 			System.out.println("TODO: Handle binary frame!");
 			break;

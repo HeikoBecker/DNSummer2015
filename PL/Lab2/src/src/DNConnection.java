@@ -20,7 +20,7 @@ public class DNConnection {
     private String userId;
     private String userName;
 
-    public DNConnection(Socket clientSocket) {
+    public DNConnection(Socket clientSocket) throws IOException {
         try {
             this.clientSocket = clientSocket;
             this.bw = new BufferedOutputStream(clientSocket.getOutputStream());
@@ -30,6 +30,7 @@ public class DNConnection {
         } catch(SocketException e) {
             System.out.println(e.getMessage());
             System.out.println(e.getCause());
+            DNChat.getInstance().closeConnection(this.userId);
         } catch (IOException e) {
             System.out.println(e);
         }
@@ -66,7 +67,7 @@ public class DNConnection {
         pr.print(serverHandshake);
         pr.flush();
 
-        System.out.println("[WS] Handshake complete!");
+        log("[WS] Handshake complete!");
     }
 
     /*
@@ -108,25 +109,24 @@ public class DNConnection {
     }
 
     public void sendMessage(SendMsg msg, String userId) throws IOException {
-        String message = ChatMsgFactory.createResponse("SEND", msg.id, new String[]{ userId, msg.getMessage()});
-        bw.write(FrameFactory.TextFrame(message));
-        bw.flush();
+        send("SEND", msg.id, new String[]{userId, msg.getMessage()});
     }
 
     public void sendAckn(AcknMsg msg, String userId) throws IOException {
-        String message = ChatMsgFactory.createResponse("ACKN", msg.id, new String[]{ userId });
-        bw.write(FrameFactory.TextFrame(message));
-        bw.flush();
+        send("ACKN", msg.id, new String[]{ userId });
     }
 
     public void sendArrv(String userId, String userName) throws IOException {
-        String message = ChatMsgFactory.createResponse("ARRV", userId, new String[]{ userName, "Desc" });
-        bw.write(FrameFactory.TextFrame(message));
-        bw.flush();
+        send("ARRV", userId, new String[]{userName, "Desc"});
     }
 
     public void sendLeft(String userId) throws IOException {
-        String message = ChatMsgFactory.createResponse("LEFT", userId, new String[]{ });
+        send("LEFT", userId, new String[]{});
+    }
+
+    /* Helpers */
+    private void send(String command, String id, String[] lines) throws IOException {
+        String message = ChatMsgFactory.createResponse(command, id, lines);
         bw.write(FrameFactory.TextFrame(message));
         bw.flush();
     }
