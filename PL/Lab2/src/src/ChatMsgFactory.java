@@ -14,7 +14,9 @@ public class ChatMsgFactory {
             case "SEND":
                 String recipient = lines[1];
                 String message = lines[2];
-                return new SendMsg(id, userId, recipient, message);
+                return new SendMsg(id, recipient, message);
+            case "ACKN":
+                return new AcknMsg(id);
             default:
                 System.out.println(command + " is not yet handled by the server.");
                 break;

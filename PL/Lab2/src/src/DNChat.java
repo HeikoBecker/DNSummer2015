@@ -19,8 +19,11 @@ public class DNChat {
         return instance;
     }
 
-    public void addConnection(String id, DNConnection connection) {
-        connections.put(id, connection);
+    public void addConnection(String id, DNConnection senderConnection) throws IOException {
+        for (DNConnection existingConnection : connections.values()) {
+            existingConnection.sendArrv(id, senderConnection.getUserName());
+        }
+        connections.put(id, senderConnection);
     }
 
     public void sendMessage(SendMsg msg, DNConnection senderConnection) throws IOException {
@@ -37,4 +40,19 @@ public class DNChat {
     }
 
 
+    public void sendAcknowledgement(AcknMsg msg, DNConnection senderConnection) throws IOException {
+        // TODO: ack should only be send to original recipients. This should be handeled somewhere.
+        for (DNConnection recipientConnection : connections.values()) {
+            if (recipientConnection.getUserId() != senderConnection.getUserId()) {
+                recipientConnection.sendAckn(msg, senderConnection.getUserId());
+            }
+        }
+    }
+
+    public void closeConnection(String userId) throws IOException {
+        connections.remove(userId);
+        for (DNConnection recipientConnection : connections.values()) {
+            recipientConnection.sendLeft(userId);
+        }
+    }
 }

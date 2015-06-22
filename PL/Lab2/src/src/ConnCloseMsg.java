@@ -46,6 +46,9 @@ public class ConnCloseMsg extends Message {
 		// THEN?
         bw.write(FrameFactory.CloseFrame(this.reason));
         bw.flush();
+
+		DNChat.getInstance().closeConnection(connection.getUserId());
+
 		clientSocket.shutdownInput();
 		clientSocket.shutdownOutput();
 		clientSocket.close();

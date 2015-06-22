@@ -3,12 +3,14 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.Socket;
+import java.net.SocketException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
 import javax.xml.bind.DatatypeConverter;
 
 public class DNConnection {
+    private final boolean DEBUG = false;
 
     private Socket clientSocket;
     MsgParser parser;
@@ -22,9 +24,12 @@ public class DNConnection {
         try {
             this.clientSocket = clientSocket;
             this.bw = new BufferedOutputStream(clientSocket.getOutputStream());
-            System.out.println("[WS] Incoming socket!");
+            log("[WS] Incoming socket!");
             this.parser = new MsgParser(clientSocket.getInputStream());
             this.serverShutdown = false;
+        } catch(SocketException e) {
+            System.out.println(e.getMessage());
+            System.out.println(e.getCause());
         } catch (IOException e) {
             System.out.println(e);
         }
@@ -106,5 +111,29 @@ public class DNConnection {
         String message = ChatMsgFactory.createResponse("SEND", msg.id, new String[]{ userId, msg.getMessage()});
         bw.write(FrameFactory.TextFrame(message));
         bw.flush();
+    }
+
+    public void sendAckn(AcknMsg msg, String userId) throws IOException {
+        String message = ChatMsgFactory.createResponse("ACKN", msg.id, new String[]{ userId });
+        bw.write(FrameFactory.TextFrame(message));
+        bw.flush();
+    }
+
+    public void sendArrv(String userId, String userName) throws IOException {
+        String message = ChatMsgFactory.createResponse("ARRV", userId, new String[]{ userName, "Desc" });
+        bw.write(FrameFactory.TextFrame(message));
+        bw.flush();
+    }
+
+    public void sendLeft(String userId) throws IOException {
+        String message = ChatMsgFactory.createResponse("LEFT", userId, new String[]{ });
+        bw.write(FrameFactory.TextFrame(message));
+        bw.flush();
+    }
+
+    private void log(String msg){
+        if (DEBUG) {
+            System.out.println(msg);
+        }
     }
 }
