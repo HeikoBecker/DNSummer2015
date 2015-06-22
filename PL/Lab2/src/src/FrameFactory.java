@@ -29,7 +29,6 @@ public class FrameFactory {
 
 		byte[] result = frame.getBytes();
         System.out.println(DatatypeConverter.printHexBinary(frame.getBytes("utf8")));
-
 		return result;
 	}
 	
