@@ -14,31 +14,27 @@ public class FrameFactory {
         return result;
     }
 
-    public static byte[] testText() {
-        byte[] result = {addFIN(MsgParser.TEXT), 0x05, 'H', 'e', 'l', 'l', 'o'};
-        return result;
-    }
-
     public static byte[] TextFrame(String text) throws UnsupportedEncodingException {
-        // TODO: handle fragmentation
-        // TODO: handle longer messages where additional payloadlength fields are used
+        /*
+         * Note: We intentionally do not support text frames that are longer than 65536.
+         * As the reference implementation does not support messages longer than 384, there is no need for this.
+         */
+
         int headerLength = 2;
         int length = text.length();
-        // Using 126 as payload length, we need 2 additional bytes as length.
-        if (length > 126) {
+        if (length > 126) { // Using 126 as payload length, we need 2 additional bytes as length.
             headerLength = 4;
         }
-        // Using 127 as payload length, we need 8 additional bytes as length.
-        if(length > 65536) {
-            headerLength = 10;
-        }
-
-        System.out.println(text);
 
         // Create header
         byte[] result = new byte[headerLength + length];
         result[0] = addFIN(MsgParser.TEXT);
         result[1] = (byte) length;
+        if (length > 126) {
+            result[1] = 126;
+            result[2] = (byte) ((length >> 8) & 0x0F);
+            result[3] = (byte) (length & 0x0F);
+        }
 
         // Insert payload
         System.arraycopy(text.getBytes("utf8"), 0, result, headerLength, length);

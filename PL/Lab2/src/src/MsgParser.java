@@ -96,6 +96,8 @@ public class MsgParser {
 		int idx = 0;
 		int opcode = -1;
 
+		// TODO: check if fin bit is not set. Then the client tries to fragment. In this case we should cleanly close the connection.
+
 		byte[] payload = new byte[payloadlength];
 		while (count - 5 <= payloadlength && (c = is.read()) != -1) {
 			count++;
