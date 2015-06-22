@@ -19,5 +19,5 @@ public abstract class Message {
         return Type + " " + Id;
     }
 
-    public abstract void execute(BufferedOutputStream bw, PrintWriter pr, Socket clientSocket) throws IOException;
+    public abstract void execute(BufferedOutputStream bw, Socket clientSocket) throws IOException;
 }

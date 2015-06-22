@@ -11,7 +11,6 @@ import javax.xml.bind.DatatypeConverter;
 public class DNConnection {
 
     private Socket clientSocket;
-    PrintWriter pr;
     MsgParser parser;
     private BufferedOutputStream bw;
     private boolean serverShutdown;
@@ -21,7 +20,6 @@ public class DNConnection {
     public DNConnection(Socket clientSocket) {
         try {
             this.clientSocket = clientSocket;
-            this.pr = new PrintWriter(clientSocket.getOutputStream(), true);
             this.bw = new BufferedOutputStream(clientSocket.getOutputStream());
             System.out.println("[WS] Incoming socket!");
             this.parser = new MsgParser(clientSocket.getInputStream());
@@ -33,22 +31,28 @@ public class DNConnection {
 
     public void run() {
         try {
-
-            HTTPMsg clientHandshake = parser.getHTTPMessage();
-            String serverHandshake = createHandshakeMessage(clientHandshake);
-            pr.print(serverHandshake);
-            pr.flush();
-
-            System.out.println("[WS] Handshake complete!");
-
+            handshake();
             while (!clientSocket.isClosed() && !this.serverShutdown) {
                 Message clientMessage = parser.getWebsocketMessage();
                 // Let new message execute, resp. send messages on socket
-                clientMessage.execute(bw, pr, clientSocket);
+                clientMessage.execute(bw, clientSocket);
             }
         } catch (IOException | InterruptedException | NoSuchAlgorithmException e) {
             System.out.println(e);
         }
+    }
+
+    /*
+     * Wait for client handshake and reply with respective message.
+     */
+    private void handshake() throws IOException, InterruptedException, NoSuchAlgorithmException {
+        HTTPMsg clientHandshake = parser.getHTTPMessage();
+        String serverHandshake = createHandshakeMessage(clientHandshake);
+        PrintWriter pr = new PrintWriter(clientSocket.getOutputStream(), true);
+        pr.print(serverHandshake);
+        pr.flush();
+
+        System.out.println("[WS] Handshake complete!");
     }
 
     /*

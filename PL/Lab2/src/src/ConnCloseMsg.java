@@ -39,13 +39,14 @@ public class ConnCloseMsg extends Message {
 	}
 
 	@Override
-	public void execute(BufferedOutputStream bw, PrintWriter pr, Socket clientSocket) throws IOException{
+	public void execute(BufferedOutputStream bw, Socket clientSocket) throws IOException{
 		//TODO: Reply needed?
 		//FIN = 1?
 		// Reserved Bytes
 		// Conn Close OPCODE
 		// THEN?
-		pr.print(FrameFactory.CloseFrame(this.reason));
+        bw.write(FrameFactory.CloseFrame(this.reason));
+        bw.flush();
 		clientSocket.shutdownInput();
 		clientSocket.shutdownOutput();
 		clientSocket.close();
