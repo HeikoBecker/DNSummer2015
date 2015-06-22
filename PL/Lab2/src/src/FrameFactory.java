@@ -23,15 +23,18 @@ public class FrameFactory {
 	public static byte[] TextFrame(String text) throws UnsupportedEncodingException {
         // TODO: handle fragmentation
         // TODO: handle longer messages where additional payloadlength fields are used
+        int headerLength = 2;
+        int length = text.length();
 
-        byte opcode = addFIN(MsgParser.TEXT);
-        byte length = (byte) text.length();
-        String frame = opcode + "" + length;
-        frame += text.getBytes("utf8");
-        System.out.println(frame);
+        System.out.println(text);
 
-		byte[] result = frame.getBytes();
-        System.out.println(DatatypeConverter.printHexBinary(frame.getBytes("utf8")));
+        // Create header
+        byte[] result = new byte[headerLength + length];
+        result[0] = addFIN(MsgParser.TEXT);
+        result[1] = (byte) length;
+
+        // Insert payload
+        System.arraycopy(text.getBytes("utf8"), 0, result, headerLength, length);
 		return result;
 	}
 	

@@ -21,12 +21,10 @@ public class AuthMsg extends Message {
     @Override
     public void execute(BufferedOutputStream bw, PrintWriter pr, Socket clientSocket) throws IOException {
         if (!this.validPassword) {
-            byte[] responseFrame = FrameFactory.TextFrame(ChatMsgFactory.createResponse("FAIL", this.Id, new String[]{"PASSWORD"}));
-            pr.print(responseFrame);
+            bw.write(FrameFactory.TextFrame(ChatMsgFactory.createResponse("FAIL", this.Id, new String[]{"PASSWORD"})));
         } else {
-            byte[] responseFrame = FrameFactory.TextFrame(ChatMsgFactory.createResponse("OKAY", this.Id, new String[] {}));
-            pr.print(responseFrame);
-            // TODO: handle authentication
+            bw.write(FrameFactory.TextFrame(ChatMsgFactory.createResponse("OKAY", this.Id, new String[] {})));
         }
+        bw.flush();
     }
 }

@@ -4,8 +4,6 @@ public class ChatMsgFactory {
         String[] header = lines[0].split(" ");
         String command = header[0];
         Long id = Long.parseLong(header[1].trim());
-        System.out.println(command);
-        System.out.println(id);
 
         switch(command)
         {
@@ -24,7 +22,7 @@ public class ChatMsgFactory {
     public static String createResponse(String command, Long id, String[] lines) {
         String response = command + " " + id;
         for(int i = 0; i < lines.length; i++) {
-            response += "\n" + lines[i];
+            response += "\r\n" + lines[i];
         }
         return response;
     }

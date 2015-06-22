@@ -97,11 +97,6 @@ public class MsgParser {
 		int opcode = -1;
 
 		byte[] payload = new byte[payloadlength];
-		String line = "";
-		while (this.inputBuffer.ready()) {
-			line += this.inputBuffer.readLine();
-		}
-		System.out.println(line);
 		while (count - 5 <= payloadlength && (c = is.read()) != -1) {
 			count++;
 			switch (count) {
@@ -149,7 +144,6 @@ public class MsgParser {
 				break;
 			}
 		}
-		System.out.println(count);
 		switch (opcode) {
 		// Continuation Frame according to RFC (opcode is 0, Page 32++)
 		// Cleanly close conn in this case
@@ -159,8 +153,10 @@ public class MsgParser {
 											// 64)
 		case TEXT:
 			String text = new String(payload, "UTF-8");
-			System.out.println("A TEXT FRAME");
+			System.out.println("[WS] Text Frame received:");
+            System.out.println("------------------------");
 			System.out.println(text);
+            System.out.println("------------------------");
             return ChatMsgFactory.createClientMessage(text);
 		case BIN:
 			System.out.println("TODO: Handle binary frame!");
