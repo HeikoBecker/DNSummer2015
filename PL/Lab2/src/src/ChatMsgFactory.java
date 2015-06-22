@@ -1,5 +1,5 @@
 public class ChatMsgFactory {
-    public static Message createClientMessage(String msg) {
+    public static Message createClientMessage(String msg, String userId) {
         String[] lines = msg.split("\r\n");
         String[] header = lines[0].split(" ");
         String command = header[0];
@@ -14,7 +14,7 @@ public class ChatMsgFactory {
             case "SEND":
                 String recipient = lines[1];
                 String message = lines[2];
-                return new SendMsg(id, recipient, message);
+                return new SendMsg(id, userId, recipient, message);
             default:
                 System.out.println(command + " is not yet handled by the server.");
                 break;

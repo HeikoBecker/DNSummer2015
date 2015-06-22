@@ -38,7 +38,7 @@ public class ConnCloseMsg extends Message {
 	}
 
 	@Override
-	public void execute(BufferedOutputStream bw, Socket clientSocket) throws IOException{
+	public void execute(DNConnection connection, BufferedOutputStream bw, Socket clientSocket) throws IOException{
 		//TODO: Reply needed?
 		//FIN = 1?
 		// Reserved Bytes

@@ -6,7 +6,7 @@ import java.net.Socket;
 public class PingMsg extends Message {
 
 	@Override
-	public void execute(BufferedOutputStream bw, Socket clientSocket) throws IOException {
+	public void execute(DNConnection connection, BufferedOutputStream bw, Socket clientSocket) throws IOException {
 		bw.write(FrameFactory.PongFrame());
 		bw.flush();
 	}

@@ -1,6 +1,5 @@
 import java.io.BufferedOutputStream;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.net.Socket;
 
 
@@ -11,7 +10,7 @@ public class HTTPMsg extends Message {
     public boolean isCorrectProtocol;
 
     @Override
-    public void execute(BufferedOutputStream bw, Socket clientSocket) throws IOException {
+    public void execute(DNConnection connection, BufferedOutputStream bw, Socket clientSocket) throws IOException {
 
     }
 }

@@ -85,7 +85,7 @@ public class MsgParser {
 		return msg;
 	}
 
-	public Message getWebsocketMessage() throws IOException {
+	public Message getWebsocketMessage(String userId) throws IOException {
 		Message msg = new UnknownMsg();
 		msg.Type = "Websocket";
 
@@ -157,7 +157,7 @@ public class MsgParser {
             System.out.println("------------------------");
 			System.out.println(text);
             System.out.println("------------------------");
-            return ChatMsgFactory.createClientMessage(text);
+            return ChatMsgFactory.createClientMessage(text, userId);
 		case BIN:
 			System.out.println("TODO: Handle binary frame!");
 			break;

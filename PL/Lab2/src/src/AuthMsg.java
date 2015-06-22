@@ -18,7 +18,7 @@ public class AuthMsg extends Message {
     }
 
     @Override
-    public void execute(BufferedOutputStream bw, Socket clientSocket) throws IOException {
+    public void execute(DNConnection connection, BufferedOutputStream bw, Socket clientSocket) throws IOException {
         // TODO: check for untaken username
 
         if (!this.validPassword) {
@@ -27,5 +27,10 @@ public class AuthMsg extends Message {
             bw.write(FrameFactory.TextFrame(ChatMsgFactory.createResponse("OKAY", this.id, new String[] {})));
         }
         bw.flush();
+
+        connection.setUserId(this.id);
+        connection.setUserName(this.name);
+
+        DNChat.getInstance().addConnection(this.id, connection);
     }
 }

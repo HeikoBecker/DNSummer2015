@@ -15,7 +15,8 @@ public class DNConnection {
     private BufferedOutputStream bw;
     private boolean serverShutdown;
 
-    private String username;
+    private String userId;
+    private String userName;
 
     public DNConnection(Socket clientSocket) {
         try {
@@ -33,13 +34,21 @@ public class DNConnection {
         try {
             handshake();
             while (!clientSocket.isClosed() && !this.serverShutdown) {
-                Message clientMessage = parser.getWebsocketMessage();
+                Message clientMessage = parser.getWebsocketMessage(userId);
                 // Let new message execute, resp. send messages on socket
-                clientMessage.execute(bw, clientSocket);
+                clientMessage.execute(this, bw, clientSocket);
             }
         } catch (IOException | InterruptedException | NoSuchAlgorithmException e) {
             System.out.println(e);
         }
+    }
+
+    public String getUserId() {
+        return this.userId;
+    }
+
+    public String getUserName() {
+        return this.userName;
     }
 
     /*
@@ -58,7 +67,7 @@ public class DNConnection {
     /*
      * Given the handshake message by the client, the servers handshake message is constructed.
      */
-    private String createHandshakeMessage(HTTPMsg clientHandshake) throws NoSuchAlgorithmException, UnsupportedEncodingException {
+    private static String createHandshakeMessage(HTTPMsg clientHandshake) throws NoSuchAlgorithmException, UnsupportedEncodingException {
         String base64Token = DNConnection.getSecToken(clientHandshake.WebSocketKey);
         String message = "HTTP/1.1 101 Switching Protocols\n"
                 + "Upgrade: websocket\n" + "Connection: Upgrade\n"
@@ -83,5 +92,19 @@ public class DNConnection {
         cript.reset();
         cript.update(token.getBytes("utf8"));
         return DatatypeConverter.printBase64Binary(cript.digest());
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
+
+    public void sendMessage(SendMsg msg, String userId) throws IOException {
+        String message = ChatMsgFactory.createResponse("SEND", msg.id, new String[]{ userId, msg.getMessage()});
+        bw.write(FrameFactory.TextFrame(message));
+        bw.flush();
     }
 }
