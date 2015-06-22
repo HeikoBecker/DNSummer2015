@@ -10,76 +10,72 @@ import javax.xml.bind.DatatypeConverter;
 
 public class DNConnection {
 
-	private Socket clientSocket;
-	PrintWriter pr;
-	MsgParser parser;
-	private BufferedOutputStream bw;
-	private boolean serverShutdown;
+    private Socket clientSocket;
+    PrintWriter pr;
+    MsgParser parser;
+    private BufferedOutputStream bw;
+    private boolean serverShutdown;
 
-	public DNConnection(Socket clientSocket) {
-		try {
-			this.clientSocket = clientSocket;
-			this.pr = new PrintWriter(clientSocket.getOutputStream(), true);
-			this.bw = new BufferedOutputStream(clientSocket.getOutputStream());
-			System.out.println("[WS] Incoming socket!");
-			this.parser = new MsgParser(clientSocket.getInputStream());
-			this.serverShutdown = false;
-		} catch (IOException e) {
-			System.out.println(e);
-		}
-	}
+    public DNConnection(Socket clientSocket) {
+        try {
+            this.clientSocket = clientSocket;
+            this.pr = new PrintWriter(clientSocket.getOutputStream(), true);
+            this.bw = new BufferedOutputStream(clientSocket.getOutputStream());
+            System.out.println("[WS] Incoming socket!");
+            this.parser = new MsgParser(clientSocket.getInputStream());
+            this.serverShutdown = false;
+        } catch (IOException e) {
+            System.out.println(e);
+        }
+    }
 
-	public void run() {
-		try {
+    public void run() {
+        try {
 
-			Message handshake = parser.getHTTPMessage();
+            Message clientHandshake = parser.getHTTPMessage();
+            String serverHandshake = createHandshakeMessage(clientHandshake);
+            pr.print(serverHandshake);
+            pr.flush();
 
-			// TODO: Maybe make this a factory!
-			String base64Token = DNConnection
-					.getSecToken(handshake.WebSocketKey);
-			String welcomeMsg = "HTTP/1.1 101 Switching Protocols\n"
-					+ "Upgrade: websocket\n" + "Connection: Upgrade\n"
-					+ "Sec-WebSocket-Accept: " + base64Token;
-			welcomeMsg += "\r\n\r\n";
-			System.out.print(welcomeMsg);
+            System.out.println("[WS] Handshake complete!");
 
-			pr.print(welcomeMsg);
-			pr.flush();
+            while (!clientSocket.isClosed() && !this.serverShutdown) {
+                Message clientMessage = parser.getWebsocketMessage();
+                // Let new message execute, resp. send messages on socket
+                clientMessage.execute(bw, pr, clientSocket);
+            }
+        } catch (IOException | InterruptedException | NoSuchAlgorithmException e) {
+            System.out.println(e);
+        }
+    }
 
-			System.out.println("[WS] Handshake complete!");
+    /*
+     * Given the handshake message by the client, the servers handshake message is constructed.
+     */
+    private String createHandshakeMessage(Message clientHandshake) throws NoSuchAlgorithmException, UnsupportedEncodingException {
+        String base64Token = DNConnection.getSecToken(clientHandshake.WebSocketKey);
+        String message = "HTTP/1.1 101 Switching Protocols\n"
+                + "Upgrade: websocket\n" + "Connection: Upgrade\n"
+                + "Sec-WebSocket-Accept: " + base64Token + "\r\n\r\n";
+        return message;
+    }
 
-			while (!clientSocket.isClosed() && !this.serverShutdown) {
-				Message message2 = parser.getWebsocketMessage();
-				// System.out.println(message2);
-				// Let new message execute, resp. send messages on socket
-				message2.execute(bw, pr, clientSocket);
-			}
-		} catch (IOException e) {
-			System.out.println(e);
-		} catch (InterruptedException e) {
-			System.out.println(e);
-		} catch (NoSuchAlgorithmException e) {
-			System.out.println(e);
-		}
-	}
+    public void tellShutdown() {
+        synchronized (this) {
+            this.serverShutdown = true;
+        }
+    }
 
-	public void tellShutdown() {
-		synchronized (this) {
-			this.serverShutdown = true;
-		}
-	}
-	
     /*
      * The Sec-Websocket-Key is processed and converted as stated in RFC6455. Therefore it is concatenated,
      * the SHA-1 hash is taken and the resulting bytes are converted to base64.
      */
-	private static String getSecToken(String token)
-			throws NoSuchAlgorithmException, UnsupportedEncodingException {
-		token += "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
-		MessageDigest cript = MessageDigest.getInstance("SHA-1");
-		cript.reset();
-		cript.update(token.getBytes("utf8"));
-		return DatatypeConverter.printBase64Binary(cript.digest());
-	}
-
+    private static String getSecToken(String token)
+            throws NoSuchAlgorithmException, UnsupportedEncodingException {
+        token += "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
+        MessageDigest cript = MessageDigest.getInstance("SHA-1");
+        cript.reset();
+        cript.update(token.getBytes("utf8"));
+        return DatatypeConverter.printBase64Binary(cript.digest());
+    }
 }
