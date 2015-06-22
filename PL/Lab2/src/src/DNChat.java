@@ -9,6 +9,8 @@ public class DNChat {
     private DNChat() {
     }
 
+    // TODO: this class has to be completely synchronized
+
     public static synchronized DNChat getInstance() {
         if (instance == null) {
             instance = new DNChat();

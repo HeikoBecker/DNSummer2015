@@ -6,11 +6,9 @@ public class SendMsg extends Message {
 
     private final String message;
     private final String recipient;
-    private final String userId;
 
-    public SendMsg(String id, String userId, String recipient, String message) {
+    public SendMsg(String id, String recipient, String message) {
         this.id = id;
-        this.userId = userId;
         this.recipient = recipient;
         this.message = message;
     }
@@ -25,13 +23,16 @@ public class SendMsg extends Message {
 
     @Override
     public void execute(DNConnection connection, BufferedOutputStream bw, Socket clientSocket) throws IOException {
-        // TODO: put in correct length limitation
-        if (this.message.length() >= 30) {
+        /*
+         * Note: The length limitation to 384 bytes is derived by reversing the reference implementation.
+         */
+
+        if (this.message.length() > 384) {
             bw.write(FrameFactory.TextFrame(ChatMsgFactory.createResponse("FAIL", this.id, new String[]{"LENGTH"})));
         } else {
-            bw.write(FrameFactory.TextFrame(ChatMsgFactory.createResponse("OKAY", this.id, new String[] {})));
+            bw.write(FrameFactory.TextFrame(ChatMsgFactory.createResponse("OKAY", this.id, new String[]{})));
+            DNChat.getInstance().sendMessage(this, connection);
         }
-        DNChat.getInstance().sendMessage(this, connection);
         bw.flush();
     }
 }
