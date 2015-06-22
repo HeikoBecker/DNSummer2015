@@ -3,7 +3,7 @@ public class ChatMsgFactory {
         String[] lines = msg.split("\r\n");
         String[] header = lines[0].split(" ");
         String command = header[0];
-        Long id = Long.parseLong(header[1].trim());
+        String id = header[1];
 
         switch(command)
         {
@@ -14,7 +14,7 @@ public class ChatMsgFactory {
             case "SEND":
                 String recipient = lines[1];
                 String message = lines[2];
-                return new SendMsg(recipient, message);
+                return new SendMsg(id, recipient, message);
             default:
                 System.out.println(command + " is not yet handled by the server.");
                 break;
@@ -23,7 +23,7 @@ public class ChatMsgFactory {
         return null;
     }
 
-    public static String createResponse(String command, Long id, String[] lines) {
+    public static String createResponse(String command, String id, String[] lines) {
         String response = command + " " + id;
         for(int i = 0; i < lines.length; i++) {
             response += "\r\n" + lines[i];

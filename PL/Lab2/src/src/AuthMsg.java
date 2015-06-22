@@ -8,8 +8,8 @@ public class AuthMsg extends Message {
     private boolean validPassword = false;
     private String name;
 
-    public AuthMsg(Long id, String name, String password) {
-        this.Id = id;
+    public AuthMsg(String id, String name, String password) {
+        this.id = id;
         this.name = name;
 
         if (password.equals(groupPassword)) {
@@ -19,10 +19,12 @@ public class AuthMsg extends Message {
 
     @Override
     public void execute(BufferedOutputStream bw, Socket clientSocket) throws IOException {
+        // TODO: check for untaken username
+
         if (!this.validPassword) {
-            bw.write(FrameFactory.TextFrame(ChatMsgFactory.createResponse("FAIL", this.Id, new String[]{"PASSWORD"})));
+            bw.write(FrameFactory.TextFrame(ChatMsgFactory.createResponse("FAIL", this.id, new String[]{"PASSWORD"})));
         } else {
-            bw.write(FrameFactory.TextFrame(ChatMsgFactory.createResponse("OKAY", this.Id, new String[] {})));
+            bw.write(FrameFactory.TextFrame(ChatMsgFactory.createResponse("OKAY", this.id, new String[] {})));
         }
         bw.flush();
     }
