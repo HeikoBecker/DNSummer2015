@@ -81,7 +81,6 @@ public class MsgParser {
 				break;
 			}
 		}
-		// for debugging :D
 		return msg;
 	}
 
@@ -181,7 +180,6 @@ public class MsgParser {
 			System.out.println("Unknown opcode: " + opcode);
 			break;
 		}
-		System.out.println("READ COMPLETE MESSAGE");
 		return null;
 	}
 }
