@@ -1,3 +1,6 @@
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
+
+import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.Socket;
@@ -27,16 +30,16 @@ public class ConnCloseMsg extends Message {
 	public ConnCloseMsg(){
 		this.reason = NOSTATUS;
 	}
-	
+
 	/*
 	 * Constructor for given close code.
 	 */
 	public ConnCloseMsg(int reason){
 		this.reason = reason;
 	}
-	
+
 	@Override
-	public void execute(PrintWriter pr, Socket clientSocket) throws IOException{
+	public void execute(BufferedOutputStream bw, PrintWriter pr, Socket clientSocket) throws IOException{
 		//TODO: Reply needed?
 		//FIN = 1?
 		// Reserved Bytes

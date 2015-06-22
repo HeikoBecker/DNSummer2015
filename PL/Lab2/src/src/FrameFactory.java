@@ -1,3 +1,5 @@
+import javax.xml.bind.DatatypeConverter;
+import java.io.UnsupportedEncodingException;
 
 public class FrameFactory {
 
@@ -17,8 +19,22 @@ public class FrameFactory {
 		byte[] result = { addFIN (MsgParser.TEXT), 0x05, 'H','e','l','l','o'};
 		return result;
 	}
+
+	public static byte[] TextFrame(String text) throws UnsupportedEncodingException {
+        byte opcode = addFIN(MsgParser.TEXT);
+        byte length = (byte) text.length();
+        String frame = opcode + "" + length;
+        frame += text.getBytes("utf8");
+        System.out.println(frame);
+
+		byte[] result = frame.getBytes();
+        System.out.println(DatatypeConverter.printHexBinary(frame.getBytes("utf8")));
+
+		return result;
+	}
 	
 	private static byte addFIN (byte OPCode) {
 		return (byte) (FIN + OPCode);
 	}
 }
+

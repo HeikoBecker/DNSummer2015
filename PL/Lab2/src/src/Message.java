@@ -4,27 +4,20 @@ import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.Random;
 
-public class Message {
+public abstract class Message {
     private static Random rnd = new Random();
 
-    public int Id;
+    public Long Id;
     public String Type;
-    public String WebSocketExtensions;
-    public String WebSocketKey;
-    public String Verb;
 
     public Message() {
-        Id = rnd.nextInt();
+        this.Id = rnd.nextLong();
     }
-
 
     @Override
     public String toString() {
         return Type + " " + Id;
     }
 
-//TODO: Make this abstract and have specialized msgs!
-	public void execute(BufferedOutputStream bw, PrintWriter pr, Socket clientSocket) throws IOException {
-		return;
-	}
+    public abstract void execute(BufferedOutputStream bw, PrintWriter pr, Socket clientSocket) throws IOException;
 }

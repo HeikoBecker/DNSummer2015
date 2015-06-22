@@ -16,6 +16,8 @@ public class DNConnection {
     private BufferedOutputStream bw;
     private boolean serverShutdown;
 
+    private String username;
+
     public DNConnection(Socket clientSocket) {
         try {
             this.clientSocket = clientSocket;
@@ -32,7 +34,7 @@ public class DNConnection {
     public void run() {
         try {
 
-            Message clientHandshake = parser.getHTTPMessage();
+            HTTPMsg clientHandshake = parser.getHTTPMessage();
             String serverHandshake = createHandshakeMessage(clientHandshake);
             pr.print(serverHandshake);
             pr.flush();
@@ -52,7 +54,7 @@ public class DNConnection {
     /*
      * Given the handshake message by the client, the servers handshake message is constructed.
      */
-    private String createHandshakeMessage(Message clientHandshake) throws NoSuchAlgorithmException, UnsupportedEncodingException {
+    private String createHandshakeMessage(HTTPMsg clientHandshake) throws NoSuchAlgorithmException, UnsupportedEncodingException {
         String base64Token = DNConnection.getSecToken(clientHandshake.WebSocketKey);
         String message = "HTTP/1.1 101 Switching Protocols\n"
                 + "Upgrade: websocket\n" + "Connection: Upgrade\n"

@@ -41,10 +41,10 @@ public class MsgParser {
 		this.inputBuffer = new BufferedReader(this.sr);
 	}
 
-	public Message getHTTPMessage() throws IOException, InterruptedException {
+	public HTTPMsg getHTTPMessage() throws IOException, InterruptedException {
 		String input;
 		String[] lines;
-		Message msg = new Message();
+		HTTPMsg msg = new HTTPMsg();
 		while (inputBuffer.ready()) {
 			input = inputBuffer.readLine();
 			System.out.println(input);
@@ -83,7 +83,7 @@ public class MsgParser {
 	}
 
 	public Message getWebsocketMessage() throws IOException {
-		Message msg = new Message();
+		Message msg = new UnknownMsg();
 		msg.Type = "Websocket";
 
 		int count = 0;
@@ -175,7 +175,7 @@ public class MsgParser {
 			String text = new String(payload, "UTF-8");
 			System.out.println("A TEXT FRAME");
 			System.out.println(text);
-			break;
+            return ChatMsgFactory.createClientMessage(text);
 		case BIN:
 			System.out.println("TODO: Handle binary frame!");
 			break;
