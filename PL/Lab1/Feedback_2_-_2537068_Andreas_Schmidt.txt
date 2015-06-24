@@ -1,0 +1,2 @@
+can not connect with "localhost", has to add port;
+dropped and failed msgs are not displayed;
