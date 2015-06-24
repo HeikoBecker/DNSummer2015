@@ -15,6 +15,6 @@ public abstract class Message {
         return Type + " " + id;
     }
 
-    public abstract void execute(Client connection) throws IOException;
+    public abstract void execute(Client client) throws IOException;
 
 }

@@ -22,17 +22,17 @@ public class AuthChatMsg extends Message {
     }
 
     @Override
-    public void execute(Client connection) throws IOException {
-        if (connection.isAuthenticated()) {
-            connection.send("INVD", "0");
-            connection.close();
+    public void execute(Client client) throws IOException {
+        if (client.isAuthenticated()) {
+            client.emit("INVD", "0");
+            client.exit();
         } else if (!this.validPassword) {
-            connection.send("FAIL", this.id, new String[]{"PASSWORD"});
+            client.emit("FAIL", this.id, new String[]{"PASSWORD"});
         } else if (Chat.getInstance().isNameTaken(name)) {
-            connection.send("FAIL", this.id, new String[]{"NAME"});
+            client.emit("FAIL", this.id, new String[]{"NAME"});
         } else {
-            connection.send("OKAY", this.id);
-            connection.authenticate(this.id, this.name);
+            client.emit("OKAY", this.id);
+            client.authenticate(this.id, this.name);
         }
     }
 }

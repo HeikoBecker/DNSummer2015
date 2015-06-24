@@ -40,14 +40,14 @@ public class CloseConnMsg extends Message {
     }
 
     @Override
-    public void execute(Client connection) throws IOException {
+    public void execute(Client client) throws IOException {
         //TODO: Reply needed?
         //FIN = 1?
         // Reserved Bytes
         // Conn Close OPCODE
         // THEN?
 
-        connection.sendFrame(FrameFactory.CloseFrame(this.reason));
-        connection.close();
+        client.emitFrame(FrameFactory.CloseFrame(this.reason));
+        client.exit();
     }
 }

@@ -10,7 +10,7 @@ import java.io.IOException;
 public class PingConnMsg extends Message {
 
 	@Override
-	public void execute(Client connection) throws IOException {
-		connection.sendFrame(FrameFactory.PongFrame());
+	public void execute(Client client) throws IOException {
+		client.emitFrame(FrameFactory.PongFrame());
 	}
 }

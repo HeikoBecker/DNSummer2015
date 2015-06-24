@@ -16,8 +16,6 @@ import java.security.NoSuchAlgorithmException;
 import javax.xml.bind.DatatypeConverter;
 
 public class Client {
-    private final boolean DEBUG = false;
-
     private Socket clientSocket;
     MsgParser parser;
     private BufferedOutputStream bw;
@@ -71,6 +69,15 @@ public class Client {
         return this.isAuthenticated;
     }
 
+    public void tellShutdown() {
+        synchronized (this) {
+            this.serverShutdown = true;
+        }
+    }
+
+
+    // ----------------- HTTP HANDSHAKE -----------------
+
     /*
      * Wait for client handshake and reply with respective message.
      */
@@ -92,12 +99,6 @@ public class Client {
                 + "Sec-WebSocket-Accept: " + Client.getSecToken(clientHandshake.WebSocketKey) + "\r\n\r\n";
     }
 
-    public void tellShutdown() {
-        synchronized (this) {
-            this.serverShutdown = true;
-        }
-    }
-
     /*
      * The Sec-Websocket-Key is processed and converted as stated in RFC6455. Therefore it is concatenated,
      * the SHA-1 hash is taken and the resulting bytes are converted to base64.
@@ -111,66 +112,100 @@ public class Client {
         return DatatypeConverter.printBase64Binary(cript.digest());
     }
 
-    public void emitSendChatMsg(SendChatMsg msg, String userId) throws IOException {
-        send("SEND", msg.id, new String[]{userId, msg.getMessage()});
-    }
 
-    public void emitAcknChatMsg(AcknChatMsg msg, String userId) throws IOException {
-        send("ACKN", msg.id, new String[]{userId});
-    }
+    // ----------------- ENTER / LEAVE -----------------
 
-    public void emitArrvChatMsg(Client otherClient) throws IOException {
-        send("ARRV", otherClient.getUserId(), new String[]{otherClient.getUserName(), "Desc"});
-    }
-
-    public void sendLeft(String userId) throws IOException {
-        send("LEFT", userId, new String[]{});
-    }
-
-    public void recvAckn(AcknChatMsg acknMsg) throws IOException {
-        Chat.getInstance().sendAcknowledgement(acknMsg, this);
-    }
-
-    public void recvMsg(SendChatMsg sendMsg) throws IOException {
-        Chat.getInstance().sendMessage(sendMsg, this);
-    }
-
-    /* Helpers */
-    public void send(String command, String id, String[] lines) throws IOException {
-        String message = ChatMsgCodec.encodeServerMessage(command, id, lines);
-        bw.write(FrameFactory.TextFrame(message));
-        bw.flush();
-    }
-
-    public void send(String command, String id) throws IOException {
-        this.send(command, id, new String[]{});
-    }
-
-    public void sendFrame(byte[] frame) throws IOException {
-        bw.write(frame);
-        bw.flush();
-    }
-
-    private void log(String msg) {
-        if (DEBUG) {
-            System.out.println(msg);
-        }
-    }
-
-    public void authenticate(String id, String name) throws IOException {
+    /*
+     * Given userId and userName, the current connection can enter authenticated state.
+     */
+    public void authenticate(String userId, String userName) throws IOException {
         isAuthenticated = true;
-        this.userId = id;
-        this.userName = name;
+        this.userId = userId;
+        this.userName = userName;
         Chat.getInstance().registerClient(this);
     }
 
-    public void close() throws IOException {
+    /*
+     * When a client exits, other client should be informed and the socket should be shut down properly.
+     */
+    public void exit() throws IOException {
         Chat.getInstance().unregisterClient(userId);
         clientSocket.shutdownInput();
         clientSocket.shutdownOutput();
         clientSocket.close();
     }
 
+
+    // ----------------- EMIT AND RECEIVE METHODS -----------------
+
+    /*
+     * Emitting another client's message to the current client.
+     */
+    public void emitSendChatMsg(SendChatMsg msg, String senderId) throws IOException {
+        emit("SEND", msg.id, new String[]{senderId, msg.getMessage()});
+    }
+
+    /*
+     * Emitting another client's ackn message to the current client.
+     */
+    public void emitAcknChatMsg(AcknChatMsg msg, String senderId) throws IOException {
+        emit("ACKN", msg.id, new String[]{senderId});
+    }
+
+    /*
+     * Emitting that another client arrived to the current client.
+     */
+    public void emitArrvChatMsg(Client otherClient) throws IOException {
+        emit("ARRV", otherClient.getUserId(), new String[]{otherClient.getUserName(), ""});
+    }
+
+    /*
+     * Emitting that another client left to the current client.
+     */
+    public void emitLeftChatMsg(String otherClient) throws IOException {
+        emit("LEFT", otherClient, new String[]{});
+    }
+
+    /*
+     * Current client sent an ackn message, which is sent to the other clients.
+     */
+    public void recvAcknChatMsg(AcknChatMsg acknMsg) throws IOException {
+        Chat.getInstance().emitAcknowledgement(acknMsg, this);
+    }
+
+    /*
+     * Current client sent a message, which is sent to the other clients.
+     */
+    public void recvSendChatMsg(SendChatMsg sendMsg) throws IOException {
+        Chat.getInstance().emitMessage(sendMsg, this);
+    }
+
+    /*
+     * Emitting a chat message, consisting of a command, an id and a list of additional lines.
+     */
+    public void emit(String command, String id, String[] lines) throws IOException {
+        String message = ChatMsgCodec.encodeServerMessage(command, id, lines);
+        this.emitFrame(FrameFactory.TextFrame(message));
+    }
+
+    /*
+     * Emitting a chat message, consisting of a command, an id and no other lines.
+     */
+    public void emit(String command, String id) throws IOException {
+        this.emit(command, id, new String[]{});
+    }
+
+    /*
+     * Emitting a frame of bytes to the client.
+     */
+    public void emitFrame(byte[] frame) throws IOException {
+        bw.write(frame);
+        bw.flush();
+    }
+
+    /*
+     * Used to compare clients and check whether they are the same or not.
+     */
     @Override
     public boolean equals(Object obj) {
         if (obj == null) {
@@ -182,5 +217,14 @@ public class Client {
         final Client other = (Client) obj;
 
         return !((this.userId == null) ? (other.userId != null) : !this.userId.equals(other.userId));
+    }
+
+    // ----------------- DEBUGGING -----------------
+    private final boolean DEBUG = false;
+
+    private void log(String msg) {
+        if (DEBUG) {
+            System.out.println(msg);
+        }
     }
 }

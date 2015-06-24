@@ -13,14 +13,14 @@ public class AcknChatMsg extends Message {
     }
 
     @Override
-    public void execute(Client connection) throws IOException {
-        if (!connection.isAuthenticated()) {
-            connection.send("INVD", "0");
-            connection.close();
-        } else if (!Chat.getInstance().isMessageIdTaken(this.id)) {
-            connection.send("FAIL", this.id, new String[]{"NUMBER"});
+    public void execute(Client client) throws IOException {
+        if (!client.isAuthenticated()) {
+            client.emit("INVD", "0");
+            client.exit();
+        } else if (!Chat.getInstance().isMessageIdOpenForAckn(this.id, client)) {
+            client.emit("FAIL", this.id, new String[]{"NUMBER"});
         } else {
-            connection.recvAckn(this);
+            client.recvAcknChatMsg(this);
         }
     }
 }

@@ -1,7 +1,5 @@
 package dn.messages;
 
-import dn.messages.MsgParser;
-
 import java.io.UnsupportedEncodingException;
 
 public class FrameFactory {
@@ -9,13 +7,11 @@ public class FrameFactory {
     public static byte FIN = (byte) 0b10000000;
 
     public static byte[] PongFrame() {
-        byte[] result = {addFIN(MsgParser.PONG)};
-        return result;
+        return new byte[]{addFIN(MsgParser.PONG)};
     }
 
     public static byte[] CloseFrame(int reason) {
-        byte[] result = {addFIN(MsgParser.CONNCLOSE), (byte) (reason << 16), (byte) reason};
-        return result;
+        return new byte[]{addFIN(MsgParser.CONNCLOSE), (byte) (reason << 16), (byte) reason};
     }
 
     public static byte[] TextFrame(String text) throws UnsupportedEncodingException {

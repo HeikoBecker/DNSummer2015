@@ -29,20 +29,20 @@ public class SendChatMsg extends Message {
     }
 
     @Override
-    public void execute(Client connection) throws IOException {
-        if (!connection.isAuthenticated()) {
-            connection.send("INVD", "0");
-            connection.close();
+    public void execute(Client client) throws IOException {
+        if (!client.isAuthenticated()) {
+            client.emit("INVD", "0");
+            client.exit();
         } else if (this.message.length() > 384) {
             /*
              * Note: The length limitation to 384 bytes is derived by reversing the reference implementation.
              */
-            connection.send("FAIL", this.id, new String[]{"LENGTH"});
+            client.emit("FAIL", this.id, new String[]{"LENGTH"});
         } else if (Chat.getInstance().isMessageIdTaken(this.id)) {
-            connection.send("FAIL", this.id, new String[]{"NUMBER"});
+            client.emit("FAIL", this.id, new String[]{"NUMBER"});
         } else {
-            connection.send("OKAY", this.id);
-            connection.recvMsg(this);
+            client.emit("OKAY", this.id);
+            client.recvSendChatMsg(this);
         }
     }
 }

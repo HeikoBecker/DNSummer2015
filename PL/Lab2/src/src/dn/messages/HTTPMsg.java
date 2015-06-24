@@ -11,7 +11,7 @@ public class HTTPMsg extends Message {
     public boolean isCorrectProtocol;
 
     @Override
-    public void execute(Client connection) throws IOException {
+    public void execute(Client client) throws IOException {
 
     }
 }
