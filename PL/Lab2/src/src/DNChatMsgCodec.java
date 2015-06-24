@@ -1,5 +1,5 @@
-public class ChatMsgFactory {
-    public static Message createClientMessage(String msg, String userId) {
+public class DNChatMsgCodec {
+    public static Message decodeClientMessage(String msg) {
         String[] lines = msg.split("\r\n");
         String[] header = lines[0].split(" ");
         String command = header[0];
@@ -20,15 +20,10 @@ public class ChatMsgFactory {
                 System.out.println(command + " is not yet handled by the server.");
                 break;
         }
-
         return null;
     }
 
-    public static String createResponse(String command, String id) {
-        return createResponse(command, id, new String[]{});
-    }
-
-    public static String createResponse(String command, String id, String[] lines) {
+    public static String encodeServerMessage(String command, String id, String[] lines) {
         String response = command + " " + id;
         for (int i = 0; i < lines.length; i++) {
             response += "\r\n" + lines[i];

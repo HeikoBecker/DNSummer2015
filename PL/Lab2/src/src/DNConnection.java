@@ -41,7 +41,7 @@ public class DNConnection {
         try {
             handshake();
             while (!clientSocket.isClosed() && !this.serverShutdown) {
-                Message clientMessage = parser.getWebsocketMessage(userId);
+                Message clientMessage = parser.getWebsocketMessage();
                 // Let new message execute, resp. send messages on socket
                 clientMessage.execute(this);
             }
@@ -123,7 +123,7 @@ public class DNConnection {
 
     /* Helpers */
     public void send(String command, String id, String[] lines) throws IOException {
-        String message = ChatMsgFactory.createResponse(command, id, lines);
+        String message = DNChatMsgCodec.encodeServerMessage(command, id, lines);
         bw.write(FrameFactory.TextFrame(message));
         bw.flush();
     }

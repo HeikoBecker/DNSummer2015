@@ -84,7 +84,7 @@ public class MsgParser {
 		return msg;
 	}
 
-	public Message getWebsocketMessage(String userId) throws IOException {
+	public Message getWebsocketMessage() throws IOException {
 		Message msg = new UnknownMsg();
 		msg.Type = "Websocket";
 
@@ -153,7 +153,7 @@ public class MsgParser {
 			return new ConnCloseMsg(1007); // INV PAYLOAD DATA (Sec. 11.7, Page
 											// 64)
 		case TEXT:
-            return ChatMsgFactory.createClientMessage(new String(payload, "UTF-8"), userId);
+            return DNChatMsgCodec.decodeClientMessage(new String(payload, "UTF-8"));
 		case BIN:
 			System.out.println("TODO: Handle binary frame!");
 			break;
