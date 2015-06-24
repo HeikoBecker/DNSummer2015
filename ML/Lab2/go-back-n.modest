@@ -1,6 +1,6 @@
 ﻿/*
     mosta go-back-n.modest -X -S -E -O out.dot -D png out.png --no-invariants
-    modes go-back-n.modest -E "N=5"
+    modes go-back-n.modest -E "N=5" -R Uniform
     
     TODO: 
         a)      - proper timeout
@@ -90,19 +90,22 @@ process Sender()
         // receive data from lower layer
         :: urgent rdt_rcv_s;
             urgent tau {=
-                packets = remove(packets, cspacket.seqnum - send_base), 
+                packets = remove(packets, (cspacket.seqnum+1) - send_base), 
                 timer_on = (length(packets) == 0) ? false : timer_on,
                 send_base = cspacket.seqnum + 1
             =}
-        :: when (timer_on && retr_timer >= TIMEOUT && retr_idx < length(packets))
-            urgent udt_snd_s
-            {= 
-                scpacket = at(packets, retr_idx),
-                retr_idx++
-            =}; 
-            urgent udt_snd_s_done
-        :: when (timer_on && retr_timer >= TIMEOUT && retr_idx >= length(packets))
-            urgent tau {= retr_timer = 0, retr_idx = 0 =}
+        :: when (timer_on && retr_timer >= TIMEOUT)
+            do {
+                :: when urgent (retr_idx < length(packets))
+                    urgent udt_snd_s
+                    {= 
+                        scpacket = at(packets, retr_idx),
+                        retr_idx++
+                    =}; 
+                    urgent udt_snd_s_done
+                :: when urgent (retr_idx >= length(packets))
+                    break {= retr_timer = 0, retr_idx = 0 =}
+            }
     }
 }
 
