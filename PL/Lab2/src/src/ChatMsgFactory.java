@@ -5,8 +5,7 @@ public class ChatMsgFactory {
         String command = header[0];
         String id = header[1];
 
-        switch(command)
-        {
+        switch (command) {
             case "AUTH":
                 String name = lines[1];
                 String password = lines[2];
@@ -25,9 +24,13 @@ public class ChatMsgFactory {
         return null;
     }
 
+    public static String createResponse(String command, String id) {
+        return createResponse(command, id, new String[]{});
+    }
+
     public static String createResponse(String command, String id, String[] lines) {
         String response = command + " " + id;
-        for(int i = 0; i < lines.length; i++) {
+        for (int i = 0; i < lines.length; i++) {
             response += "\r\n" + lines[i];
         }
         return response;

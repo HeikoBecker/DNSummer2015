@@ -19,6 +19,7 @@ public class DNConnection {
 
     private String userId;
     private String userName;
+    private boolean isAuthenticated = false;
 
     public DNConnection(Socket clientSocket) throws IOException {
         try {
@@ -27,7 +28,7 @@ public class DNConnection {
             log("[WS] Incoming socket!");
             this.parser = new MsgParser(clientSocket.getInputStream());
             this.serverShutdown = false;
-        } catch(SocketException e) {
+        } catch (SocketException e) {
             System.out.println(e.getMessage());
             System.out.println(e.getCause());
             DNChat.getInstance().closeConnection(this.userId);
@@ -42,7 +43,7 @@ public class DNConnection {
             while (!clientSocket.isClosed() && !this.serverShutdown) {
                 Message clientMessage = parser.getWebsocketMessage(userId);
                 // Let new message execute, resp. send messages on socket
-                clientMessage.execute(this, bw, clientSocket);
+                clientMessage.execute(this);
             }
         } catch (IOException | InterruptedException | NoSuchAlgorithmException e) {
             System.out.println(e);
@@ -55,6 +56,10 @@ public class DNConnection {
 
     public String getUserName() {
         return this.userName;
+    }
+
+    public boolean isAuthenticated() {
+        return this.isAuthenticated;
     }
 
     /*
@@ -100,20 +105,12 @@ public class DNConnection {
         return DatatypeConverter.printBase64Binary(cript.digest());
     }
 
-    public void setUserName(String userName) {
-        this.userName = userName;
-    }
-
-    public void setUserId(String userId) {
-        this.userId = userId;
-    }
-
     public void sendMessage(SendMsg msg, String userId) throws IOException {
         send("SEND", msg.id, new String[]{userId, msg.getMessage()});
     }
 
     public void sendAckn(AcknMsg msg, String userId) throws IOException {
-        send("ACKN", msg.id, new String[]{ userId });
+        send("ACKN", msg.id, new String[]{userId});
     }
 
     public void sendArrv(String userId, String userName) throws IOException {
@@ -125,15 +122,46 @@ public class DNConnection {
     }
 
     /* Helpers */
-    private void send(String command, String id, String[] lines) throws IOException {
+    public void send(String command, String id, String[] lines) throws IOException {
         String message = ChatMsgFactory.createResponse(command, id, lines);
         bw.write(FrameFactory.TextFrame(message));
         bw.flush();
     }
 
-    private void log(String msg){
+    public void send(String command, String id) throws IOException {
+        this.send(command, id, new String[]{});
+    }
+
+    public void sendFrame(byte[] frame) throws IOException {
+        bw.write(frame);
+        bw.flush();
+    }
+
+    private void log(String msg) {
         if (DEBUG) {
             System.out.println(msg);
         }
+    }
+
+    public void authenticate(String id, String name) throws IOException {
+        isAuthenticated = true;
+        this.userId = id;
+        this.userName = name;
+        DNChat.getInstance().addConnection(id, this);
+    }
+
+    public void close() throws IOException {
+        DNChat.getInstance().closeConnection(userId);
+        clientSocket.shutdownInput();
+        clientSocket.shutdownOutput();
+        clientSocket.close();
+    }
+
+    public void recvAckn(AcknMsg acknMsg) throws IOException {
+        DNChat.getInstance().sendAcknowledgement(acknMsg, this);
+    }
+
+    public void recvMsg(SendMsg sendMsg) throws IOException {
+        DNChat.getInstance().sendMessage(sendMsg, this);
     }
 }

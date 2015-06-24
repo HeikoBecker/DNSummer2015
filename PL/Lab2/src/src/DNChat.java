@@ -6,6 +6,8 @@ public class DNChat {
 
     private HashMap<String, DNConnection> connections = new HashMap<>();
 
+    private HashMap<String, String> messages = new HashMap<>();
+
     private DNChat() {
     }
 
@@ -22,12 +24,16 @@ public class DNChat {
     public boolean isNameTaken(String userName) {
         boolean result = false;
         for (DNConnection existingConnection : connections.values()) {
-            if(existingConnection.getUserName().equals(userName)) {
+            if (existingConnection.getUserName().equals(userName)) {
                 result = true;
                 break;
             }
         }
         return result;
+    }
+
+    public boolean isMessageIdTaken(String id) {
+        return messages.containsKey(id);
     }
 
     public void sendMessage(SendMsg msg, DNConnection senderConnection) throws IOException {
@@ -41,8 +47,9 @@ public class DNChat {
         } else {
             connections.get(recipient).sendMessage(msg, senderConnection.getUserId());
         }
+        // TODO: insert proper value
+        messages.put(msg.getId(), "");
     }
-
 
     public void sendAcknowledgement(AcknMsg msg, DNConnection senderConnection) throws IOException {
         // TODO: ack should only be send to original recipients. This should be handeled somewhere.

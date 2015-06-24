@@ -1,6 +1,4 @@
-import java.io.BufferedOutputStream;
 import java.io.IOException;
-import java.net.Socket;
 
 public class AcknMsg extends Message {
 
@@ -9,7 +7,14 @@ public class AcknMsg extends Message {
     }
 
     @Override
-    public void execute(DNConnection connection, BufferedOutputStream bw, Socket clientSocket) throws IOException {
-        DNChat.getInstance().sendAcknowledgement(this, connection);
+    public void execute(DNConnection connection) throws IOException {
+        if (!connection.isAuthenticated()) {
+            connection.send("INVD", "0");
+            connection.close();
+        } else if (!DNChat.getInstance().isMessageIdTaken(this.id)) {
+            connection.send("FAIL", this.id, new String[]{"NUMBER"});
+        } else {
+            connection.recvAckn(this);
+        }
     }
 }

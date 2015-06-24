@@ -1,6 +1,4 @@
-import java.io.BufferedOutputStream;
 import java.io.IOException;
-import java.net.Socket;
 
 public class AuthMsg extends Message {
     private static final String groupPassword = "3YnnafwB";
@@ -18,20 +16,17 @@ public class AuthMsg extends Message {
     }
 
     @Override
-    public void execute(DNConnection connection, BufferedOutputStream bw, Socket clientSocket) throws IOException {
-        if (!this.validPassword) {
-            bw.write(FrameFactory.TextFrame(ChatMsgFactory.createResponse("FAIL", this.id, new String[]{"PASSWORD"})));
-        } else if(DNChat.getInstance().isNameTaken(name)) {
-            bw.write(FrameFactory.TextFrame(ChatMsgFactory.createResponse("FAIL", this.id, new String[]{"NAME"})));
+    public void execute(DNConnection connection) throws IOException {
+        if (connection.isAuthenticated()) {
+            connection.send("INVD", "0");
+            connection.close();
+        } else if (!this.validPassword) {
+            connection.send("FAIL", this.id, new String[]{"PASSWORD"});
+        } else if (DNChat.getInstance().isNameTaken(name)) {
+            connection.send("FAIL", this.id, new String[]{"NAME"});
         } else {
-            bw.write(FrameFactory.TextFrame(ChatMsgFactory.createResponse("OKAY", this.id, new String[] {})));
-
-            connection.setUserId(this.id);
-            connection.setUserName(this.name);
-
-            DNChat.getInstance().addConnection(this.id, connection);
-
+            connection.send("OKAY", this.id);
+            connection.authenticate(this.id, this.name);
         }
-        bw.flush();
     }
 }
