@@ -1,7 +1,6 @@
 package dn.messages.connection;
 
 import dn.Client;
-import dn.messages.FrameFactory;
 import dn.messages.Message;
 
 import java.io.IOException;
@@ -42,12 +41,13 @@ public class CloseConnMsg extends Message {
     @Override
     public void execute(Client client) throws IOException {
         //TODO: Reply needed?
-        //FIN = 1?
+        // FIN = 1?
         // Reserved Bytes
         // Conn Close OPCODE
         // THEN?
 
-        client.emitFrame(FrameFactory.CloseFrame(this.reason));
-        client.exit();
+        if(!client.isClosed()) {
+            client.exit();
+        }
     }
 }

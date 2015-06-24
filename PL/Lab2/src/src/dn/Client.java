@@ -34,11 +34,9 @@ public class Client {
             log("[WS] Incoming socket!");
             this.parser = new MsgParser(clientSocket.getInputStream());
             this.serverShutdown = false;
-        } catch (SocketException e) {
-            System.out.println(e.getMessage());
-            Chat.getInstance().unregisterClient(this.userId);
         } catch (IOException e) {
             System.out.println(e.getMessage());
+            exit();
         }
     }
 
@@ -46,14 +44,18 @@ public class Client {
         try {
             handshake();
             while (!clientSocket.isClosed() && !this.serverShutdown) {
-                // Let new message execute, resp. send dn.messages on socket
-                parser.getWebsocketMessage().execute(this);
+                // Let new message execute, resp. send messages on socket
+                Message websocketMessage = parser.getWebsocketMessage();
+                if(websocketMessage == null) {
+                    exit();
+                    break;
+                }
+                websocketMessage.execute(this);
             }
-        } catch (SocketException | InterruptedException e) {
+        } catch (SocketException | InterruptedException | NoSuchAlgorithmException e) {
             System.out.println(e.getMessage());
-            Chat.getInstance().unregisterClient(this.userId);
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
+        } finally {
+            exit();
         }
     }
 
@@ -67,6 +69,10 @@ public class Client {
 
     public boolean isAuthenticated() {
         return this.isAuthenticated;
+    }
+
+    public boolean isClosed() {
+        return this.clientSocket.isClosed();
     }
 
     public void tellShutdown() {
@@ -129,10 +135,16 @@ public class Client {
      * When a client exits, other client should be informed and the socket should be shut down properly.
      */
     public void exit() throws IOException {
-        Chat.getInstance().unregisterClient(userId);
-        clientSocket.shutdownInput();
-        clientSocket.shutdownOutput();
-        clientSocket.close();
+        if(isAuthenticated) {
+            Chat.getInstance().unregisterClient(userId);
+        }
+        if(!isClosed()) {
+            // TODO: 0 might be replaced by real reason
+            this.emitFrame(FrameFactory.CloseFrame(0));
+            clientSocket.shutdownInput();
+            clientSocket.shutdownOutput();
+            clientSocket.close();
+        }
     }
 
 
