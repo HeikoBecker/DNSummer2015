@@ -1,7 +1,13 @@
+package dn.messages.connection;
+
+import dn.Client;
+import dn.messages.FrameFactory;
+import dn.messages.Message;
+
 import java.io.IOException;
 
 
-public class ConnCloseMsg extends Message {
+public class CloseConnMsg extends Message {
 
     public static int NORMAL = 1000;
     public static int GOINGAWAY = 1001;
@@ -22,19 +28,19 @@ public class ConnCloseMsg extends Message {
      * Default Constructor, sets close code to 1005 as said in
      * 7.1.5 page 41
      */
-    public ConnCloseMsg() {
+    public CloseConnMsg() {
         this.reason = NOSTATUS;
     }
 
     /*
      * Constructor for given close code.
      */
-    public ConnCloseMsg(int reason) {
+    public CloseConnMsg(int reason) {
         this.reason = reason;
     }
 
     @Override
-    public void execute(DNConnection connection) throws IOException {
+    public void execute(Client connection) throws IOException {
         //TODO: Reply needed?
         //FIN = 1?
         // Reserved Bytes

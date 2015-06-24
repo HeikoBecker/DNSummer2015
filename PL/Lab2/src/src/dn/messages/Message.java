@@ -1,3 +1,7 @@
+package dn.messages;
+
+import dn.Client;
+
 import java.io.IOException;
 
 public abstract class Message {
@@ -11,6 +15,6 @@ public abstract class Message {
         return Type + " " + id;
     }
 
-    public abstract void execute(DNConnection connection) throws IOException;
+    public abstract void execute(Client connection) throws IOException;
 
 }

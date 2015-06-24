@@ -1,10 +1,15 @@
+package dn.messages.connection;
+
+import dn.Client;
+import dn.messages.Message;
+
 import java.io.IOException;
 
 
-public class PongMsg extends Message {
+public class PongConnMsg extends Message {
 
     @Override
-    public void execute(DNConnection connection) throws IOException {
+    public void execute(Client connection) throws IOException {
         //PAGE 37, RFC 6455
         //PONG frame is unidirectional heartbeat --> no sending
         //on receipt

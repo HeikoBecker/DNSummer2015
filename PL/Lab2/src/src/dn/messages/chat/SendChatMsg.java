@@ -1,10 +1,16 @@
+package dn.messages.chat;
+
+import dn.Chat;
+import dn.Client;
+import dn.messages.Message;
+
 import java.io.IOException;
 
-public class SendMsg extends Message {
+public class SendChatMsg extends Message {
     private final String message;
     private final String recipient;
 
-    public SendMsg(String id, String recipient, String message) {
+    public SendChatMsg(String id, String recipient, String message) {
         this.id = id;
         this.recipient = recipient;
         this.message = message;
@@ -23,7 +29,7 @@ public class SendMsg extends Message {
     }
 
     @Override
-    public void execute(DNConnection connection) throws IOException {
+    public void execute(Client connection) throws IOException {
         if (!connection.isAuthenticated()) {
             connection.send("INVD", "0");
             connection.close();
@@ -32,7 +38,7 @@ public class SendMsg extends Message {
              * Note: The length limitation to 384 bytes is derived by reversing the reference implementation.
              */
             connection.send("FAIL", this.id, new String[]{"LENGTH"});
-        } else if (DNChat.getInstance().isMessageIdTaken(this.id)) {
+        } else if (Chat.getInstance().isMessageIdTaken(this.id)) {
             connection.send("FAIL", this.id, new String[]{"NUMBER"});
         } else {
             connection.send("OKAY", this.id);

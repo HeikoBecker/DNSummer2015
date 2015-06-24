@@ -1,3 +1,9 @@
+package dn;
+
+import dn.messages.*;
+import dn.messages.chat.AcknChatMsg;
+import dn.messages.chat.SendChatMsg;
+
 import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -9,7 +15,7 @@ import java.security.NoSuchAlgorithmException;
 
 import javax.xml.bind.DatatypeConverter;
 
-public class DNConnection {
+public class Client {
     private final boolean DEBUG = false;
 
     private Socket clientSocket;
@@ -21,7 +27,9 @@ public class DNConnection {
     private String userName;
     private boolean isAuthenticated = false;
 
-    public DNConnection(Socket clientSocket) throws IOException {
+    // TODO: should a connection close after some time??? Make use of PONG dn.messages?
+
+    public Client(Socket clientSocket) throws IOException {
         try {
             this.clientSocket = clientSocket;
             this.bw = new BufferedOutputStream(clientSocket.getOutputStream());
@@ -30,23 +38,24 @@ public class DNConnection {
             this.serverShutdown = false;
         } catch (SocketException e) {
             System.out.println(e.getMessage());
-            System.out.println(e.getCause());
-            DNChat.getInstance().closeConnection(this.userId);
+            Chat.getInstance().unregisterClient(this.userId);
         } catch (IOException e) {
-            System.out.println(e);
+            System.out.println(e.getMessage());
         }
     }
 
-    public void run() {
+    public void run() throws IOException {
         try {
             handshake();
             while (!clientSocket.isClosed() && !this.serverShutdown) {
-                Message clientMessage = parser.getWebsocketMessage();
-                // Let new message execute, resp. send messages on socket
-                clientMessage.execute(this);
+                // Let new message execute, resp. send dn.messages on socket
+                parser.getWebsocketMessage().execute(this);
             }
-        } catch (IOException | InterruptedException | NoSuchAlgorithmException e) {
-            System.out.println(e);
+        } catch (SocketException | InterruptedException e) {
+            System.out.println(e.getMessage());
+            Chat.getInstance().unregisterClient(this.userId);
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
         }
     }
 
@@ -71,7 +80,6 @@ public class DNConnection {
         PrintWriter pr = new PrintWriter(clientSocket.getOutputStream(), true);
         pr.print(serverHandshake);
         pr.flush();
-
         log("[WS] Handshake complete!");
     }
 
@@ -79,11 +87,9 @@ public class DNConnection {
      * Given the handshake message by the client, the servers handshake message is constructed.
      */
     private static String createHandshakeMessage(HTTPMsg clientHandshake) throws NoSuchAlgorithmException, UnsupportedEncodingException {
-        String base64Token = DNConnection.getSecToken(clientHandshake.WebSocketKey);
-        String message = "HTTP/1.1 101 Switching Protocols\n"
+        return "HTTP/1.1 101 Switching Protocols\n"
                 + "Upgrade: websocket\n" + "Connection: Upgrade\n"
-                + "Sec-WebSocket-Accept: " + base64Token + "\r\n\r\n";
-        return message;
+                + "Sec-WebSocket-Accept: " + Client.getSecToken(clientHandshake.WebSocketKey) + "\r\n\r\n";
     }
 
     public void tellShutdown() {
@@ -105,25 +111,33 @@ public class DNConnection {
         return DatatypeConverter.printBase64Binary(cript.digest());
     }
 
-    public void sendMessage(SendMsg msg, String userId) throws IOException {
+    public void emitSendChatMsg(SendChatMsg msg, String userId) throws IOException {
         send("SEND", msg.id, new String[]{userId, msg.getMessage()});
     }
 
-    public void sendAckn(AcknMsg msg, String userId) throws IOException {
+    public void emitAcknChatMsg(AcknChatMsg msg, String userId) throws IOException {
         send("ACKN", msg.id, new String[]{userId});
     }
 
-    public void sendArrv(String userId, String userName) throws IOException {
-        send("ARRV", userId, new String[]{userName, "Desc"});
+    public void emitArrvChatMsg(Client otherClient) throws IOException {
+        send("ARRV", otherClient.getUserId(), new String[]{otherClient.getUserName(), "Desc"});
     }
 
     public void sendLeft(String userId) throws IOException {
         send("LEFT", userId, new String[]{});
     }
 
+    public void recvAckn(AcknChatMsg acknMsg) throws IOException {
+        Chat.getInstance().sendAcknowledgement(acknMsg, this);
+    }
+
+    public void recvMsg(SendChatMsg sendMsg) throws IOException {
+        Chat.getInstance().sendMessage(sendMsg, this);
+    }
+
     /* Helpers */
     public void send(String command, String id, String[] lines) throws IOException {
-        String message = DNChatMsgCodec.encodeServerMessage(command, id, lines);
+        String message = ChatMsgCodec.encodeServerMessage(command, id, lines);
         bw.write(FrameFactory.TextFrame(message));
         bw.flush();
     }
@@ -147,21 +161,26 @@ public class DNConnection {
         isAuthenticated = true;
         this.userId = id;
         this.userName = name;
-        DNChat.getInstance().addConnection(id, this);
+        Chat.getInstance().registerClient(this);
     }
 
     public void close() throws IOException {
-        DNChat.getInstance().closeConnection(userId);
+        Chat.getInstance().unregisterClient(userId);
         clientSocket.shutdownInput();
         clientSocket.shutdownOutput();
         clientSocket.close();
     }
 
-    public void recvAckn(AcknMsg acknMsg) throws IOException {
-        DNChat.getInstance().sendAcknowledgement(acknMsg, this);
-    }
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final Client other = (Client) obj;
 
-    public void recvMsg(SendMsg sendMsg) throws IOException {
-        DNChat.getInstance().sendMessage(sendMsg, this);
+        return !((this.userId == null) ? (other.userId != null) : !this.userId.equals(other.userId));
     }
 }

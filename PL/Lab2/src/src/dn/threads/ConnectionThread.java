@@ -1,9 +1,13 @@
+package dn.threads;
+
+import dn.Client;
+
 import java.io.IOException;
 import java.net.Socket;
 
 public class ConnectionThread extends Thread {
 
-    DNConnection connection;
+    Client connection;
     final Socket clientSocket;
 
     public ConnectionThread(Socket clientSocket) {
@@ -13,14 +17,10 @@ public class ConnectionThread extends Thread {
     @Override
     public void run() {
         try {
-            connection = new DNConnection(clientSocket);
+            connection = new Client(clientSocket);
             connection.run();
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
-
-    public void tellShutdown() {
-        this.connection.tellShutdown();
     }
 }

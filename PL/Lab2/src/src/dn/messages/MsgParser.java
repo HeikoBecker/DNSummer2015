@@ -1,3 +1,9 @@
+package dn.messages;
+
+import dn.messages.connection.CloseConnMsg;
+import dn.messages.connection.PingConnMsg;
+import dn.messages.connection.PongConnMsg;
+
 import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.IOException;
@@ -32,13 +38,11 @@ public class MsgParser {
 	public static final byte PONG = 10;
 
 	private BufferedReader inputBuffer;
-	private InputStreamReader sr;
 	private InputStream is;
 
 	public MsgParser(InputStream is) {
 		this.is = is;
-		this.sr = new InputStreamReader(new DataInputStream(is));
-		this.inputBuffer = new BufferedReader(this.sr);
+		this.inputBuffer = new BufferedReader(new InputStreamReader(new DataInputStream(is)));
 	}
 
 	public HTTPMsg getHTTPMessage() throws IOException, InterruptedException {
@@ -96,7 +100,6 @@ public class MsgParser {
 		int opcode = -1;
 
 		// TODO: check if fin bit is not set. Then the client tries to fragment. In this case we should cleanly close the connection.
-
 		byte[] payload = new byte[payloadlength];
 		while (count - 5 <= payloadlength && (c = is.read()) != -1) {
 			count++;
@@ -150,26 +153,25 @@ public class MsgParser {
 		// Cleanly close conn in this case
 		case CONT:
 			System.out.println("TODO: Close connection on Continuation!");
-			return new ConnCloseMsg(1007); // INV PAYLOAD DATA (Sec. 11.7, Page
-											// 64)
+			return new CloseConnMsg(CloseConnMsg.INVPAYLOAD); // INV PAYLOAD DATA (Sec. 11.7, Page 64)
 		case TEXT:
-            return DNChatMsgCodec.decodeClientMessage(new String(payload, "UTF-8"));
+            return ChatMsgCodec.decodeClientMessage(new String(payload, "UTF-8"));
 		case BIN:
 			System.out.println("TODO: Handle binary frame!");
 			break;
 		case CONNCLOSE:
 			System.out.println("A CONNECTION CLOSE");
 			if (opcode == -1)
-				return new ConnCloseMsg();
+				return new CloseConnMsg();
 			else
 				// TODO: Check for correctness of opcode
-				return new ConnCloseMsg(opcode);
+				return new CloseConnMsg(opcode);
 			// TODO: Finally you must close the connection
 			// TODO: Server must close first
 		case PING:
-			return new PingMsg();
+			return new PingConnMsg();
 		case PONG:
-			return new PongMsg();
+			return new PongConnMsg();
 			// TODO: Find out what to do for unspecified opcodes
 		default:
 			System.out.println("Unknown opcode: " + opcode);

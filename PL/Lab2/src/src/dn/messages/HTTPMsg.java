@@ -1,3 +1,7 @@
+package dn.messages;
+
+import dn.Client;
+
 import java.io.IOException;
 
 
@@ -7,7 +11,7 @@ public class HTTPMsg extends Message {
     public boolean isCorrectProtocol;
 
     @Override
-    public void execute(DNConnection connection) throws IOException {
+    public void execute(Client connection) throws IOException {
 
     }
 }

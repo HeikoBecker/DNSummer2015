@@ -1,3 +1,7 @@
+package dn.messages;
+
+import dn.messages.MsgParser;
+
 import java.io.UnsupportedEncodingException;
 
 public class FrameFactory {
@@ -17,7 +21,7 @@ public class FrameFactory {
     public static byte[] TextFrame(String text) throws UnsupportedEncodingException {
         /*
          * Note: We intentionally do not support text frames that are longer than the value range of int.
-         * As the reference implementation does not support messages longer than 384, there is no need for this.
+         * As the reference implementation does not support dn.messages longer than 384, there is no need for this.
          */
 
         int headerLength = 2;

@@ -1,3 +1,7 @@
+package dn;
+
+import dn.threads.WelcomeThread;
+
 import java.io.IOException;
 import java.util.Scanner;
 

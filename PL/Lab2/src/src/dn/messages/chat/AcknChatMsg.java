@@ -1,17 +1,23 @@
+package dn.messages.chat;
+
+import dn.Chat;
+import dn.Client;
+import dn.messages.Message;
+
 import java.io.IOException;
 
-public class AcknMsg extends Message {
+public class AcknChatMsg extends Message {
 
-    public AcknMsg(String id) {
+    public AcknChatMsg(String id) {
         this.id = id;
     }
 
     @Override
-    public void execute(DNConnection connection) throws IOException {
+    public void execute(Client connection) throws IOException {
         if (!connection.isAuthenticated()) {
             connection.send("INVD", "0");
             connection.close();
-        } else if (!DNChat.getInstance().isMessageIdTaken(this.id)) {
+        } else if (!Chat.getInstance().isMessageIdTaken(this.id)) {
             connection.send("FAIL", this.id, new String[]{"NUMBER"});
         } else {
             connection.recvAckn(this);
