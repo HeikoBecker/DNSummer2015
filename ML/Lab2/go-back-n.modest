@@ -180,21 +180,21 @@ process ChannelRS()
 packet crpacket; // data buffer from channel to receiver
 process Receiver()
 {
-    int received_seqnum = 0;
+    int recv_seqnum = 0;
     do {
         urgent rdt_rcv_r;       // get the data from the channel
         alt {
             // expected sequence number or previous number
-            :: when urgent (crpacket.seqnum == received_seqnum + 1)
+            :: when urgent (crpacket.seqnum == recv_seqnum + 1)
                     urgent deliver_data {= 
                         rudata = crpacket.data, 
-                        received_seqnum = crpacket.seqnum
+                        recv_seqnum = crpacket.seqnum
                     =};
                     urgent deliver_data_done
             // unexpected number
-            :: when urgent (crpacket.seqnum != received_seqnum + 1) urgent drop_data
+            :: when urgent (crpacket.seqnum != recv_seqnum + 1) urgent drop_data
         };
-        urgent udt_snd_r {= rcpacket = packet { seqnum: received_seqnum } =};
+        urgent udt_snd_r {= rcpacket = packet { seqnum: recv_seqnum } =};
         urgent udt_snd_r_done
     }
 }
