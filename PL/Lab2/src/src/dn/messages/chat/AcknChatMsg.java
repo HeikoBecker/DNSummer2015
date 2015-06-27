@@ -6,6 +6,9 @@ import dn.messages.Message;
 
 import java.io.IOException;
 
+/*
+ *  High Level encapsulation of a single ACKN message.
+ */
 public class AcknChatMsg extends Message {
 
     public AcknChatMsg(String id) {
@@ -17,7 +20,7 @@ public class AcknChatMsg extends Message {
         if (!client.isAuthenticated()) {
             client.emit("INVD", "0");
             client.exit();
-        } else if (!Chat.getInstance().isMessageIdOpenForAckn(this.id, client)) {
+        } else if (!Chat.getInstance().isMessageIdOpenForAckn(this.id, client)) { //TODO: Duplicate ACKS?
             client.emit("FAIL", this.id, new String[]{"NUMBER"});
         } else {
             client.recvAcknChatMsg(this);

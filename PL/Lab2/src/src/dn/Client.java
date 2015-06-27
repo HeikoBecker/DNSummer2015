@@ -15,17 +15,23 @@ import java.security.NoSuchAlgorithmException;
 
 import javax.xml.bind.DatatypeConverter;
 
+/*
+ * A Client encapsulates the associated port for the connection as well as the user information.
+ */
 public class Client {
+	
+	//Network level
     private Socket clientSocket;
-    MsgParser parser;
     private BufferedOutputStream bw;
     private boolean serverShutdown;
 
+    //Parser
+    MsgParser parser;
+    
+    //Chat Protocol Level
     private String userId;
     private String userName;
     private boolean isAuthenticated = false;
-
-    // TODO: should a connection close after some time??? Make use of PONG dn.messages?
 
     public Client(Socket clientSocket) throws IOException {
         try {

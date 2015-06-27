@@ -2,6 +2,10 @@ package dn;
 
 import java.util.LinkedList;
 
+/*
+ * Class to encapsulte all outstanding ACKs for a single Message to ensure correct ACKing
+ * by the clients (no double ACKs...)
+ */
 public class OutstandingAcknowledgements {
     private String senderId;
     private LinkedList<String> recipientIds;

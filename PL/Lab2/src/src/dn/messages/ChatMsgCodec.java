@@ -2,8 +2,13 @@ package dn.messages;
 
 import dn.messages.chat.AcknChatMsg;
 import dn.messages.chat.AuthChatMsg;
+import dn.messages.chat.InvdMsg;
 import dn.messages.chat.SendChatMsg;
 
+/*
+ * Static methods to decode Client messages into high level objects
+ * and encode high level objects into strings for sending.
+ */
 public class ChatMsgCodec {
     public static Message decodeClientMessage(String msg) {
         String[] lines = msg.split("\r\n");

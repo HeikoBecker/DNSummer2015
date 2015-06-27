@@ -1,6 +1,7 @@
-package dn.messages;
+package dn.messages.chat;
 
 import dn.Client;
+import dn.messages.Message;
 
 import java.io.IOException;
 

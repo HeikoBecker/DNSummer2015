@@ -138,9 +138,6 @@ public class MsgParser {
 	}
 
 	public Message getWebsocketMessage() throws IOException {
-		Message msg = new UnknownMsg();
-		msg.Type = "Websocket";
-
 		int count = 0;
 		int c;
 		Integer payloadlength = 125;
