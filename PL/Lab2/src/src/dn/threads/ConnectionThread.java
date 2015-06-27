@@ -11,23 +11,26 @@ import java.net.Socket;
  * and a server.
  */
 public class ConnectionThread extends Thread {
+    private final boolean DEBUG = false;
 
-	Client connection;
-	final Socket clientSocket;
+    Client connection;
+    final Socket clientSocket;
 
-	public ConnectionThread(Socket clientSocket) {
-		System.out.println("[TCP] New connection established");
-		this.clientSocket = clientSocket;
-	}
+    public ConnectionThread(Socket clientSocket) {
+        if (DEBUG) {
+            System.out.println("[TCP] New connection established");
+        }
+        this.clientSocket = clientSocket;
+    }
 
-	@Override
-	public void run() {
-		try {
-			// create a new client and let it execute
-			connection = new Client(clientSocket);
-			connection.run();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
+    @Override
+    public void run() {
+        try {
+            // create a new client and let it execute
+            connection = new Client(clientSocket);
+            connection.run();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 }
