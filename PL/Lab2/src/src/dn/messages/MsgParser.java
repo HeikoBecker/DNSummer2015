@@ -154,12 +154,18 @@ public class MsgParser {
 			switch (count) {
 			case 1:
 				opcode = c & 0x0F;
-				break;
-			case 2:
-				// check if fin bit is not set. Then the client tries to fragment.
-				// In this case we should cleanly close the connection.
+				//Check wether FIN bit is set.
+				//If not, close connection as we do not support fragmentation
 				boolean fin = (c & 0b10000000) == 0b10000000;
 				if (!fin)
+					return new CloseConnMsg();
+				break;
+			case 2:
+				// check if mask bit is not set. Then the client tries to send unmasked data.
+				//This is forbidden according to the RFC
+				// In this case we should cleanly close the connection.
+				boolean mask = (c & 0b10000000) == 0b10000000;
+				if (!mask)
 					return new CloseConnMsg();
 				//otherwise continue
 				payloadlength = c & 0b01111111;
