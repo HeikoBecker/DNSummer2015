@@ -165,8 +165,13 @@ public class Client {
         return !((this.userId == null) ? (other.userId != null) : !this.userId.equals(other.userId));
     }
 
-    public void log(String msg) {
-        String userId = (this.userId.equals("")) ? "UNAUTH" :  this.userId;
-        System.out.println("[C-" + userId + "] " + msg);
+    // ----------------- DEBUGGING -----------------
+    private final boolean DEBUG = false;
+
+    private void log(String msg) {
+        if(DEBUG) {
+            String userId = (this.userId.equals("")) ? "UNAUTH" :  this.userId;
+            System.out.println("[C-" + userId + "] " + msg);
+        }
     }
 }

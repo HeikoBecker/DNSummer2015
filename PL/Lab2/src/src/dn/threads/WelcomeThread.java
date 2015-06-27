@@ -9,24 +9,27 @@ import java.net.ServerSocket;
  * handling thread for each request received on the bound server socket.
  */
 public class WelcomeThread implements Runnable {
-	
-	@Override
-	public void run() {
-		int port = 42015; // using the dnChat protocol's default port.
+    private final boolean DEBUG = false;
 
-		try {
-			//First create the server port
-			ServerSocket socket = new ServerSocket(port);
-			System.out.println("[TCP] Welcome Socket bound on port " + port + ".");
+    @Override
+    public void run() {
+        int port = 42015; // using the dnChat protocol's default port.
 
-			//Accept all incoming connections on the server socket.
-			//socket.accept() blocks hence there is no busy wait
-			while (true) {
-				ConnectionThread conn = new ConnectionThread(socket.accept());
-				conn.start();
-			}
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
+        try {
+            //First create the server port
+            ServerSocket socket = new ServerSocket(port);
+            if (DEBUG) {
+                System.out.println("[TCP] Welcome Socket bound on port " + port + ".");
+            }
+
+            //Accept all incoming connections on the server socket.
+            //socket.accept() blocks hence there is no busy wait
+            while (true) {
+                ConnectionThread conn = new ConnectionThread(socket.accept());
+                conn.start();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 }

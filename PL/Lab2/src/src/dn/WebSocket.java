@@ -120,7 +120,7 @@ public class WebSocket {
 
 
     // ----------------- DEBUGGING -----------------
-    private final boolean DEBUG = true;
+    private final boolean DEBUG = false;
 
     private void log(String msg) {
         if (DEBUG) {
