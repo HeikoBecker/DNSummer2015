@@ -33,13 +33,13 @@ public class SendChatMsg extends Message {
         if (!client.isAuthenticated()) {
             client.emit("INVD", "0");
             client.exit();
+        } else if (Chat.getInstance().isMessageIdTaken(this.id)) {
+            client.emit("FAIL", this.id, new String[]{"NUMBER"});
         } else if (this.message.length() > 384) {
             /*
              * Note: The length limitation to 384 bytes is derived by reversing the reference implementation.
              */
             client.emit("FAIL", this.id, new String[]{"LENGTH"});
-        } else if (Chat.getInstance().isMessageIdTaken(this.id)) {
-            client.emit("FAIL", this.id, new String[]{"NUMBER"});
         } else {
             client.emit("OKAY", this.id);
             client.recvSendChatMsg(this);

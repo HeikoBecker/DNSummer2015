@@ -39,6 +39,10 @@ public class Chat {
         return result;
     }
 
+    public synchronized boolean isUserIdTaken(String userId) {
+        return clients.containsKey(userId);
+    }
+
     public synchronized boolean isMessageIdTaken(String messageId) {
         return outstandingAcks.containsKey(messageId);
     }
@@ -77,7 +81,7 @@ public class Chat {
      * A message is stored so future acknowledgements can be checked.
      */
     private void storeMessage(String messageId, String senderId, String receiverId) {
-        if(!outstandingAcks.containsKey(messageId)) {
+        if (!outstandingAcks.containsKey(messageId)) {
             outstandingAcks.put(messageId, new OutstandingAcknowledgements(senderId));
         }
         // TODO: start a timer and remove message when timer expired
@@ -93,7 +97,7 @@ public class Chat {
      */
     private void removeMessage(String messageId, String receiverId) {
         outstandingAcks.get(messageId).remove(receiverId);
-        if(outstandingAcks.get(messageId).size() == 0) {
+        if (outstandingAcks.get(messageId).size() == 0) {
             outstandingAcks.remove(messageId);
         }
     }

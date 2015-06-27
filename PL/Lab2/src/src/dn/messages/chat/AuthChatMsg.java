@@ -28,6 +28,8 @@ public class AuthChatMsg extends Message {
             client.exit();
         } else if (!this.validPassword) {
             client.emit("FAIL", this.id, new String[]{"PASSWORD"});
+        } else if (Chat.getInstance().isUserIdTaken(this.id)) {
+            client.emit("FAIL", this.id, new String[]{"NUMBER"});
         } else if (Chat.getInstance().isNameTaken(name)) {
             client.emit("FAIL", this.id, new String[]{"NAME"});
         } else {
