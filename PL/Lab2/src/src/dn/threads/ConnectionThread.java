@@ -16,7 +16,7 @@ public class ConnectionThread extends Thread {
 	final Socket clientSocket;
 
 	public ConnectionThread(Socket clientSocket) {
-		System.out.println("New connection established");
+		System.out.println("[TCP] New connection established");
 		this.clientSocket = clientSocket;
 	}
 

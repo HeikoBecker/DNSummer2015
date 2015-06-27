@@ -17,8 +17,7 @@ public class WelcomeThread implements Runnable {
 		try {
 			//First create the server port
 			ServerSocket socket = new ServerSocket(port);
-			System.out.println("[WS] Welcome Socket bound on port " + port
-					+ ".");
+			System.out.println("[TCP] Welcome Socket bound on port " + port + ".");
 
 			//Accept all incoming connections on the server socket.
 			//socket.accept() blocks hence there is no busy wait

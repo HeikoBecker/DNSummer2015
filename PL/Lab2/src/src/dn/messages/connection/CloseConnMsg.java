@@ -45,9 +45,6 @@ public class CloseConnMsg extends Message {
         // Reserved Bytes
         // Conn Close OPCODE
         // THEN?
-
-        if(!client.isClosed()) {
-            client.exit();
-        }
+        client.exit();
     }
 }
