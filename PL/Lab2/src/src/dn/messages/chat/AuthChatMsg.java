@@ -6,6 +6,10 @@ import dn.messages.Message;
 
 import java.io.IOException;
 
+/*
+ * High Level encapsulation of a single AUTH message.
+ * Statically checks against group password.
+ */
 public class AuthChatMsg extends Message {
     private static final String groupPassword = "3YnnafwB";
 
@@ -28,7 +32,7 @@ public class AuthChatMsg extends Message {
             client.exit();
         } else if (!this.validPassword) {
             client.emit("FAIL", this.id, new String[]{"PASSWORD"});
-        } else if (Chat.getInstance().isUserIdTaken(this.id)) {
+        } else if (Chat.getInstance().isUserIdTaken(this.id)) { //TODO: Check for msg numbers too?
             client.emit("FAIL", this.id, new String[]{"NUMBER"});
         } else if (Chat.getInstance().isNameTaken(name)) {
             client.emit("FAIL", this.id, new String[]{"NAME"});

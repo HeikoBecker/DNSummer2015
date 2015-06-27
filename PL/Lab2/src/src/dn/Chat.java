@@ -6,6 +6,10 @@ import dn.messages.chat.SendChatMsg;
 import java.io.IOException;
 import java.util.HashMap;
 
+/*
+ * Global Chat Server instance.
+ * Aggregates information: Authenticated clients with ID, Messages and outstanding ACKs
+ */
 public class Chat {
     private static Chat instance = null;
 

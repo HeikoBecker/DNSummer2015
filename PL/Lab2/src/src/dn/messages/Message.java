@@ -15,6 +15,10 @@ public abstract class Message {
         return Type + " " + id;
     }
 
+    /*
+     * Apply the "effects" of the message to the client.
+     * Can be compared to the Command Pattern.
+     */
     public abstract void execute(Client client) throws IOException;
 
 }

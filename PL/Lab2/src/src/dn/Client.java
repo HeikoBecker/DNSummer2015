@@ -9,13 +9,17 @@ import java.net.Socket;
 import java.net.SocketException;
 import java.security.NoSuchAlgorithmException;
 
+/*
+ * A Client encapsulates the associated port for the connection as well as the user information.
+ */
 public class Client {
+    // Network Level
     private final WebSocket websocket;
+
+    // Chat Protocol Level
     private String userId;
     private String userName;
     private boolean isAuthenticated = false;
-
-    // TODO: should a connection close after some time??? Make use of PONG dn.messages?
 
     public Client(Socket clientSocket) throws IOException {
         this.websocket = new WebSocket(clientSocket);
