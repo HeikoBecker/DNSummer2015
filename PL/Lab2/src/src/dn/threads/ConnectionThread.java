@@ -12,23 +12,22 @@ import java.net.Socket;
  */
 public class ConnectionThread extends Thread {
 
-    Client connection;
-    final Socket clientSocket;
+	Client connection;
+	final Socket clientSocket;
 
-    public ConnectionThread(Socket clientSocket) {
-    	System.out.println("New connection established");
-    	System.out.flush();;
-        this.clientSocket = clientSocket;
-    }
+	public ConnectionThread(Socket clientSocket) {
+		System.out.println("New connection established");
+		this.clientSocket = clientSocket;
+	}
 
-    @Override
-    public void run() {
-        try {
-        	//create a new client and let it execute
-            connection = new Client(clientSocket);
-            connection.run();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
+	@Override
+	public void run() {
+		try {
+			// create a new client and let it execute
+			connection = new Client(clientSocket);
+			connection.run();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
 }
