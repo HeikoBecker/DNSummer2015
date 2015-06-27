@@ -42,15 +42,16 @@ public class Client {
 
     public void run() throws IOException {
         try {
-            handshake();
-            while (!clientSocket.isClosed() && !this.serverShutdown) {
+            if (handshake()){
+            	while (!clientSocket.isClosed() && !this.serverShutdown) {
                 // Let new message execute, resp. send messages on socket
-                Message websocketMessage = parser.getWebsocketMessage();
-                if(websocketMessage == null) {
-                    exit();
-                    break;
-                }
-                websocketMessage.execute(this);
+            		Message websocketMessage = parser.getWebsocketMessage();
+            		if(websocketMessage == null) {
+            			exit();
+            			break;
+            		}
+            		websocketMessage.execute(this);
+            	}
             }
         } catch (SocketException | InterruptedException | NoSuchAlgorithmException e) {
             System.out.println(e.getMessage());
@@ -86,23 +87,41 @@ public class Client {
 
     /*
      * Wait for client handshake and reply with respective message.
+     * Section 4.2.1 May need to be included here with the parser and the set method in HTTPMsg
      */
-    private void handshake() throws IOException, InterruptedException, NoSuchAlgorithmException {
+    private boolean handshake() throws IOException, InterruptedException, NoSuchAlgorithmException {
+    	System.out.println("Parsing message");
         HTTPMsg clientHandshake = parser.getHTTPMessage();
+    	PrintWriter pr = new PrintWriter(clientSocket.getOutputStream(), true);
+    	if(clientHandshake.isInvalid() || clientHandshake.Type != "Handshake"){
+        	String serverReply = createInvReply(clientHandshake);
+        	pr.print(serverReply);
+        	pr.flush();
+        	log("[WS] Handshake failed due to client error.\n Closing connection.");
+        	return false;
+    	}
         String serverHandshake = createHandshakeMessage(clientHandshake);
-        PrintWriter pr = new PrintWriter(clientSocket.getOutputStream(), true);
-        pr.print(serverHandshake);
-        pr.flush();
-        log("[WS] Handshake complete!");
+       	pr.print(serverHandshake);
+       	pr.flush();
+       	log("[WS] Handshake complete!");
+       	return true;
     }
 
     /*
+     * Create a Reply indicating that the handshake cannot be completed.
+     * TODO: Does this suffice?
+     */
+    private String createInvReply(HTTPMsg clientHandshake) {
+		return "HTTP/1.1 400 Bad Request\r\n\r\n";
+	}
+
+	/*
      * Given the handshake message by the client, the servers handshake message is constructed.
      */
     private static String createHandshakeMessage(HTTPMsg clientHandshake) throws NoSuchAlgorithmException, UnsupportedEncodingException {
         return "HTTP/1.1 101 Switching Protocols\n"
                 + "Upgrade: websocket\n" + "Connection: Upgrade\n"
-                + "Sec-WebSocket-Accept: " + Client.getSecToken(clientHandshake.WebSocketKey) + "\r\n\r\n";
+                + "Sec-WebSocket-Accept: " + Client.getSecToken(clientHandshake.getWebSocketKey()) + "\r\n\r\n";
     }
 
     /*
@@ -232,7 +251,7 @@ public class Client {
     }
 
     // ----------------- DEBUGGING -----------------
-    private final boolean DEBUG = false;
+    private final boolean DEBUG = true;
 
     private void log(String msg) {
         if (DEBUG) {

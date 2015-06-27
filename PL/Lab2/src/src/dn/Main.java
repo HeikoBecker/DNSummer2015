@@ -22,5 +22,7 @@ public class Main {
         }
         // TODO: should be cleaner
         wt.interrupt();
+        //Close Scanner to avoid resource leak
+        sc.close();
     }
 }
