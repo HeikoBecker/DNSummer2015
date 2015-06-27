@@ -70,7 +70,7 @@ public class WebSocket {
         HTTPMsg clientHandshake = parser.getHTTPMessage();
         PrintWriter pr = new PrintWriter(this.clientSocket.getOutputStream(), true);
         if (clientHandshake.isInvalid() || !clientHandshake.Type.equals("Handshake")) {
-            String serverReply = createInvReply(clientHandshake);
+            String serverReply = createInvReply();
             pr.print(serverReply);
             pr.flush();
             log("Handshake failed due to client error.\n Closing connection.");
@@ -88,7 +88,7 @@ public class WebSocket {
      * Taken from RFC 6455 Page 26
      * TODO: Does this suffice?
      */
-    private String createInvReply(HTTPMsg clientHandshake) {
+    private String createInvReply() {
         return "HTTP/1.1 400 Bad Request\r\n"
                 + "...\r\n"
                 + "Sec-WebSocket-Version: 13\r\n"

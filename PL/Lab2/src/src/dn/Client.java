@@ -23,6 +23,8 @@ public class Client {
 
     public Client(Socket clientSocket) throws IOException {
         this.websocket = new WebSocket(clientSocket);
+        //Initialization for debug messages
+        this.userId = "";
     }
 
     public void run() throws IOException {
