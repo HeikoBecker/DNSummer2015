@@ -99,9 +99,17 @@ public class MsgParser {
 				break;
 			// Connection Header Field Required as by 4.2.1 4.
 			case MsgParser.CONN:
-				if (lines[1].equals("Upgrade")) {
-					break;
-				} else {
+				boolean ok = false;
+				String[] values = lines[1].split(",");
+				
+				for(String value : values){
+					value = value.replace(" ", "");
+					if (ok) 
+						break;
+					if (value.equals("Upgrade"))
+						ok = true;
+				}
+				if (!ok) {
 					msg.invalid = true;
 					System.out.println("Invalid Connection Request: "+lines[1]);
 				}
