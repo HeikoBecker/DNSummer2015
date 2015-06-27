@@ -148,8 +148,6 @@ public class MsgParser {
 		int idx = 0;
 		int opcode = -1;
 
-		// TODO: check if fin bit is not set. Then the client tries to fragment.
-		// In this case we should cleanly close the connection.
 		byte[] payload = new byte[payloadlength];
 		while (count - 5 <= payloadlength && (c = is.read()) != -1) {
 			count++;
@@ -158,8 +156,14 @@ public class MsgParser {
 				opcode = c & 0x0F;
 				break;
 			case 2:
+				// check if fin bit is not set. Then the client tries to fragment.
+				// In this case we should cleanly close the connection.
+				boolean fin = (c & 0b10000000) == 0b10000000;
+				if (!fin)
+					return new CloseConnMsg();
+				//otherwise continue
 				payloadlength = c & 0b01111111;
-				// TODO: 126 --> 7+16 bits (as unsigned integer)
+				// TODO: 126 --> 7+16 bits (as unsigned integer?)
 				// Unsigned done
 				// with:https://stackoverflow.com/questions/9854166/declaring-an-unsigned-int-in-java
 				if (payloadlength == 126) {
