@@ -66,7 +66,7 @@ public class MsgParser {
 			//Finish loop earlier if we already had a failure
 			if(msg.invalid)
 				break;
-			
+			input = inputBuffer.readLine();
 			lines = input.split(MsgParser.SPLIT);
 			String key = lines[0];
 			switch (key) {
@@ -78,7 +78,7 @@ public class MsgParser {
 			case MsgParser.UPG:
 				// must be exactly a upgrade to a websocket (RFC 6455 see 4.2.1
 				// 3.)
-				if (lines[1] == "websocket") {
+				if (lines[1].equals("websocket")) {
 					msg.Type = "Handshake";
 				} else {
 					System.out.println("Invalid Upgrade");					
@@ -99,16 +99,16 @@ public class MsgParser {
 				break;
 			// Connection Header Field Required as by 4.2.1 4.
 			case MsgParser.CONN:
-				if (lines[1] == "Upgrade") {
+				if (lines[1].equals("Upgrade")) {
 					break;
 				} else {
 					msg.invalid = true;
-					System.out.println("Invalid Connection Request");
+					System.out.println("Invalid Connection Request: "+lines[1]);
 				}
 				break;
 			//Sec-WebSocket-Version - required field, must be 13 (4.2.1 6.)
 			case MsgParser.SECWS:
-				if(lines[1] == "13"){
+				if(lines[1].equals("13")){
 					break;
 				}else{
 					msg.invalid = true;
@@ -194,7 +194,7 @@ public class MsgParser {
 				maskingKey[3] = (byte) c;
 				break;
 			default:
-				// TODO: Hier muss das entmaskieren aus dem RFC hin
+				// Demask the payload as explained in the RFC
 				payload[idx] = (byte) ((byte) c ^ maskingKey[idx % 4]);
 				idx++;
 				break;
@@ -210,19 +210,15 @@ public class MsgParser {
 					.decodeClientMessage(new String(payload, "UTF-8"));
 		case CONNCLOSE:
 			return new CloseConnMsg();
-			// TODO: Finally you must close the connection
-			// TODO: Server must close first
 		case PING:
 			return new PingConnMsg();
 		case PONG:
 			return new PongConnMsg();
 		case BIN:
 		default:
-			// In this case the parser will return null and this causes the
-			// thread to close the socket.
+			// In this case the parser will close the connection as this part is not specified in the RFC
 			System.out.println("Unknown opcode: " + opcode);
-			break;
+			return new CloseConnMsg();
 		}
-		return null;
 	}
 }
