@@ -1,25 +1,59 @@
 package dn;
 
+import java.io.IOException;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Timer;
+import java.util.TimerTask;
+
 import dn.messages.chat.AcknChatMsg;
 import dn.messages.chat.SendChatMsg;
-
-import java.io.IOException;
-import java.util.HashMap;
 
 /*
  * Global Chat Server instance.
  * Aggregates information: Authenticated clients with ID, Messages and outstanding ACKs
  */
 public class Chat {
-    private static Chat instance = null;
+	//Minutes to wait until cleanup occurs, in milliseconds, currently 1 minute
+    private static final long CLEANTIME = 1 * 1000;
+    //maximal age in milliseconds, currently 5 minutes
+    private static final long MAXAGE = 5 * 1000; 
+	private static Chat instance = null;
 
+	/*
+	 * Cleanup Task removing all messages that are older than MAXAGE minutes.
+	 * 
+	 * Here we derive from the specification as explained in
+	 * https://dcms.cs.uni-saarland.de/dn/forum/viewtopic.php?f=3&t=109
+	 */
+    private class Cleaner extends TimerTask {
+
+		@Override
+		public void run() {
+			synchronized (outstandingAcks){
+				for (String id : outstandingAcks.keySet() ){
+					OutstandingAcknowledgements acks = outstandingAcks.get(id); 
+					if (acks.getAge() + MAXAGE < System.currentTimeMillis()){
+						outstandingAcks.remove(id);
+					}
+				}
+			}
+		}
+    	
+    }
+    
     // Client ID -> Client
     private HashMap<String, Client> clients = new HashMap<>();
 
     // Message ID -> Collection of outstanding acknowledgements
     private HashMap<String, OutstandingAcknowledgements> outstandingAcks = new HashMap<>();
 
+    private Timer timer;
+    
     private Chat() {
+    	//Start cleanup timer.
+    	timer = new Timer();
+    	timer.scheduleAtFixedRate(new Cleaner(), new Date(System.currentTimeMillis()+ Chat.CLEANTIME), Chat.CLEANTIME);
     }
 
     public static synchronized Chat getInstance() {
@@ -86,7 +120,7 @@ public class Chat {
      */
     private void storeMessage(String messageId, String senderId, String receiverId) {
         if (!outstandingAcks.containsKey(messageId)) {
-            outstandingAcks.put(messageId, new OutstandingAcknowledgements(senderId));
+            outstandingAcks.put(messageId, new OutstandingAcknowledgements(senderId, System.currentTimeMillis()));
         }
         // TODO: start a timer and remove message when timer expired
         outstandingAcks.get(messageId).add(receiverId);
