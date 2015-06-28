@@ -2,6 +2,10 @@
     mosta go-back-n.modest -X -S -E -O out.dot -D png out.png --no-invariants
     modes go-back-n.modest -E "N=5" -R Uniform
     
+	TODO: Remove this after Modest update:
+	As stated in https://dcms.cs.uni-saarland.de/dn/forum/viewtopic.php?f=3&t=120 we use the Uniform resolver.
+	Modest currently does not support resolving the nondeterminism for having an ACK pending and data ready to send.
+	 
     TODO: 
         a)      - proper timeout
         b-d)    - insert properties
@@ -69,43 +73,51 @@ int usdata; // data buffer from upper layer to sender
 packet cspacket; // data buffer from channel to sender
 process Sender()
 {
-    packetlist option packets;
-    int send_base = 1;
-    int next_seqnum = 1;
-    int retr_idx = 0;
-    bool timer_on = false;
-    clock retr_timer;
+    packetlist option packets; 	//Queued packets for sending
+    int send_base = 1; 				//initial we start with sequence number 1
+    int next_seqnum = 1; 			//initial the next sequence number is the current sequence number
+    int retr_idx = 0;				//
+    bool timer_on = false;			//flag to detect wether timer is running or not
+    clock retr_timer;				//clock for package timeout
     
+	 //work loop
     do {
         // receive call from upper layer
-        ::  when urgent (next_seqnum - send_base < N) rdt_snd;         
-            urgent udt_snd_s
-            {=
-                scpacket = packet { seqnum: next_seqnum, data: usdata },
-                packets = append(packets, scpacket),
-                timer_on = true,
-                next_seqnum++
-            =};
-            urgent udt_snd_s_done
+        ::  when 
+		  			urgent (next_seqnum - send_base < N) //If we have space in our window available to send
+						rdt_snd;         						 //Send the packet
+            	urgent udt_snd_s							 //Synchronize with lower layer for sending
+            		{=
+                		scpacket = packet { seqnum: next_seqnum, data: usdata }, //generate the packet
+                		packets = append(packets, scpacket),							//enqueue the packet
+                		timer_on = true,														//start the timer
+                		next_seqnum++															//next sequence number must be incremented
+            		=};
+            urgent udt_snd_s_done	//Finish sending
+				
         // receive data from lower layer
         :: urgent rdt_rcv_s;
-            urgent tau {=
-                packets = remove(packets, (cspacket.seqnum + 1) - send_base), 
-                send_base = cspacket.seqnum + 1,
-                timer_on = (next_seqnum - (cspacket.seqnum + 1) > 0),
-                retr_timer = 0
+           	urgent tau {=
+                packets = remove(packets, (cspacket.seqnum + 1) - send_base), //TODO What does this do?
+                send_base = cspacket.seqnum + 1,										//We received an ACK --> increment window base TODO: Why this way, this seems not cumulative
+                timer_on = (next_seqnum - (cspacket.seqnum + 1) > 0),			//The timer continues if there are still packages in flight
+                retr_timer = 0																//Reset timer to 0
             =}
-        :: when urgent (timer_on && (retr_timer >= TIMEOUT)) timeout;
+			//If the timer runs and the clock value is greater than the TIMEOUT value
+        :: when urgent (timer_on && (retr_timer >= TIMEOUT)) 
+		  		timeout;		//Timeout event
             do {
+					 //Resend the packet if the retry ID is less than the amount of packets
                 :: when urgent (retr_idx < length(packets))
                     urgent udt_snd_s
                     {= 
-                        scpacket = at(packets, retr_idx),
-                        retr_idx++
+                        scpacket = at(packets, retr_idx), //resend the packet
+                        retr_idx++								 //increment to resend next packet
                     =}; 
-                    urgent udt_snd_s_done
+                    urgent udt_snd_s_done	//event: sending finished
+					 //Resend no packet anymore if we have resend all timeouted packets
                 :: when urgent (retr_idx >= length(packets))
-                    break {= retr_timer = 0, retr_idx = 0 =}
+                    break {= retr_timer = 0, retr_idx = 0 =} //leave loop and reset variables
             }
     }
 }
