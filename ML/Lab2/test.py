@@ -2,6 +2,7 @@
 
 import sys
 import os
+import string
 
 MAX=int(sys.argv[1])
 RUNS=sys.argv[2]
@@ -44,7 +45,7 @@ minimumTime = totalTimes[runTimes]
 runRet = 1
 minimumRetrans = retransmissions[runRet]
 
-print ("Run Nr\t\t|| TotalTime \t\t|| Retransmissions")
+print ("Run Nr\t|| TotalTime \t\t|| Retransmissions")
 for i in totalTimes.keys():
     if (minimumTime > totalTimes[i]):
         minimumTime = totalTimes[i]
@@ -52,7 +53,9 @@ for i in totalTimes.keys():
     if (minimumRetrans > retransmissions[i]):
         minimumRetrans = retransmissions[i]
         runRet=i
-    print (str(i)+"\t\t||"+str(totalTimes[i])+"\t\t||"+str(retransmissions[i]))
+    timeStr = str(totalTimes[i]).replace("\n","") + "\t"
+    retransStr = str(retransmissions[i]).replace("\n","")
+    print (str(i)+"\t||"+ timeStr+"||"+retransStr)
 
 print ("For N="+str(runTimes)+ " minimal time can be achieved as "+ str(minimumTime))
 print ("For N="+str(runRet) + " minimal retransmissions can be achieved as "+str(minimumRetrans))
