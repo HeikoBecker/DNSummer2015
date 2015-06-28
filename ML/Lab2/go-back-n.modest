@@ -7,7 +7,6 @@
 	Modest currently does not support resolving the nondeterminism for having an ACK pending and data ready to send.
 	 
     TODO: 
-        a)      - proper timeout
         b-d)    - insert properties
     
 */
@@ -53,7 +52,12 @@ int deliveredPacketCount;
 property ProbError = Pmax(<> (hasError || lastDelivered && deliveredPacketCount != PKT_COUNT));
 property DeliveredPackets = Xmax(deliveredPacketCount | lastDelivered);
 
+clock totalTime;
+int retransmits;
+
 // Properties
+property TotalTime = Xmax(totalTime | lastDelivered);
+property Retransmissions = Xmax(retransmits | lastDelivered);
 
 // Upper layers on sender side
 // Do not modify this process
@@ -111,8 +115,9 @@ process Sender()
                 :: when urgent (retr_idx < length(packets))
                     urgent udt_snd_s
                     {= 
-                        scpacket = at(packets, retr_idx), //resend the packet
-                        retr_idx++								 //increment to resend next packet
+                        scpacket = at(packets, retr_idx),           //resend the packet
+                        retransmits++,                              //count the retransmits for b)
+                        retr_idx++								    //increment to resend next packet
                     =}; 
                     urgent udt_snd_s_done	//event: sending finished
 					 //Resend no packet anymore if we have resend all timeouted packets
