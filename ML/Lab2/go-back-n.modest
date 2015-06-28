@@ -89,7 +89,7 @@ process Sender()
             	urgent udt_snd_s							 //Synchronize with lower layer for sending
             		{=
                 		scpacket = packet { seqnum: next_seqnum, data: usdata }, //generate the packet
-                		packets = append(packets, scpacket),							//enqueue the packet
+                		packets = append(packets, packet { seqnum: next_seqnum, data: usdata }), //scpacket),							//enqueue the packet
                 		timer_on = true,														//start the timer
                 		next_seqnum++															//next sequence number must be incremented
             		=};
@@ -98,8 +98,8 @@ process Sender()
         // receive data from lower layer
         :: urgent rdt_rcv_s;
            	urgent tau {=
-                packets = remove(packets, (cspacket.seqnum + 1) - send_base), //TODO What does this do?
-                send_base = cspacket.seqnum + 1,										//We received an ACK --> increment window base TODO: Why this way, this seems not cumulative
+                packets = remove(packets, (cspacket.seqnum + 1) - send_base), //Remove ACked packet
+                send_base = cspacket.seqnum + 1,										//We received an ACK --> set window base to ACKed number + 1
                 timer_on = (next_seqnum - (cspacket.seqnum + 1) > 0),			//The timer continues if there are still packages in flight
                 retr_timer = 0																//Reset timer to 0
             =}
@@ -192,22 +192,25 @@ process ChannelRS()
 packet crpacket; // data buffer from channel to receiver
 process Receiver()
 {
-    int recv_seqnum = 0;
+    int recv_seqnum = 0; //Initially Received Sequence Number is 0
+	 
+	 //Work-Loop
     do {
         urgent rdt_rcv_r;       // get the data from the channel
         alt {
             // expected sequence number or previous number
-            :: when urgent (crpacket.seqnum == recv_seqnum + 1)
-                    urgent deliver_data {= 
+            :: when urgent (crpacket.seqnum == recv_seqnum + 1) //We receive the real next packet, that we can receive
+                    urgent deliver_data //event to deliver the data to upper layer
+						  {= 
                         rudata = crpacket.data, 
                         recv_seqnum = crpacket.seqnum
                     =};
-                    urgent deliver_data_done
+                    urgent deliver_data_done //finish delivery
             // unexpected number
             :: when urgent (crpacket.seqnum != recv_seqnum + 1) urgent drop_data
         };
-        urgent udt_snd_r {= rcpacket = packet { seqnum: recv_seqnum } =};
-        urgent udt_snd_r_done
+        urgent udt_snd_r {= rcpacket = packet { seqnum: recv_seqnum } =}; //Send ACK/duplicate ACK on error
+        urgent udt_snd_r_done //notify send done
     }
 }
 
