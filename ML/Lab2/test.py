@@ -27,14 +27,14 @@ for i in range(1,MAX+1):
                 print ("TotalTime for run " +str(i)+":")
                 print (values[1])
                 TotalTime = False
-                totalTimes[i] = values[1]
+                totalTimes[i] = float(values[1])
         if Retransmissions:
             if "Mean" in line:
                 values = line.split(":")
                 print ("Retransmissions for run " +str(i)+":")
                 print (values[1])
                 Retransmissions = False
-                retransmissions[i] = values[1]
+                retransmissions[i] = float(values[1])
         if "Property TotalTime" in line:
             TotalTime = True
         if "Property Retransmissions" in line:
