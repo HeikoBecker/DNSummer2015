@@ -104,6 +104,7 @@ public class Client {
 
     /*
      * Emitting that another client arrived to the current client.
+     * Sending an empty description string is ok, as stated here: https://dcms.cs.uni-saarland.de/dn/forum/viewtopic.php?f=3&t=132
      */
     public void emitArrvChatMsg(Client otherClient) throws IOException {
         websocket.emit("ARRV", otherClient.getUserId(), new String[]{otherClient.getUserName(), ""});
