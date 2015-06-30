@@ -30,7 +30,8 @@ public class SendChatMsg extends Message {
         if (!client.isAuthenticated()) {
             client.emit("INVD", "0");
             client.exit();
-        } else if (Chat.getInstance().isMessageIdTaken(this.id)) { //TODO: Same as for AuthChatMsg.
+        } else if (Chat.getInstance().isMessageIdTaken(this.id)) {
+            // We only check for existing messageIds and not userIds, following the reference implementation.
             client.emit("FAIL", this.id, new String[]{"NUMBER"});
         } else if (this.message.length() > 384) {
             /*

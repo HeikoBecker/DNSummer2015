@@ -11,14 +11,12 @@ public class Client {
     private final WebSocket websocket;
 
     // Chat Protocol Level
-    private String userId;
+    private String userId = "";
     private String userName;
     private boolean isAuthenticated = false;
 
     public Client(Socket clientSocket) throws IOException {
         this.websocket = new WebSocket(clientSocket);
-        //Initialization for debug messages
-        this.userId = "";
     }
 
     public void run() throws IOException {
@@ -59,11 +57,11 @@ public class Client {
      * Given userId and userName, the current connection can enter authenticated state.
      */
     public void authenticate(String userId, String userName) throws IOException {
-        isAuthenticated = true;
+        this.isAuthenticated = true;
         this.userId = userId;
         this.userName = userName;
         Chat.getInstance().registerClient(this);
-        log("Authenticated.");
+        this.log("Authenticated.");
     }
 
     /*
@@ -73,8 +71,8 @@ public class Client {
         if (isAuthenticated) {
             Chat.getInstance().unregisterClient(userId);
         }
-        log("Exited.");
-        websocket.close();
+        this.log("Exited.");
+        this.websocket.close();
     }
 
 
@@ -84,16 +82,16 @@ public class Client {
      * Emitting another client's message to the current client.
      */
     public void emitSendChatMsg(SendChatMsg msg, String senderId) throws IOException {
-        websocket.emit("SEND", msg.id, new String[]{senderId, msg.getMessage()});
-        log("Received a message.");
+        this.websocket.emit("SEND", msg.id, new String[]{senderId, msg.getMessage()});
+        this.log("Received a message.");
     }
 
     /*
      * Emitting another client's ackn message to the current client.
      */
     public void emitAcknChatMsg(AcknChatMsg msg, String senderId) throws IOException {
-        websocket.emit("ACKN", msg.id, new String[]{senderId});
-        log("Received an ack.");
+        this.websocket.emit("ACKN", msg.id, new String[]{senderId});
+        this.log("Received an ack.");
     }
 
     /*
@@ -101,16 +99,16 @@ public class Client {
      * Sending an empty description string is ok, as stated here: https://dcms.cs.uni-saarland.de/dn/forum/viewtopic.php?f=3&t=132
      */
     public void emitArrvChatMsg(Client otherClient) throws IOException {
-        websocket.emit("ARRV", otherClient.getUserId(), new String[]{otherClient.getUserName(), ""});
-        log("Received an arrv.");
+        this.websocket.emit("ARRV", otherClient.getUserId(), new String[]{otherClient.getUserName(), ""});
+        this.log("Received an arrv.");
     }
 
     /*
      * Emitting that another client left to the current client.
      */
     public void emitLeftChatMsg(String otherClient) throws IOException {
-        websocket.emit("LEFT", otherClient, new String[]{});
-        log("Received a left.");
+        this.websocket.emit("LEFT", otherClient, new String[]{});
+        this.log("Received a left.");
     }
 
     // ----------------- RECEIVE METHODS -----------------
@@ -119,7 +117,7 @@ public class Client {
      */
     public void recvAcknChatMsg(AcknChatMsg acknMsg) throws IOException {
         Chat.getInstance().emitAcknowledgement(acknMsg, this);
-        log("Sent an ack.");
+        this.log("Sent an ack.");
     }
 
     /*
@@ -127,7 +125,7 @@ public class Client {
      */
     public void recvSendChatMsg(SendChatMsg sendMsg) throws IOException {
         Chat.getInstance().emitMessage(sendMsg, this);
-        log("Sent a message.");
+        this.log("Sent a message.");
     }
 
 
@@ -137,7 +135,7 @@ public class Client {
     }
 
     public void emit(String command, String id) throws IOException {
-        this.emit(command, id, new String[] {});
+        this.emit(command, id, new String[]{});
     }
 
     public void emitFrame(byte[] frame) throws IOException {
@@ -164,8 +162,8 @@ public class Client {
     private final boolean DEBUG = false;
 
     private void log(String msg) {
-        if(DEBUG) {
-            String userId = (this.userId.equals("")) ? "UNAUTH" :  this.userId;
+        if (DEBUG) {
+            String userId = (this.userId.equals("")) ? "UNAUTH" : this.userId;
             System.out.println("[C-" + userId + "] " + msg);
         }
     }

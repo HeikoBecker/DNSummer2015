@@ -117,7 +117,6 @@ public class Chat {
         if (!outstandingAcks.containsKey(messageId)) {
             outstandingAcks.put(messageId, new OutstandingAcknowledgements(senderId, System.currentTimeMillis()));
         }
-        // TODO: start a timer and remove message when timer expired
         outstandingAcks.get(messageId).add(receiverId);
     }
 

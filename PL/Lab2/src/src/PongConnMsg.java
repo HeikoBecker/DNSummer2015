@@ -9,6 +9,4 @@ public class PongConnMsg extends Message {
         //PONG frame is unidirectional heartbeat --> no sending
         //on receipt
     }
-
-    //TODO: Method to notify server that client is awake!
 }

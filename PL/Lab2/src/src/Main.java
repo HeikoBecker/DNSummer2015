@@ -16,9 +16,8 @@ public class Main {
                 break;
             }
         }
-        // TODO: should be cleaner
         wt.interrupt();
-        //Close Scanner to avoid resource leak
+        // Close Scanner to avoid resource leak
         sc.close();
     }
 }

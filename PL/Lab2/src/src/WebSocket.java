@@ -26,7 +26,6 @@ public class WebSocket {
 
     public void close() throws IOException {
         if (!isClosed()) {
-            // TODO: 0 might be replaced by real reason
             this.emitFrame(FrameFactory.CloseFrame(0));
             clientSocket.shutdownInput();
             clientSocket.shutdownOutput();

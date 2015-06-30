@@ -5,6 +5,7 @@ import java.io.IOException;
  * Statically checks against group password.
  */
 public class AuthChatMsg extends Message {
+    // We use our group password to authenticate users.
     private static final String groupPassword = "3YnnafwB";
 
     private boolean validPassword = false;
@@ -26,7 +27,8 @@ public class AuthChatMsg extends Message {
             client.exit();
         } else if (!this.validPassword) {
             client.emit("FAIL", this.id, new String[]{"PASSWORD"});
-        } else if (Chat.getInstance().isUserIdTaken(this.id)) { //TODO: Check for msg numbers too?
+        } else if (Chat.getInstance().isUserIdTaken(this.id)) {
+            // We only check for existing userIds and not messageIds, following the reference implementation.
             client.emit("FAIL", this.id, new String[]{"NUMBER"});
         } else if (Chat.getInstance().isNameTaken(name)) {
             client.emit("FAIL", this.id, new String[]{"NAME"});
