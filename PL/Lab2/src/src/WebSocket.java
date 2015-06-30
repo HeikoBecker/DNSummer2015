@@ -1,7 +1,3 @@
-package dn;
-
-import dn.messages.*;
-
 import javax.xml.bind.DatatypeConverter;
 import java.io.BufferedOutputStream;
 import java.io.IOException;

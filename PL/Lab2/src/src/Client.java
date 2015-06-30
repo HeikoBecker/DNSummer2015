@@ -1,9 +1,3 @@
-package dn;
-
-import dn.messages.*;
-import dn.messages.chat.AcknChatMsg;
-import dn.messages.chat.SendChatMsg;
-
 import java.io.IOException;
 import java.net.Socket;
 import java.net.SocketException;

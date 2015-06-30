@@ -1,7 +1,3 @@
-package dn.messages;
-
-import dn.Client;
-
 import java.io.IOException;
 import java.util.Base64;
 

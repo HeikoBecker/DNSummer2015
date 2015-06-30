@@ -1,7 +1,3 @@
-package dn.threads;
-
-import dn.Client;
-
 import java.io.IOException;
 import java.net.Socket;
 

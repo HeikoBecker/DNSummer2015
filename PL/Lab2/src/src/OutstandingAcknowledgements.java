@@ -1,5 +1,3 @@
-package dn;
-
 import java.util.LinkedList;
 
 /*

@@ -1,8 +1,3 @@
-package dn.messages.connection;
-
-import dn.Client;
-import dn.messages.Message;
-
 import java.io.IOException;
 
 

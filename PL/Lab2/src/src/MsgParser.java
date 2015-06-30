@@ -1,9 +1,3 @@
-package dn.messages;
-
-import dn.messages.connection.CloseConnMsg;
-import dn.messages.connection.PingConnMsg;
-import dn.messages.connection.PongConnMsg;
-
 import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.IOException;

@@ -1,5 +1,3 @@
-package dn.messages;
-
 import java.io.UnsupportedEncodingException;
 
 public class FrameFactory {

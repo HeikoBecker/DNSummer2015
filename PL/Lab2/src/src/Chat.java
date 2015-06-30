@@ -1,13 +1,8 @@
-package dn;
-
 import java.io.IOException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Timer;
 import java.util.TimerTask;
-
-import dn.messages.chat.AcknChatMsg;
-import dn.messages.chat.SendChatMsg;
 
 /*
  * Global Chat Server instance.
