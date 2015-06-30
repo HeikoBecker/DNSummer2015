@@ -93,10 +93,8 @@ Run Nr	|| TotalTime 		|| Retransmissions
 19	|| 1880.65676143734	|| 398.509
 20	|| 1898.65391148669	|| 421.597
 
-The script computed the following minimal values:
+The script computed the following:
 For N=9 minimal time can be achieved as  1551.69139033685
-
-For N=5 minimal retransmissions can be achieved as  107.138
 
 We fixed the number of runs to 1000 as this seems to be large enough to get reasonable values and
 with the script automation, no additional work was involved.
