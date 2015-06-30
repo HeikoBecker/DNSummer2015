@@ -1,0 +1,4 @@
+In this current folder (the root folder when you extracted the zip). Enter the following commands:
+
+javac -d . *.java
+java Main
