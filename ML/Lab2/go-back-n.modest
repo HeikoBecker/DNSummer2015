@@ -2,10 +2,8 @@
     mosta go-back-n.modest -X -S -E -O out.dot -D png out.png --no-invariants
     modes go-back-n.modest -E "N=9" --resolve-uniformly "{rdt_snd,rdt_rcv_s}"
     
-	TODO: Remove this after Modest update:
-	As stated in https://dcms.cs.uni-saarland.de/dn/forum/viewtopic.php?f=3&t=120 we use the Uniform resolver.
-	Modest currently does not support resolving the nondeterminism for having an ACK pending and data ready to send.
-	 
+	The non-default parameter --resolve-uniformly is used according to post:
+    https://dcms.cs.uni-saarland.de/dn/forum/viewtopic.php?f=3&t=115 
 */
 
 patient action rdt_snd, udt_snd_s, udt_snd_s_done, udt_snd_r, udt_snd_r_done, rdt_rcv_s, rdt_rcv_r, deliver_data, deliver_data_done;
