@@ -80,12 +80,10 @@ public class WebSocket {
 
     /*
      * Create a Reply indicating that the handshake cannot be completed.
-     * Taken from RFC 6455 Page 26
-     * TODO: Does this suffice?
+     * Taken from RFC 6455 Page 26 and 63
      */
     private String createInvReply() {
         return "HTTP/1.1 400 Bad Request\r\n"
-                + "...\r\n"
                 + "Sec-WebSocket-Version: 13\r\n"
                 + "\r\n";
     }
