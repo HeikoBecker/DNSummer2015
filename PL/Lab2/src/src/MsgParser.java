@@ -168,7 +168,7 @@ public class MsgParser {
                         return new CloseConnMsg();
                     //otherwise continue
                     payloadlength = c & 0b01111111;
-                    // TODO: 126 --> 7+16 bits (as unsigned integer?)
+                    // T126 --> 7+16 bits (as unsigned integer?)
                     // Unsigned done
                     // with:https://stackoverflow.com/questions/9854166/declaring-an-unsigned-int-in-java
                     if (payloadlength == 126) {
@@ -177,7 +177,7 @@ public class MsgParser {
                         c = is.read();
                         payloadlength = payloadlength | c;
                     } else if (payloadlength == 127) {
-                        // TODO: 127 --> 7+64 bits (as unsigned int)
+                        // 127 --> 7+64 bits (as unsigned int)
                         c = is.read();
                         payloadlength = c << 32;
                         c = is.read();
@@ -186,9 +186,15 @@ public class MsgParser {
                         payloadlength = payloadlength | (c << 8);
                         c = is.read();
                         payloadlength = payloadlength | c;
+
+                        // We deviate from the RFC as the application will only support message up to a length of 300,
+                        // so there is no need to parse larger messsages.
+                        // See https://dcms.cs.uni-saarland.de/dn/forum/viewtopic.php?f=3&t=124
+                        if(payloadlength < 0) {
+                            payloadlength = Integer.MAX_VALUE;
+                        }
                     }
-                    payload = new byte[payloadlength]; // TODO: Does this need to be
-                    // a long for unsigned?
+                    payload = new byte[payloadlength];
                     break;
                 case 3:
                     maskingKey[0] = (byte) c;
