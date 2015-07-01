@@ -14,7 +14,7 @@ public class AcknChatMsg extends Message {
         if (!client.isAuthenticated()) {
             client.emit("INVD", "0");
             client.exit();
-        } else if (!Chat.getInstance().isMessageIdOpenForAckn(this.id, client)) { //TODO: Duplicate ACKS?
+        } else if (!Chat.getInstance().isMessageIdOpenForAckn(this.id, client)) {
             client.emit("FAIL", this.id, new String[]{"NUMBER"});
         } else {
             client.recvAcknChatMsg(this);
