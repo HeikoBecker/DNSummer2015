@@ -1,6 +1,6 @@
 ﻿/*
     mosta go-back-n.modest -X -S -E -O out.dot -D png out.png --no-invariants
-    modes go-back-n.modest -E "N=9" -R Uniform
+    modes go-back-n.modest -E "N=9" --resolve-uniformly "{rdt_snd,rdt_rcv_s}"
     
 	TODO: Remove this after Modest update:
 	As stated in https://dcms.cs.uni-saarland.de/dn/forum/viewtopic.php?f=3&t=120 we use the Uniform resolver.
@@ -173,11 +173,11 @@ process ChannelRS()
 			urgent udt_snd_r;
 			urgent alt {
 			::	when(length(packets) <= 16) urgent udt_snd_r_done palt {
-				:100-PKT_LOSS_PROB:
+				:100-ACK_LOSS_PROB:
 					{=	sendUntil = max(sendUntil + ACK_TRANS_DELAY, timer + ACK_TRANS_DELAY),
 						packets = append(packets, rcpacket),
 						packetTimes = appendR(packetTimes, max(sendUntil + ACK_TRANS_DELAY, timer + ACK_TRANS_DELAY) + Exp(1/ACK_PROP_DELAY)) =}
-				:PKT_LOSS_PROB:
+				:ACK_LOSS_PROB:
 					{= sendUntil = max(sendUntil + ACK_TRANS_DELAY, timer + ACK_TRANS_DELAY) =}
 				}
 			::	when(length(packets) > 16) udt_snd_r_done // queue overflow, drop packet
