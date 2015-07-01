@@ -35,11 +35,6 @@ public class CloseConnMsg extends Message {
 
     @Override
     public void execute(Client client) throws IOException {
-        //TODO: Reply needed?
-        // FIN = 1?
-        // Reserved Bytes
-        // Conn Close OPCODE
-        // THEN?
         client.exit();
     }
 }

@@ -31,7 +31,6 @@ public class WebSocket {
             clientSocket.shutdownOutput();
             clientSocket.close();
         }
-
     }
 
     /*
