@@ -12,8 +12,8 @@ retransmissions = {}
 
 for i in range(1,MAX+1):
     print("Run number "+str(i))
-    filename="/tmp/modes_run_"+str(i)+".txt"
-    os.system("modes.exe go-back-n.modest -E \"N="+str(i)+"\" -R Uniform -N "+RUNS+" > "+filename)
+    filename="C:/tmp/modes_run_"+str(i)+".txt"
+    os.system("modes.exe go-back-n.modest -E \"N="+str(i)+"\" --resolve-uniformly '{rdt_snd,rdt_rcv_s}' -N "+RUNS+" > "+filename)
 
     print ("Parsing") 
 
