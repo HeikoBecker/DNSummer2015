@@ -1,4 +1,5 @@
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 
 public class FrameFactory {
 
@@ -19,7 +20,8 @@ public class FrameFactory {
          */
 
         int headerLength = 2;
-        int length = text.length();
+        byte[] payLoadData = text.getBytes(StandardCharsets.UTF_8);
+        int length = payLoadData.length;
         if (length >= 126) { // Using 126 as payload length, we need 2 additional bytes as length.
             headerLength = 4;
         }
@@ -49,7 +51,7 @@ public class FrameFactory {
         }
 
         // Insert payload
-        System.arraycopy(text.getBytes("utf8"), 0, result, headerLength, length);
+        System.arraycopy(payLoadData, 0, result, headerLength, length);
         return result;
     }
 

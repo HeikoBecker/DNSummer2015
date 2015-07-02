@@ -3,6 +3,7 @@ import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 
 public class MsgParser {
     private static final String HOST = "Host";
@@ -222,7 +223,7 @@ public class MsgParser {
                 return new CloseConnMsg(); // INV PAYLOAD DATA (Sec. 11.7, Page 64)
             case TEXT:
                 return ChatMsgCodec
-                        .decodeClientMessage(new String(payload, "UTF-8"));
+                        .decodeClientMessage(new String(payload, StandardCharsets.UTF_8));
             case CONNCLOSE:
                 return new CloseConnMsg();
             case PING:
