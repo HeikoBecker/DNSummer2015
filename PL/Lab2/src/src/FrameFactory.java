@@ -20,10 +20,10 @@ public class FrameFactory {
 
         int headerLength = 2;
         int length = text.length();
-        if (length > 126) { // Using 126 as payload length, we need 2 additional bytes as length.
+        if (length >= 126) { // Using 126 as payload length, we need 2 additional bytes as length.
             headerLength = 4;
         }
-        if (length > 65536) { // Using 127 as payload length, we need 8 additional bytes as length.
+        if (length >= 65536) { // Using 127 as payload length, we need 8 additional bytes as length.
             headerLength = 10;
         }
 
@@ -31,21 +31,21 @@ public class FrameFactory {
         byte[] result = new byte[headerLength + length];
         result[0] = addFIN(MsgParser.TEXT);
         result[1] = (byte) length;
-        if (length > 126) {
+        if (length >= 126) {
             result[1] = 126;
-            result[2] = (byte) ((length >> 8) & 0x0F);
-            result[3] = (byte) (length & 0x0F);
+            result[2] = (byte) ((length >> 8) & 0x0FF);
+            result[3] = (byte) (length & 0x0FF);
         }
-        if (length > 65536) {
+        if (length >= 65536) {
             result[1] = 127;
-            result[2] = (byte) ((length >> 56) & 0x0F);
-            result[3] = (byte) ((length >> 48) & 0x0F);
-            result[4] = (byte) ((length >> 40) & 0x0F);
-            result[5] = (byte) ((length >> 32) & 0x0F);
-            result[6] = (byte) ((length >> 24) & 0x0F);
-            result[7] = (byte) ((length >> 16) & 0x0F);
-            result[8] = (byte) ((length >> 8) & 0x0F);
-            result[9] = (byte) ((length) & 0x0F);
+            result[2] = (byte) ((length >> 56) & 0x0FF);
+            result[3] = (byte) ((length >> 48) & 0x0FF);
+            result[4] = (byte) ((length >> 40) & 0x0FF);
+            result[5] = (byte) ((length >> 32) & 0x0FF);
+            result[6] = (byte) ((length >> 24) & 0x0FF);
+            result[7] = (byte) ((length >> 16) & 0x0FF);
+            result[8] = (byte) ((length >> 8) & 0x0FF);
+            result[9] = (byte) ((length) & 0x0FF);
         }
 
         // Insert payload
