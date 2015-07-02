@@ -16,7 +16,7 @@ for i in range(1,MAX+1):
     timeouts[i] = timeout
     print("Run number "+str(i)+" with timeout: " + str(timeout))
     filename="C:/tmp/modes_run_"+str(i)+".txt"
-    cmd = "modes.exe go-back-n.modest -E \"N=9,TIMEOUT="+str(timeout)+"\" -R Uniform -N "+RUNS+" > "+filename
+    cmd = "modes.exe go-back-n.modest -E \"N=9,TIMEOUT="+str(timeout)+"\" --resolve-uniformly '{rdt_snd,rdt_rcv_s}' -N "+RUNS+" > "+filename
     print cmd
     os.system(cmd)
 
