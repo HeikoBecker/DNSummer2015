@@ -77,7 +77,7 @@ process Sender()
     int next_seqnum = 1; 			//initial the next sequence number is the current sequence number
     int retr_idx = 0;				//
     bool timer_on = false;			//flag to detect wether timer is running or not
-    clock retr_timer;				//clock for package timeout
+    var retr_timer; der(retr_timer) = 1; //clock for package timeout
     
 	 //work loop
     do {
@@ -90,6 +90,7 @@ process Sender()
                 		scpacket = packet { seqnum: next_seqnum, data: usdata }, //generate the packet
                 		packets = append(packets, packet { seqnum: next_seqnum, data: usdata }), //scpacket),							//enqueue the packet
                 		timer_on = true,														//start the timer
+                        retr_timer = (timer_on) ? retr_timer : 0,
                 		next_seqnum++															//next sequence number must be incremented
             		=};
             urgent udt_snd_s_done	//Finish sending
@@ -97,10 +98,10 @@ process Sender()
         // receive data from lower layer
         :: urgent rdt_rcv_s;
            	urgent tau {=
-                packets = remove(packets, (cspacket.seqnum + 1) - send_base), //Remove ACked packet
-                send_base = cspacket.seqnum + 1,										//We received an ACK --> set window base to ACKed number + 1
-                timer_on = (next_seqnum - (cspacket.seqnum + 1) > 0),			//The timer continues if there are still packages in flight
-                retr_timer = 0																//Reset timer to 0
+                packets = remove(packets, (cspacket.seqnum + 1) - send_base),   //Remove ACKed packet
+                send_base = cspacket.seqnum + 1,                                //We received an ACK --> set window base to ACKed number + 1
+                timer_on = (next_seqnum - (cspacket.seqnum + 1) > 0),           //The timer continues if there are still packages in flight
+                retr_timer = 0                                                  //Reset timer to 0
             =}
 			//If the timer runs and the clock value is greater than the TIMEOUT value
         :: when urgent (timer_on && (retr_timer >= TIMEOUT)) 
