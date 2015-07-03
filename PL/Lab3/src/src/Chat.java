@@ -1,8 +1,6 @@
 import java.io.IOException;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.net.Socket;
+import java.util.*;
 
 /*
  * Global Chat Server instance.
@@ -14,13 +12,14 @@ public class Chat {
     //maximal age in milliseconds, currently 5 minutes
     private static final long MAXAGE = 5 * 1000; 
 	private static Chat instance = null;
+    public static final int DEFAULT_PORT = 42015;
 
-	/*
-	 * Cleanup Task removing all messages that are older than MAXAGE minutes.
-	 * 
-	 * Here we derive from the specification as explained in
-	 * https://dcms.cs.uni-saarland.de/dn/forum/viewtopic.php?f=3&t=109
-	 */
+    /*
+     * Cleanup Task removing all messages that are older than MAXAGE minutes.
+     *
+     * Here we derive from the specification as explained in
+     * https://dcms.cs.uni-saarland.de/dn/forum/viewtopic.php?f=3&t=109
+     */
     private class Cleaner extends TimerTask {
 
 		@Override
@@ -43,6 +42,8 @@ public class Chat {
     // Message ID -> Collection of outstanding acknowledgements
     private HashMap<String, OutstandingAcknowledgements> outstandingAcks = new HashMap<>();
 
+    private LinkedList<Server> federationServers = new LinkedList<>();
+
     private Timer timer;
     
     private Chat() {
@@ -58,6 +59,13 @@ public class Chat {
 
         return instance;
     }
+
+
+    // ----------------- FEDERATION -----------------
+    public void addFederationServer(Server server) throws IOException {
+        federationServers.add(server);
+    }
+
 
     // ----------------- COLLISION CHECKS -----------------
 

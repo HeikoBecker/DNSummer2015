@@ -1,18 +1,22 @@
 import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.net.Socket;
 import java.util.Scanner;
 
 public class Main {
-    public static void main(String[] args) throws IOException {
+
+
+    public static void main(String[] args) throws IOException, InterruptedException {
         System.out.println("dnChat is getting started!");
-        int port = 42015;
+        int listenPort = Chat.DEFAULT_PORT;
         if(args.length > 0) {
-            port = Integer.parseInt(args[0]);
+            listenPort = Integer.parseInt(args[0]);
         }
 
-        Thread wt = new Thread(new WelcomeThread(port));
+        Thread wt = new Thread(new WelcomeThread(listenPort));
         wt.setDaemon(true);
         wt.start();
-        System.out.println("Type in \"exit\" to stop the server.");
+        System.out.println("Type in \"exit\" to stop the server or \"connect <host> [port]\" to connect to another server.");
 
         Scanner sc = new Scanner(System.in);
         while(sc.hasNextLine()) {
@@ -20,9 +24,29 @@ public class Main {
             if (line.equals("exit")) {
                 break;
             }
+            if(line.startsWith("connect")) {
+                connect(line);
+            }
         }
         wt.interrupt();
         // Close Scanner to avoid resource leak
         sc.close();
+    }
+
+    private static void connect(String line) throws IOException, InterruptedException {
+        String[] parts = line.split(" ");
+        if(!(parts.length == 2 || parts.length == 3)) {
+            System.out.println("Please enter a command of the form \"connect <host> [port]\".");
+            return;
+        }
+
+        int connectPort = Chat.DEFAULT_PORT;
+        if(parts.length == 3) {
+            connectPort = Integer.parseInt(parts[2]);
+        }
+
+        Thread ct = new Thread(new ConnectionThread(parts[1], connectPort));
+        ct.setDaemon(true);
+        ct.start();
     }
 }

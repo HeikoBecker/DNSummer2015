@@ -19,7 +19,7 @@ public class Peer {
 
     public Message initialize() throws IOException {
         try {
-            if (websocket.handshake()) {
+            if (websocket.awaitHandshake()) {
                 Message websocketMessage = this.websocket.getWebsocketMessage();
                 if (websocketMessage == null) {
                     exit();
@@ -33,21 +33,16 @@ public class Peer {
     }
 
     public void run() throws IOException {
-        try {
-            while (!websocket.isClosed()) {
-                // Let new message execute, resp. send messages on socket
-                Message websocketMessage = this.websocket.getWebsocketMessage();
-                if (websocketMessage == null) {
-                    exit();
-                    break;
-                }
-                websocketMessage.execute(this);
+        while (!websocket.isClosed()) {
+            // Let new message execute, resp. send messages on socket
+            Message websocketMessage = this.websocket.getWebsocketMessage();
+            if (websocketMessage == null) {
+                exit();
+                break;
             }
-        } catch (SocketException e) {
-            System.out.println(e.getMessage());
-        } finally {
-            exit();
+            websocketMessage.execute(this);
         }
+        exit();
     }
 
     // ----------------- EMIT METHODS TO FORWARD TO SOCKET -----------------
@@ -83,6 +78,10 @@ public class Peer {
         throw new NotImplementedException();
     }
 
+    public void connect(String host) throws IOException, InterruptedException {
+        throw new NotImplementedException();
+    }
+
     public void exit() throws IOException {
         throw new NotImplementedException();
     }
@@ -95,6 +94,4 @@ public class Peer {
             System.out.println("[P] " + msg);
         }
     }
-
-
 }
