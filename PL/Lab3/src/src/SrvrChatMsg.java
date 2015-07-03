@@ -8,6 +8,6 @@ public class SrvrChatMsg extends Message {
 
     @Override
     public void execute(Peer peer) throws IOException {
-        peer.identifyAsServer();
+
     }
 }

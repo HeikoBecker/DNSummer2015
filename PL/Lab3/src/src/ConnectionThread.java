@@ -30,7 +30,6 @@ public class ConnectionThread extends Thread {
             } else {
                 peer = new Client(peer);
             }
-            System.out.println(msg);
             msg.execute(peer);
             peer.run();
         } catch (IOException e) {

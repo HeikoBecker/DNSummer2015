@@ -8,7 +8,6 @@ import java.security.NoSuchAlgorithmException;
 public class Peer {
     // Network Level
     protected WebSocket websocket;
-    private boolean server;
 
     public Peer() {
         websocket = null;
@@ -49,15 +48,6 @@ public class Peer {
         } finally {
             exit();
         }
-    }
-
-    // ----------------- SERVER / CLIENT DISCRIMINATION -----------------
-    public void identifyAsServer() {
-        this.server = true;
-    }
-
-    public boolean isServer() {
-        return this.server;
     }
 
     // ----------------- EMIT METHODS TO FORWARD TO SOCKET -----------------
