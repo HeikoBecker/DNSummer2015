@@ -1,4 +1,8 @@
 ﻿/*
+
+	For our model we implemented the FSM specification of the sender and receiver for
+	Go-Back-N from slideset 10 slides 26 and 27.
+
     mosta go-back-n.modest -X -S -E -O out.dot -D png out.png --no-invariants
     modes go-back-n.modest -E "N=9" --resolve-uniformly "{rdt_snd,rdt_rcv_s}"
     
@@ -43,14 +47,14 @@ const int ACK_PROP_DELAY = 10; // average propagation delay of an acknowledgment
 // Basic error checking: ProbError should be 0 and DeliveredPackets should be PKT_COUNT
 bool hasError;
 bool lastDelivered;
-int deliveredPacketCount;
+int deliveredPacketCount; //Added for b)
 property ProbError = Pmax(<> (hasError || lastDelivered && deliveredPacketCount != PKT_COUNT));
 property DeliveredPackets = Xmax(deliveredPacketCount | lastDelivered);
 
 clock totalTime;
 int retransmits;
 
-// Properties
+// Properties, added for b)
 property TotalTime = Xmax(totalTime | lastDelivered);
 property Retransmissions = Xmax(retransmits | lastDelivered);
 
@@ -67,6 +71,7 @@ process UpperLayerSender()
 }
 
 // RDT implementation on sender side
+//Implementation of FSM for Go-Back-N sender, slideset 10, slide 26.
 const int TIMEOUT = 30; // sender timeout
 int usdata; // data buffer from upper layer to sender
 packet cspacket; // data buffer from channel to sender
@@ -190,6 +195,7 @@ process ChannelRS()
 }
 
 // RDT implementation on receiver side
+//Implementation of FSM for Go-Back-N receiver, slideset 10, slide 27.
 packet crpacket; // data buffer from channel to receiver
 process Receiver()
 {
