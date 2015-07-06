@@ -68,9 +68,9 @@ public class WebSocket {
     public boolean awaitHandshake() throws IOException, NoSuchAlgorithmException, InterruptedException {
         log("Awaiting handshake.");
 
-        HTTPMsg clientHandshake = parser.getHTTPMessage();
+        HTTPMsg clientHandshake = parser.getHTTPMessage(false);
         PrintWriter pr = new PrintWriter(this.peerSocket.getOutputStream(), true);
-        if (clientHandshake.isInvalid() || !clientHandshake.Type.equals("Handshake")) {
+        if ((clientHandshake.isInvalid() && clientHandshake.isHostSet()) || !clientHandshake.Type.equals("Handshake")) {
             String serverReply = createInvReply();
             pr.print(serverReply);
             pr.flush();
@@ -99,7 +99,8 @@ public class WebSocket {
      */
     private static String createHandshakeResponseMessage(HTTPMsg clientHandshake) throws NoSuchAlgorithmException, UnsupportedEncodingException {
         return "HTTP/1.1 101 Switching Protocols\n"
-                + "Upgrade: websocket\n" + "Connection: Upgrade\n"
+                + "Upgrade: websocket\n"
+                + "Connection: Upgrade\n"
                 + "Sec-WebSocket-Accept: " + WebSocket.getSecToken(clientHandshake.getWebSocketKey()) + "\r\n\r\n";
     }
 
@@ -133,7 +134,7 @@ public class WebSocket {
         pr.flush();
 
         // used to read the response
-        parser.getHTTPMessage(); // TODO: ensure that the peer responded correctly
+        HTTPMsg msg = parser.getHTTPMessage(true); // TODO: ensure that the peer responded correctly
         log("Handshake completed.");
     }
 

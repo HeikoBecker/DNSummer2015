@@ -19,6 +19,7 @@ public class MsgParser {
     private static final String ORIGIN = "Origin";
     private static final String SECWSEXT = "Sec-WebSocket-Extensions";
     private static final String SECWSKEY = "Sec-WebSocket-Key";
+    private static final String SECWSACCEPT = "Sec-WebSocket-Accept";
     private static final String CONN = "Connection";
     private static final String PRAGMA = "Pragma";
     private static final String CC = "Cache-Control";
@@ -42,7 +43,7 @@ public class MsgParser {
                 new DataInputStream(is)));
     }
 
-    public HTTPMsg getHTTPMessage() throws IOException, InterruptedException {
+    public HTTPMsg getHTTPMessage(boolean isResponse) throws IOException, InterruptedException {
         String input;
         String[] lines;
         HTTPMsg msg = new HTTPMsg();
@@ -51,15 +52,15 @@ public class MsgParser {
         input = inputBuffer.readLine();
         // Check the first line to be equal to "GET / HTTP/1.1" otherwise
         // this cannot be a valid request
-        if (!input.equals(MsgParser.GET)) {
-            msg.invalid = true;
+        if (!input.equals(MsgParser.GET) && !isResponse) {
+            msg.setInvalid();
             return msg;
         }
-        msg.isCorrectProtocol = true;
+        msg.setCorrectProtocol();
 
         while (inputBuffer.ready()) {
             //Finish loop earlier if we already had a failure
-            if (msg.invalid)
+            if (msg.isInvalid())
                 break;
             input = inputBuffer.readLine();
             lines = input.split(MsgParser.SPLIT);
@@ -67,7 +68,7 @@ public class MsgParser {
             switch (key) {
                 //Duplicate GET --> Failure, may come from browser accessing
                 case MsgParser.GET:
-                    msg.invalid = true;
+                    msg.setInvalid();
                     break;
                 // Upgrade Key check
                 case MsgParser.UPG:
@@ -77,7 +78,7 @@ public class MsgParser {
                         msg.Type = "Handshake";
                     } else {
                         log("Invalid Upgrade");
-                        msg.invalid = true;
+                        msg.setInvalid();
                     }
                     break;
                 //Sec-WebSocket-Key field, must be 16 bytes in length when base64-decoded (4.2.1 5.)
@@ -105,7 +106,7 @@ public class MsgParser {
                             ok = true;
                     }
                     if (!ok) {
-                        msg.invalid = true;
+                        msg.setInvalid();
                         log("Invalid Connection Request: " + lines[1]);
                     }
                     break;
@@ -114,9 +115,11 @@ public class MsgParser {
                     if (lines[1].equals("13")) {
                         break;
                     } else {
-                        msg.invalid = true;
+                        msg.setInvalid();
                         log("Invalid SecWSVersion");
                     }
+                    break;
+                case SECWSACCEPT:
                     break;
                 //Optional, unchecked fields, ignored as stated in forum
                 case MsgParser.USRAGENT:
@@ -133,7 +136,7 @@ public class MsgParser {
                 //Dead Code, Only for debugging
                 default:
                     log("Unhandled key: " + key);
-                    msg.invalid = true;
+                    msg.setInvalid();
                     break;
             }
         }

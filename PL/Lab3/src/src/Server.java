@@ -1,3 +1,5 @@
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
+
 import java.io.IOException;
 import java.net.Socket;
 
@@ -13,5 +15,11 @@ public class Server extends Peer {
     public void connect(String host) throws IOException, InterruptedException {
         this.websocket.executeHandshake(host);
         this.emit("SRVR", "0");
+    }
+
+    @Override
+    public void exit() throws IOException {
+        System.out.println("SERVER EXITING");
+        throw new NotImplementedException();
     }
 }

@@ -29,6 +29,8 @@ public class Main {
             }
         }
         wt.interrupt();
+        // TODO: close all connection threads to other servers
+
         // Close Scanner to avoid resource leak
         sc.close();
     }
@@ -45,8 +47,7 @@ public class Main {
             connectPort = Integer.parseInt(parts[2]);
         }
 
-        Thread ct = new Thread(new ConnectionThread(parts[1], connectPort));
-        ct.setDaemon(true);
+        ConnectionThread ct = new ConnectionThread(parts[1], connectPort);
         ct.start();
     }
 }

@@ -5,9 +5,9 @@ import java.util.Base64;
 public class HTTPMsg extends Message {
     public String WebSocketExtensions;
     private String WebSocketKey;
-    public boolean isCorrectProtocol;
+    private boolean isCorrectProtocol;
 	public boolean hostSet;
-	public boolean invalid;
+	private boolean invalid;
 
 	public HTTPMsg(){
 		this.Type = "http-Handshake";
@@ -26,7 +26,7 @@ public class HTTPMsg extends Message {
 		//4.2.1 5.
 		if (decoded.length == 16){
 			this.WebSocketKey = wskey;
-		}else{
+		} else {
 			this.invalid = true;
 		}
 	}
@@ -36,6 +36,18 @@ public class HTTPMsg extends Message {
 	}
 	
 	public boolean isInvalid(){
-		return invalid || !hostSet || !isCorrectProtocol; 
+		return invalid || !isCorrectProtocol;
 	}
+
+	public void setInvalid() {
+		this.invalid = true;
+	}
+
+	public boolean isHostSet() {
+		return hostSet;
+	}
+
+    public void setCorrectProtocol() {
+        isCorrectProtocol = true;
+    }
 }

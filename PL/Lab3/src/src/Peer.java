@@ -13,8 +13,8 @@ public class Peer {
         websocket = null;
     }
 
-    public Peer(Socket clientSocket) throws IOException {
-        this.websocket = new WebSocket(clientSocket);
+    public Peer(Socket peerSocket) throws IOException {
+        this.websocket = new WebSocket(peerSocket);
     }
 
     public Message initialize() throws IOException {
@@ -37,7 +37,6 @@ public class Peer {
             // Let new message execute, resp. send messages on socket
             Message websocketMessage = this.websocket.getWebsocketMessage();
             if (websocketMessage == null) {
-                exit();
                 break;
             }
             websocketMessage.execute(this);

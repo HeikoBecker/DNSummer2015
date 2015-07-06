@@ -10,7 +10,7 @@ import java.net.Socket;
 public class ConnectionThread extends Thread {
     private final boolean DEBUG = false;
 
-    Peer peer;
+    private Peer peer;
 
     public ConnectionThread(Socket peerSocket) throws IOException {
         if (DEBUG) {

@@ -41,6 +41,8 @@ public class ChatMsgCodec {
                     return new InvdMsg();
                 }
                 return new AcknChatMsg(id);
+            case "SRVR":
+                return new SrvrChatMsg();
             default:
                 return new InvdMsg();
         }
