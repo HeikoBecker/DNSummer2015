@@ -10,9 +10,11 @@ RUNS=sys.argv[2]
 totalTimes = {}
 retransmissions = {}
 
+os.mkdir("tmp")
+
 for i in range(1,MAX+1):
     print("Run number "+str(i))
-    filename="/tmp/modes_run_"+str(i)+".txt"
+    filename="tmp/modes_run_"+str(i)+".txt"
     os.system("modes.exe go-back-n.modest -E \"N="+str(i)+"\" --resolve-uniformly '{rdt_snd,rdt_rcv_s}' -N "+RUNS+" > "+filename)
 
     print ("Parsing") 
