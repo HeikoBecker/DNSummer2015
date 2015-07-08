@@ -118,7 +118,7 @@ the channels capacity and furthermore see results when going beyond the channel 
 The table shows that with increasing N, the number of retransmissions that are necessary increases.
 For increasing N, the total time first decreases until N=9 and then starts to increase again.
 This may be due to a larger N leading to more packets in flight, which means that statistically more packets
-can be dropped.
+can be dropped by the receiver as they do not arrive in order. This is caused by an intermediate packet not being delivered.
 
 Therefore we see it as reasonable to use the N=9 as this gives the least value for TotalRuntime.
 For a fixed number of packets, that are send (128, per default in the model file) N=9 gives the best possible
