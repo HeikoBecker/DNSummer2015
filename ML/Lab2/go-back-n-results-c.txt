@@ -1,6 +1,7 @@
 # Task ML2 / Part c
 
-To find a reasonable size for N, we wrote a python script to generate the output of the model.
+To find a reasonable size for N, we wrote a python script to generate the output of simulating 
+the model in a given range for N.
 The script we wrote is:
 
 ####################################### SCRIPT #######################################
@@ -76,10 +77,12 @@ The first argument of the script is the maximal N for which the model should be 
 We will refer to this value by MaxN.
 The second argument is the number of runs, that each computation should be done (the -N parameter)
 From N=1 to N=MaxN, for each value, the script simulates the "go-back-n.modest" model which must be in the
-same folder as the script, for the specified number of runs.
+same folder as the script, for the specified number of runs with the modes.exe.
+modes.exe must be inside the systems path for executables.
 
 We decided that a range from 1 to MaxN=20 seems reasonable, as this also captures values of N that go beyond
 the size of the queue, which is 16.
+Therefore we would also be able to spot, wether it may be reasonable to increase N beyond the queue size.
 The script generates the following table (called with testC.py 20 1000):
 
 Run Nr   || TotalTime       || Retransmissions
@@ -104,11 +107,10 @@ Run Nr   || TotalTime       || Retransmissions
 19       || 1889.41027557   || 401.325
 20       || 1895.33146042   || 421.8898
 
-The script computed the following:
+The script computed the following result:
 For N=9 minimal time can be achieved as 1553.45433007
 
-We fixed the number of runs to 1000 as this seems to be large enough to get reasonable values and
-with the script automation, no additional work was involved.
+We fixed the number of runs to 1000 as this seems to be large enough to get reasonable values.
 The channel capacity is 16.
 As explained before, we initially tried the range from 1 to 20 to have every possible number inside
 the channels capacity and furthermore see results when going beyond the channel capacity.
@@ -118,8 +120,9 @@ For increasing N, the total time first decreases until N=9 and then starts to in
 This may be due to a larger N leading to more packets in flight, which means that statistically more packets
 can be dropped.
 
-Therefore we see it as reasonable to use the N=9 as the number of retransmissions only slightly increases until
-this value and starts to increase faster after reaching N=10.
+Therefore we see it as reasonable to use the N=9 as this gives the least value for TotalRuntime.
+For a fixed number of packets, that are send (128, per default in the model file) N=9 gives the best possible
+throughput.
 
 To increase our belief in the results we got, we started another simulation run with MaxN=40 and 5000 runs:
 
@@ -164,8 +167,8 @@ Run Nr  || TotalTime            || Retransmissions
 38      ||1870.65036852463      ||745.052399999997
 39      ||1872.68469243932      ||761.402400000001
 40      ||1857.52585428567      ||772.721000000001
-For N=9 minimal time can be achieved as 1556.04942788235
-For N=1 minimal retransmissions can be achieved as 65.1389999999998
 
-As before, the number of retransmissions is permanently increasing, while minimal TotalTime
-can again be achieved with N=9, which was our previous result too.
+The script computed the results:
+For N=9 minimal time can be achieved as 1556.04942788235
+
+As before, minimal TotalTime can again be achieved with N=9, which was our previous result too.
