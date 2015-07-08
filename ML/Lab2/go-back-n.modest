@@ -117,7 +117,10 @@ process Sender()
                     urgent udt_snd_s
                     {= 
                         scpacket = at(packets, retr_idx),           //resend the packet
-                        retransmits++,                              //count the retransmits for b)
+			//count the retransmits for b)
+			//as stated in https://dcms.cs.uni-saarland.de/dn/forum/viewtopic.php?f=3&t=150 
+			//each resend packet is counted as a retransmit
+                        retransmits++,
                         retr_idx++								    //increment to resend next packet
                     =}; 
                     urgent udt_snd_s_done	//event: sending finished
