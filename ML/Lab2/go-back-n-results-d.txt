@@ -1,9 +1,8 @@
 # Task ML2 / Part d
 
-In order to find out how TIMEOUT is affecting the model, we again wrote a script to compute some reference values. The script is the following:
+In order to find out how TIMEOUT is affecting the model, we again wrote a python3 script to compute some reference values. The script is the following:
 
 ####################################### SCRIPT #######################################
-
 #!/usr/bin/python
 
 import sys
@@ -17,7 +16,11 @@ totalTimes = {}
 timeouts = {}
 retransmissions = {}
 
-os.mkdir("tmp")
+try:
+    os.mkdir("tmp")
+except FileExistsError as exc: # Python >2.5
+    pass
+
 
 for i in range(1,MAX+1):
     timeout = i * 5 + 10
@@ -26,7 +29,7 @@ for i in range(1,MAX+1):
     
     filename="tmp/modes_run_"+str(i)+".txt"
     cmd = "modes.exe go-back-n.modest -E \"N=9,TIMEOUT="+str(timeout)+"\" --resolve-uniformly '{rdt_snd,rdt_rcv_s}' -N "+RUNS+" > "+filename
-    print cmd
+    print (cmd)
     os.system(cmd)
 
     print ("Parsing") 
@@ -73,7 +76,6 @@ for i in totalTimes.keys():
 
 print ("For N="+str(runTimes)+ " minimal time can be achieved as "+ str(minimumTime))
 print ("For N="+str(runRet) + " minimal retransmissions can be achieved as "+str(minimumRetrans))
-
 ####################################### EVALUATION #######################################
 
 The first argument of the script is the maximal index i for calculating a TIMEOUT for which the model should be evaluated. ( -E 'TIMEOUT=...'). The TIMEOUT is calculated as follows:

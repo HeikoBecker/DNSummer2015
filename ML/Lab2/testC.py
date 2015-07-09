@@ -10,7 +10,10 @@ RUNS=sys.argv[2]
 totalTimes = {}
 retransmissions = {}
 
-os.mkdir("tmp")
+try:
+    os.mkdir("tmp")
+except FileExistsError as exc: # Python >2.5
+    pass
 
 for i in range(1,MAX+1):
     print("Run number "+str(i))

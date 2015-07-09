@@ -11,7 +11,11 @@ totalTimes = {}
 timeouts = {}
 retransmissions = {}
 
-os.mkdir("tmp")
+try:
+    os.mkdir("tmp")
+except FileExistsError as exc: # Python >2.5
+    pass
+
 
 for i in range(1,MAX+1):
     timeout = i * 5 + 10
@@ -20,7 +24,7 @@ for i in range(1,MAX+1):
     
     filename="tmp/modes_run_"+str(i)+".txt"
     cmd = "modes.exe go-back-n.modest -E \"N=9,TIMEOUT="+str(timeout)+"\" --resolve-uniformly '{rdt_snd,rdt_rcv_s}' -N "+RUNS+" > "+filename
-    print cmd
+    print (cmd)
     os.system(cmd)
 
     print ("Parsing") 

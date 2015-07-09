@@ -1,11 +1,10 @@
 # Task ML2 / Part c
 
-To find a reasonable size for N, we wrote a python script to generate the output of simulating 
+To find a reasonable size for N, we wrote a python3 script to generate the output of simulating 
 the model in a given range for N.
 The script we wrote is:
 
 ####################################### SCRIPT #######################################
-
 #!/usr/bin/python
 
 import sys
@@ -18,7 +17,10 @@ RUNS=sys.argv[2]
 totalTimes = {}
 retransmissions = {}
 
-os.mkdir("tmp")
+try:
+    os.mkdir("tmp")
+except FileExistsError as exc: # Python >2.5
+    pass
 
 for i in range(1,MAX+1):
     print("Run number "+str(i))
@@ -69,8 +71,6 @@ for i in totalTimes.keys():
 
 print ("For N="+str(runTimes)+ " minimal time can be achieved as "+ str(minimumTime))
 print ("For N="+str(runRet) + " minimal retransmissions can be achieved as "+str(minimumRetrans))
-
-
 ####################################### EVALUATION #######################################
 
 The first argument of the script is the maximal N for which the model should be evaluated. ( -E N=...)
