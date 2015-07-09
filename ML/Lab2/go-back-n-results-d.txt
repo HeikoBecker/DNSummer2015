@@ -1,0 +1,121 @@
+# Task ML2 / Part d
+
+In order to find out how TIMEOUT is affecting the model, we again wrote a python3 script to compute some reference values. The script is the following:
+
+####################################### SCRIPT #######################################
+#!/usr/bin/python
+
+import sys
+import os
+import string
+
+MAX=int(sys.argv[1])
+RUNS=sys.argv[2]
+
+totalTimes = {}
+timeouts = {}
+retransmissions = {}
+
+try:
+    os.mkdir("tmp")
+except FileExistsError as exc: # Python >2.5
+    pass
+
+
+for i in range(1,MAX+1):
+    timeout = i * 5 + 10
+    timeouts[i] = timeout
+    print("Run number "+str(i)+" with timeout: " + str(timeout))
+    
+    filename="tmp/modes_run_"+str(i)+".txt"
+    cmd = "modes.exe go-back-n.modest -E \"N=9,TIMEOUT="+str(timeout)+"\" --resolve-uniformly '{rdt_snd,rdt_rcv_s}' -N "+RUNS+" > "+filename
+    print (cmd)
+    os.system(cmd)
+
+    print ("Parsing") 
+
+    result = open(filename, 'r')
+    TotalTime = False
+    Retransmissions = False
+    for line in result:
+        if TotalTime:
+            if "Mean" in line:
+                values = line.split(":")
+                print ("TotalTime for run " +str(i)+":")
+                print (values[1])
+                TotalTime = False
+                totalTimes[i] = float(values[1])
+        if Retransmissions:
+            if "Mean" in line:
+                values = line.split(":")
+                print ("Retransmissions for run " +str(i)+":")
+                print (values[1])
+                Retransmissions = False
+                retransmissions[i] = float(values[1])
+        if "Property TotalTime" in line:
+            TotalTime = True
+        if "Property Retransmissions" in line:
+            Retransmissions = True
+
+runTimes = 1
+minimumTime = totalTimes[runTimes]
+runRet = 1
+minimumRetrans = retransmissions[runRet]
+
+print ("Run Timeout\t|| TotalTime \t\t|| Retransmissions")
+for i in totalTimes.keys():
+    if (minimumTime > totalTimes[i]):
+        minimumTime = totalTimes[i]
+        runTimes = i
+    if (minimumRetrans > retransmissions[i]):
+        minimumRetrans = retransmissions[i]
+        runRet=i
+    timeStr = str(totalTimes[i]).replace("\n","") + "\t"
+    retransStr = str(retransmissions[i]).replace("\n","")
+    print (str(timeouts[i])+"\t||"+ timeStr+"||"+retransStr)
+
+print ("For N="+str(runTimes)+ " minimal time can be achieved as "+ str(minimumTime))
+print ("For N="+str(runRet) + " minimal retransmissions can be achieved as "+str(minimumRetrans))
+####################################### EVALUATION #######################################
+
+The first argument of the script is the maximal index i for calculating a TIMEOUT for which the model should be evaluated. ( -E 'TIMEOUT=...'). The TIMEOUT is calculated as follows:
+timeout = i * 5 + 10
+
+Thereby we are getting steps of 5 time unit timeouts.
+
+We take N=9 from part c), as we found out that it is the optimal solution in terms of throughput. (compare https://dcms.cs.uni-saarland.de/dn/forum/viewtopic.php?f=3&t=136)
+
+The second argument is the number of runs, that each computation should be done (the -N parameter).
+
+To run the script, in the file go-back-n.modest, the assignment int TIMEOUT = 30; must be changed to int TIMEOUT;
+to make it a model parameter, that can be assigned by the script as a command line parameter.
+
+It yielded the following values, when run with MAX=15 and RUNS=5000:
+
+Run Timeout  || TotalTime       || Retransmissions
+15           || 1228.83558685   || 369.0124
+20           || 1283.7583383    || 242.8576
+25           || 1404.41169603   || 188.4514
+30           || 1567.20247483   || 163.3022
+35           || 1716.1287856    || 148.0682
+40           || 1854.85543433   || 138.9086
+45           || 1977.8135624    || 133.1734
+50           || 2103.014029     || 130.3778
+55           || 2205.95805771   || 127.9768
+60           || 2305.08717111   || 126.8844
+65           || 2386.88847784   || 125.5354
+70           || 2477.11102596   || 125.0394
+75           || 2534.91204075   || 123.4504
+80           || 2629.8619055    || 124.2386
+85           || 2703.47160551   || 124.1166
+
+For TIMEOUT=15 minimal time can be achieved as 1228.83558685
+For TIMEOUT=85 minimal retransmissions can be achieved as 123.4504
+
+
+####################################### OPTIMIZATION #######################################
+In general, we think that choosing the right value is a design decision that has to be made by the protocol developers and operators.
+
+It is not possible to find the best solution for maximal throughput and minimal number of retransmits. This is due to the fact, that with increasing timeout, the time needed to send all packets increases (respectively reducing throughput) and the number of retransmits decreases. While the former increases linearly, the latter decreases logarithmically.
+
+We plotted the series and found out that for a timeout 45 seconds, we have saved 30 retransmits and only need 400 time units more. At this point, further increasing the timeout will not lead to more significant drops in the number of retransmits, but the time will still increase linearly. Therefore, we recommend this as a good tradeoff between high throughput and low number of retransmits.

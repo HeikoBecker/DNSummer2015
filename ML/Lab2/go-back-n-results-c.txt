@@ -1,0 +1,174 @@
+# Task ML2 / Part c
+
+To find a reasonable size for N, we wrote a python3 script to generate the output of simulating 
+the model in a given range for N.
+The script we wrote is:
+
+####################################### SCRIPT #######################################
+#!/usr/bin/python
+
+import sys
+import os
+import string
+
+MAX=int(sys.argv[1])
+RUNS=sys.argv[2]
+
+totalTimes = {}
+retransmissions = {}
+
+try:
+    os.mkdir("tmp")
+except FileExistsError as exc: # Python >2.5
+    pass
+
+for i in range(1,MAX+1):
+    print("Run number "+str(i))
+    filename="tmp/modes_run_"+str(i)+".txt"
+    os.system("modes.exe go-back-n.modest -E \"N="+str(i)+"\" --resolve-uniformly '{rdt_snd,rdt_rcv_s}' -N "+RUNS+" > "+filename)
+
+    print ("Parsing") 
+
+    result = open(filename, 'r')
+    TotalTime = False
+    Retransmissions = False
+    for line in result:
+        if TotalTime:
+            if "Mean" in line:
+                values = line.split(":")
+                print ("TotalTime for run " +str(i)+":")
+                print (values[1])
+                TotalTime = False
+                totalTimes[i] = float(values[1])
+        if Retransmissions:
+            if "Mean" in line:
+                values = line.split(":")
+                print ("Retransmissions for run " +str(i)+":")
+                print (values[1])
+                Retransmissions = False
+                retransmissions[i] = float(values[1])
+        if "Property TotalTime" in line:
+            TotalTime = True
+        if "Property Retransmissions" in line:
+            Retransmissions = True
+
+runTimes = 1
+minimumTime = totalTimes[runTimes]
+runRet = 1
+minimumRetrans = retransmissions[runRet]
+
+print ("Run Nr\t|| TotalTime \t\t|| Retransmissions")
+for i in totalTimes.keys():
+    if (minimumTime > totalTimes[i]):
+        minimumTime = totalTimes[i]
+        runTimes = i
+    if (minimumRetrans > retransmissions[i]):
+        minimumRetrans = retransmissions[i]
+        runRet=i
+    timeStr = str(totalTimes[i]).replace("\n","") + "\t"
+    retransStr = str(retransmissions[i]).replace("\n","")
+    print (str(i)+"\t||"+ timeStr+"||"+retransStr)
+
+print ("For N="+str(runTimes)+ " minimal time can be achieved as "+ str(minimumTime))
+print ("For N="+str(runRet) + " minimal retransmissions can be achieved as "+str(minimumRetrans))
+####################################### EVALUATION #######################################
+
+The first argument of the script is the maximal N for which the model should be evaluated. ( -E N=...)
+We will refer to this value by MaxN.
+The second argument is the number of runs, that each computation should be done (the -N parameter)
+From N=1 to N=MaxN, for each value, the script simulates the "go-back-n.modest" model which must be in the
+same folder as the script, for the specified number of runs with the modes.exe.
+modes.exe must be inside the systems path for executables.
+
+We decided that a range from 1 to MaxN=20 seems reasonable, as this also captures values of N that go beyond
+the size of the queue, which is 16.
+Therefore we would also be able to spot, wether it may be reasonable to increase N beyond the queue size.
+The script generates the following table (called with testC.py 20 1000):
+
+Run Nr   || TotalTime       || Retransmissions
+1        || 3996.3506721    || 65.2066
+2        || 2543.36043438   || 69.1818
+3        || 2104.50767907   || 80.8904
+4        || 1893.00238452   || 94.3992
+5        || 1759.83391004   || 107.2982
+6        || 1675.33150679   || 120.847
+7        || 1617.12176005   || 133.942
+8        || 1571.21854292   || 146.673
+9        || 1553.45433007   || 161.4348
+10       || 1581.9231385    || 182.3004
+11       || 1601.50736248   || 201.7444
+12       || 1613.43613688   || 220.7068
+13       || 1639.87262584   || 242.0618
+14       || 1661.57219279   || 263.4208
+15       || 1681.4642935    || 284.7654
+16       || 1696.55879411   || 304.4432
+17       || 1716.90882332   || 326.1726
+18       || 1865.67455639   || 375.4622
+19       || 1889.41027557   || 401.325
+20       || 1895.33146042   || 421.8898
+
+The script computed the following result:
+For N=9 minimal time can be achieved as 1553.45433007
+
+We fixed the number of runs to 1000 as this seems to be large enough to get reasonable values.
+The channel capacity is 16.
+As explained before, we initially tried the range from 1 to 20 to have every possible number inside
+the channels capacity and furthermore see results when going beyond the channel capacity.
+
+The table shows that with increasing N, the number of retransmissions that are necessary increases.
+For increasing N, the total time first decreases until N=9 and then starts to increase again.
+This may be due to a larger N leading to more packets in flight, which means that statistically more packets
+can be dropped by the receiver as they do not arrive in order. This is caused by an intermediate packet not being delivered.
+
+Therefore we see it as reasonable to use the N=9 as this gives the least value for TotalRuntime.
+For a fixed number of packets, that are send (128, per default in the model file) N=9 gives the best possible
+throughput.
+
+To increase our belief in the results we got, we started another simulation run with MaxN=40 and 5000 runs:
+
+Run Nr  || TotalTime            || Retransmissions
+1       ||3995.12204179858      ||65.1389999999998
+2       ||2542.95779531097      ||69.0716
+3       ||2108.12504809772      ||81.1117999999995
+4       ||1896.24249527341      ||94.7992000000002
+5       ||1762.80681501616      ||107.5818
+6       ||1675.97624764806      ||120.7762
+7       ||1615.0188367825       ||133.64
+8       ||1575.06726786124      ||147.038599999999
+9       ||1556.04942788235      ||161.862
+10      ||1576.05242940379      ||181.6192
+11      ||1599.07395231219      ||201.4538
+12      ||1621.62090836416      ||222.145000000001
+13      ||1634.54021471962      ||241.786600000001
+14      ||1667.65153971199      ||263.903
+15      ||1674.68439886606      ||283.496599999999
+16      ||1699.96393644214      ||304.7976
+17      ||1722.22913896717      ||327.4364
+18      ||1871.7465049768       ||378.1294
+19      ||1885.25976557693      ||400.409600000001
+20      ||1887.60079281155      ||420.0484
+21      ||1895.30664274986      ||441.351799999999
+22      ||1898.00340752202      ||461.986
+23      ||1891.47174640644      ||479.4672
+24      ||1895.35255787703      ||499.4546
+25      ||1890.44537714604      ||516.145800000002
+26      ||1885.96069219616      ||534.3092
+27      ||1887.10498662134      ||553.634599999995
+28      ||1889.67914676988      ||573.151600000003
+29      ||1888.46501161096      ||593.849000000002
+30      ||1882.3980081949       ||607.256199999999
+31      ||1878.72202553218      ||624.7012
+32      ||1873.50294771424      ||640.758199999999
+33      ||1876.36679959631      ||660.660199999999
+34      ||1874.39215595884      ||677.209600000002
+35      ||1874.40965709332      ||694.780800000001
+36      ||1873.03790911509      ||711.884399999998
+37      ||1867.81762279249      ||726.904400000001
+38      ||1870.65036852463      ||745.052399999997
+39      ||1872.68469243932      ||761.402400000001
+40      ||1857.52585428567      ||772.721000000001
+
+The script computed the results:
+For N=9 minimal time can be achieved as 1556.04942788235
+
+As before, minimal TotalTime can again be achieved with N=9, which was our previous result too.
