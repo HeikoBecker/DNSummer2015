@@ -14,7 +14,7 @@ public class Server extends Peer {
 
     public void connect(String host) throws IOException, InterruptedException {
         this.websocket.executeHandshake(host);
-        this.emit("SRVR", "0");
+        this.emit(true, "SRVR", "0");
     }
 
     @Override

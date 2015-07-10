@@ -30,7 +30,7 @@ public class WebSocket {
     public void close() {
         if (!isClosed()) {
             try {
-                this.emitFrame(FrameFactory.CloseFrame(0));
+                this.emitFrame(FrameFactory.CloseFrame(false, 0));
                 peerSocket.shutdownInput();
                 peerSocket.shutdownOutput();
                 peerSocket.close();
@@ -43,9 +43,9 @@ public class WebSocket {
     /*
      * Emitting a chat message, consisting of a command, an id and a list of additional lines.
      */
-    public void emit(String command, String id, String[] lines) throws IOException {
+    public void emit(boolean asClient, String command, String id, String[] lines) throws IOException {
         String message = ChatMsgCodec.encodeServerMessage(command, id, lines);
-        this.emitFrame(FrameFactory.TextFrame(message));
+        this.emitFrame(FrameFactory.TextFrame(asClient, message));
     }
 
     /*

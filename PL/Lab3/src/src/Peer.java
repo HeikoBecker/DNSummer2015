@@ -45,12 +45,12 @@ public class Peer {
     }
 
     // ----------------- EMIT METHODS TO FORWARD TO SOCKET -----------------
-    public void emit(String command, String id, String[] lines) throws IOException {
-        this.websocket.emit(command, id, lines);
+    public void emit(boolean asClient, String command, String id, String[] lines) throws IOException {
+        this.websocket.emit(asClient, command, id, lines);
     }
 
-    public void emit(String command, String id) throws IOException {
-        this.emit(command, id, new String[]{});
+    public void emit(boolean asClient, String command, String id) throws IOException {
+        this.emit(asClient, command, id, new String[]{});
     }
 
     public void emitFrame(byte[] frame) throws IOException {

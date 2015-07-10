@@ -8,7 +8,7 @@ public class InvdMsg extends Message {
 
     @Override
     public void execute(Peer peer) throws IOException {
-        peer.emit("INVD", "0");
+        peer.emit(false, "INVD", "0");
         peer.exit();
     }
 }

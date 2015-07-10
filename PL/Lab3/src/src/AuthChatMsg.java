@@ -24,17 +24,17 @@ public class AuthChatMsg extends Message {
     @Override
     public void execute(Peer peer) throws IOException {
         if (peer.isAuthenticated()) {
-            peer.emit("INVD", "0");
+            peer.emit(false, "INVD", "0");
             peer.exit();
         } else if (!this.validPassword) {
-            peer.emit("FAIL", this.Id, new String[]{"PASSWORD"});
+            peer.emit(false, "FAIL", this.Id, new String[]{"PASSWORD"});
         } else if (Chat.getInstance().isUserIdTaken(this.Id)) {
             // We only check for existing userIds and not messageIds, following the reference implementation.
-            peer.emit("FAIL", this.Id, new String[]{"NUMBER"});
+            peer.emit(false, "FAIL", this.Id, new String[]{"NUMBER"});
         } else if (Chat.getInstance().isNameTaken(name)) {
-            peer.emit("FAIL", this.Id, new String[]{"NAME"});
+            peer.emit(false, "FAIL", this.Id, new String[]{"NAME"});
         } else {
-            peer.emit("OKAY", this.Id);
+            peer.emit(false, "OKAY", this.Id);
             peer.authenticate(this.Id, this.name);
         }
     }

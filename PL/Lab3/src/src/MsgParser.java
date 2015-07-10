@@ -165,11 +165,14 @@ public class MsgParser {
                     break;
                 case 2:
                     // check if mask bit is not set. Then the client tries to send unmasked data.
-                    //This is forbidden according to the RFC
+                    // This is forbidden according to the RFC
                     // In this case we should cleanly close the connection.
                     boolean mask = (c & 0b10000000) == 0b10000000;
                     if (!mask)
+                    {
+                        log("Client not setting mask bit.");
                         return new CloseConnMsg();
+                    }
                     //otherwise continue
                     payloadlength = c & 0b01111111;
                     // T126 --> 7+16 bits (as unsigned integer?)

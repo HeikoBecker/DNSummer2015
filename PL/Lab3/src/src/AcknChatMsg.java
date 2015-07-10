@@ -13,10 +13,10 @@ public class AcknChatMsg extends Message {
     @Override
     public void execute(Peer peer) throws IOException {
         if (!peer.isAuthenticated()) {
-            peer.emit("INVD", "0");
+            peer.emit(false, "INVD", "0");
             peer.exit();
         } else if (!Chat.getInstance().isMessageIdOpenForAckn(this.Id, (Client) peer)) {
-            peer.emit("FAIL", this.Id, new String[]{"NUMBER"});
+            peer.emit(false, "FAIL", this.Id, new String[]{"NUMBER"});
         } else {
             peer.recvAcknChatMsg(this);
         }

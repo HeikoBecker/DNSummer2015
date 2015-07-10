@@ -61,7 +61,7 @@ public class Client extends Peer {
      * Emitting another client's message to the current client.
      */
     public void emitSendChatMsg(SendChatMsg msg, String senderId) throws IOException {
-        this.websocket.emit("SEND", msg.Id, new String[]{senderId, msg.getMessage()});
+        this.websocket.emit(false, "SEND", msg.Id, new String[]{senderId, msg.getMessage()});
         this.log("Received a message.");
     }
 
@@ -69,7 +69,7 @@ public class Client extends Peer {
      * Emitting another client's ackn message to the current client.
      */
     public void emitAcknChatMsg(AcknChatMsg msg, String senderId) throws IOException {
-        this.websocket.emit("ACKN", msg.Id, new String[]{senderId});
+        this.websocket.emit(false, "ACKN", msg.Id, new String[]{senderId});
         this.log("Received an ack.");
     }
 
@@ -78,7 +78,7 @@ public class Client extends Peer {
      * Sending an empty description string is ok, as stated here: https://dcms.cs.uni-saarland.de/dn/forum/viewtopic.php?f=3&t=132
      */
     public void emitArrvChatMsg(Client otherClient) throws IOException {
-        this.websocket.emit("ARRV", otherClient.getUserId(), new String[]{otherClient.getUserName(), ""});
+        this.websocket.emit(false, "ARRV", otherClient.getUserId(), new String[]{otherClient.getUserName(), ""});
         this.log("Received an arrv.");
     }
 
@@ -86,7 +86,7 @@ public class Client extends Peer {
      * Emitting that another client left to the current client.
      */
     public void emitLeftChatMsg(String otherClient) throws IOException {
-        this.websocket.emit("LEFT", otherClient, new String[]{});
+        this.websocket.emit(false, "LEFT", otherClient, new String[]{});
         this.log("Received a left.");
     }
 

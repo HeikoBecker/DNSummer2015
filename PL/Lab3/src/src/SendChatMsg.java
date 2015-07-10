@@ -29,20 +29,20 @@ public class SendChatMsg extends Message {
     @Override
     public void execute(Peer peer) throws IOException {
         if (!peer.isAuthenticated()) {
-            peer.emit("INVD", "0");
+            peer.emit(false, "INVD", "0");
             peer.exit();
         } else if (Chat.getInstance().isMessageIdTaken(this.Id)) {
             // We only check for existing messageIds and not userIds, following the reference implementation.
-            peer.emit("FAIL", this.Id, new String[]{"NUMBER"});
+            peer.emit(false, "FAIL", this.Id, new String[]{"NUMBER"});
         } else if (this.message.length() > 384) {
             /*
              * Note: The length limitation to 384 bytes is derived by reversing the reference implementation.
              * https://dcms.cs.uni-saarland.de/dn/forum/viewtopic.php?f=3&t=124: Appropriate 300 is OK hence 
              * this should work
              */
-            peer.emit("FAIL", this.Id, new String[]{"LENGTH"});
+            peer.emit(false, "FAIL", this.Id, new String[]{"LENGTH"});
         } else {
-            peer.emit("OKAY", this.Id);
+            peer.emit(false, "OKAY", this.Id);
             peer.recvSendChatMsg(this);
         }
     }
