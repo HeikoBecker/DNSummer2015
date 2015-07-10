@@ -1,3 +1,5 @@
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
+
 import java.io.IOException;
 import java.net.Socket;
 import java.util.*;
@@ -7,11 +9,11 @@ import java.util.*;
  * Aggregates information: Authenticated clients with ID, Messages and outstanding ACKs
  */
 public class Chat {
-	//Minutes to wait until cleanup occurs, in milliseconds, currently 1 minute
+    //Minutes to wait until cleanup occurs, in milliseconds, currently 1 minute
     private static final long CLEANTIME = 1 * 1000;
     //maximal age in milliseconds, currently 5 minutes
-    private static final long MAXAGE = 5 * 1000; 
-	private static Chat instance = null;
+    private static final long MAXAGE = 5 * 1000;
+    private static Chat instance = null;
     public static final int DEFAULT_PORT = 42015;
 
     /*
@@ -22,20 +24,20 @@ public class Chat {
      */
     private class Cleaner extends TimerTask {
 
-		@Override
-		public void run() {
-			synchronized (outstandingAcks){
-				for (String id : outstandingAcks.keySet() ){
-					OutstandingAcknowledgements acks = outstandingAcks.get(id); 
-					if (acks.getAge() + MAXAGE < System.currentTimeMillis()){
-						outstandingAcks.remove(id);
-					}
-				}
-			}
-		}
-    	
+        @Override
+        public void run() {
+            synchronized (outstandingAcks) {
+                for (String id : outstandingAcks.keySet()) {
+                    OutstandingAcknowledgements acks = outstandingAcks.get(id);
+                    if (acks.getAge() + MAXAGE < System.currentTimeMillis()) {
+                        outstandingAcks.remove(id);
+                    }
+                }
+            }
+        }
+
     }
-    
+
     // Client ID -> Client
     private HashMap<String, Client> clients = new HashMap<>();
 
@@ -45,11 +47,11 @@ public class Chat {
     private LinkedList<Server> federationServers = new LinkedList<>();
 
     private Timer timer;
-    
+
     private Chat() {
-    	//Start cleanup timer.
-    	timer = new Timer();
-    	timer.scheduleAtFixedRate(new Cleaner(), new Date(System.currentTimeMillis()+ Chat.CLEANTIME), Chat.CLEANTIME);
+        //Start cleanup timer.
+        timer = new Timer();
+        timer.scheduleAtFixedRate(new Cleaner(), new Date(System.currentTimeMillis() + Chat.CLEANTIME), Chat.CLEANTIME);
     }
 
     public static synchronized Chat getInstance() {
@@ -64,6 +66,12 @@ public class Chat {
     // ----------------- FEDERATION -----------------
     public void addFederationServer(Server server) throws IOException {
         federationServers.add(server);
+    }
+
+    public void receiveArrvBroadcast(ArrvChatMsg arrvChatMsg, Peer peer) {
+        clients.put(arrvChatMsg.Id, peer);
+
+        throw new NotImplementedException();
     }
 
 
@@ -98,19 +106,22 @@ public class Chat {
         String recipientName = msg.getRecipient();
         if (recipientName.equals("*")) {
             for (Client receivingClient : clients.values()) {
-                if (!receivingClient.equals(sendingClient)) {
+                if (!receivingClient.equals(sendingClient) && receivingClient.getHopCount() == 0) {
                     receivingClient.emitSendChatMsg(msg, sendingClient.getUserId());
                     storeMessage(msg.getId(), sendingClient.getUserId(), receivingClient.getUserId());
                 }
+                // TODO: broadcast to others that are more than 1 hop away
             }
         } else {
             Client receivingClient = clients.get(recipientName);
             receivingClient.emitSendChatMsg(msg, sendingClient.getUserId());
             storeMessage(msg.getId(), sendingClient.getUserId(), receivingClient.getUserId());
+            // TODO: broadcast to others that are more than 1 hop away
         }
     }
 
     public synchronized void emitAcknowledgement(AcknChatMsg msg, Client sendingClient) throws IOException {
+        // TODO: broadcast to others that are more than 1 hop away
         if (outstandingAcks.containsKey(msg.Id)) {
             String receiverId = sendingClient.getUserId();
             clients.get(outstandingAcks.get(msg.Id).getSenderId()).emitAcknChatMsg(msg, receiverId);
@@ -154,6 +165,11 @@ public class Chat {
             existingClient.emitArrvChatMsg(newClient);
             newClient.emitArrvChatMsg(existingClient);
         }
+
+        for (Server server : federationServers) {
+            server.sendArrv(newClient);
+        }
+
         clients.put(newClient.getUserId(), newClient);
     }
 
@@ -164,6 +180,10 @@ public class Chat {
         clients.remove(userId);
         for (Client existingClient : clients.values()) {
             existingClient.emitLeftChatMsg(userId);
+        }
+
+        for (Server server : federationServers) {
+            server.sendLeft(userId);
         }
     }
 }

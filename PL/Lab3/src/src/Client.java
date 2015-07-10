@@ -9,13 +9,16 @@ public class Client extends Peer {
     private String userId = "";
     private String userName;
     private boolean isAuthenticated = false;
+    private int hopCount = 0;
 
     public Client(Socket clientSocket) throws IOException {
         super(clientSocket);
+        this.websocket.setClient();
     }
 
     public Client(Peer peer) {
         this.websocket = peer.websocket;
+        this.websocket.setClient();
     }
 
     public String getUserId() {
@@ -77,7 +80,7 @@ public class Client extends Peer {
      * Emitting that another client arrived to the current client.
      * Sending an empty description string is ok, as stated here: https://dcms.cs.uni-saarland.de/dn/forum/viewtopic.php?f=3&t=132
      */
-    public void emitArrvChatMsg(Client otherClient) throws IOException {
+    public void emitArrvChatMsg(Peer otherClient) throws IOException {
         this.websocket.emit(false, "ARRV", otherClient.getUserId(), new String[]{otherClient.getUserName(), ""});
         this.log("Received an arrv.");
     }
@@ -131,5 +134,13 @@ public class Client extends Peer {
             String userId = (this.userId.equals("")) ? "UNAUTH" : this.userId;
             System.out.println("[C-" + userId + "] " + msg);
         }
+    }
+
+    public int getHopCount() {
+        return hopCount;
+    }
+
+    public void setHopCount(int hopCount) {
+        this.hopCount = hopCount;
     }
 }

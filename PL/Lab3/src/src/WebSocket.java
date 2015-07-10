@@ -14,6 +14,7 @@ public class WebSocket {
     private Socket peerSocket;
     MsgParser parser;
     private BufferedOutputStream bw;
+    private boolean isClient;
 
     public WebSocket(Socket peerSocket) throws IOException {
         try {
@@ -40,6 +41,10 @@ public class WebSocket {
         }
     }
 
+    public void setClient() {
+        isClient = true;
+    }
+
     /*
      * Emitting a chat message, consisting of a command, an id and a list of additional lines.
      */
@@ -61,7 +66,7 @@ public class WebSocket {
     }
 
     public Message getWebsocketMessage() throws IOException {
-        return parser.getWebsocketMessage();
+        return parser.getWebsocketMessage(isClient);
     }
 
 

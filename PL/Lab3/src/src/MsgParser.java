@@ -143,7 +143,7 @@ public class MsgParser {
         return msg;
     }
 
-    public Message getWebsocketMessage() throws IOException {
+    public Message getWebsocketMessage(boolean isClient) throws IOException {
         int count = 0;
         int c;
         Integer payloadlength = 125;
@@ -229,7 +229,7 @@ public class MsgParser {
                 return new CloseConnMsg(); // INV PAYLOAD DATA (Sec. 11.7, Page 64)
             case TEXT:
                 return ChatMsgCodec
-                        .decodeClientMessage(new String(payload, StandardCharsets.UTF_8));
+                        .decodeMessage(isClient, new String(payload, StandardCharsets.UTF_8));
             case CONNCLOSE:
                 return new CloseConnMsg();
             case PING:

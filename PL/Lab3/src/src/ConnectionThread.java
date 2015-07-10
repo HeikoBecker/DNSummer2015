@@ -22,6 +22,7 @@ public class ConnectionThread extends Thread {
         Message msg = peer.initialize();
         if (msg.getClass() == SrvrChatMsg.class) {
             peer = new Server(peer);
+            Chat.getInstance().addFederationServer((Server) peer);
         } else {
             peer = new Client(peer);
         }
