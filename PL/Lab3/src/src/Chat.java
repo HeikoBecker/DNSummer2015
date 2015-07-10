@@ -69,8 +69,6 @@ public class Chat {
     }
 
     public void receiveArrvBroadcast(ArrvChatMsg arrvChatMsg, Peer peer) {
-        clients.put(arrvChatMsg.Id, peer);
-
         throw new NotImplementedException();
     }
 
