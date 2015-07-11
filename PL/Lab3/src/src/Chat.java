@@ -68,6 +68,7 @@ public class Chat {
 
     // ----------------- FEDERATION -----------------
     public void addFederationServer(Server server) throws IOException {
+    	log("New Server connected");
         federationServers.add(server);
     }
 
@@ -90,7 +91,7 @@ public class Chat {
     	log("Broadcasting own registered users to new server");
     	for (String id : this.clients.keySet()){
     		Client client = this.clients.get(id);
-    		String [] lines = { "Group 12", Integer.toString(client.getHopCount())};
+    		String [] lines = { client.getUserName()," Group 12", Integer.toString(client.getHopCount()+1)};
     		server.emit(true, "ARRV", id, lines);
     	}
     }
@@ -190,6 +191,8 @@ public class Chat {
             newClient.emitArrvChatMsg(existingClient);
         }
 
+        //TODO: This is no "controlled flooding".
+        //At this place, we should be sure that the client came not from this server
         for (Server server : federationServers) {
             server.sendArrv(newClient);
         }
