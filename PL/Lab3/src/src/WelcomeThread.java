@@ -7,7 +7,7 @@ import java.net.ServerSocket;
  * handling thread for each request received on the bound server socket.
  */
 public class WelcomeThread implements Runnable {
-    private final boolean DEBUG = false;
+    private final boolean DEBUG = true;
     private int PORT = 42015; // using the dnChat protocol's default port.
 
     public WelcomeThread(int port) {

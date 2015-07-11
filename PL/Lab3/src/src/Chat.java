@@ -1,8 +1,11 @@
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
-
 import java.io.IOException;
-import java.net.Socket;
-import java.util.*;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.Timer;
+import java.util.TimerTask;
+
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 /*
  * Global Chat Server instance.
@@ -68,11 +71,34 @@ public class Chat {
         federationServers.add(server);
     }
 
-    public void receiveArrvBroadcast(ArrvChatMsg arrvChatMsg, Peer peer) {
-        throw new NotImplementedException();
+    public synchronized void receiveArrvBroadcast(ArrvChatMsg arrvChatMsg, Peer peer) throws IOException {
+    	log("Received broadcast");
+        Client client = this.clients.get(arrvChatMsg.Id);
+        //The client is already registered and! we have found a cheaper route
+        if (client == null || client.getHopCount() > arrvChatMsg.getHopCount()){
+        	this.clients.remove(arrvChatMsg.Id);
+        	Client newClient = new Client(arrvChatMsg.Id, arrvChatMsg.getUserName(), arrvChatMsg.getHopCount());
+        	this.registerClient(newClient);
+        	log(newClient.toString() + " has registered");
+        }
     }
 
-
+    /*
+     * Synchronized sending of all registered users. Must be synchronized as we have no concurrent hashmap
+     */
+    public synchronized void broadcastUsers(Server server) throws IOException{
+    	log("Broadcasting own registered users to new server");
+    	for (String id : this.clients.keySet()){
+    		Client client = this.clients.get(id);
+    		String [] lines = { "Group 12", Integer.toString(client.getHopCount())};
+    		server.emit(true, "ARRV", id, lines);
+    	}
+    }
+    
+    public void broadcastUser(){
+    	throw new NotImplementedException();
+    }
+    
     // ----------------- COLLISION CHECKS -----------------
 
     public synchronized boolean isNameTaken(String userName) {
@@ -182,6 +208,14 @@ public class Chat {
 
         for (Server server : federationServers) {
             server.sendLeft(userId);
+        }
+    }
+    
+    protected boolean DEBUG = true;
+    
+    protected void log(String msg) {
+        if (DEBUG) {
+            System.out.println("[CHAT] " + msg);
         }
     }
 }

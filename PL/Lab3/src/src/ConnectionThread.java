@@ -8,13 +8,13 @@ import java.net.Socket;
  * and a server.
  */
 public class ConnectionThread extends Thread {
-    private final boolean DEBUG = false;
+    private final boolean DEBUG = true;
 
     private Peer peer;
 
     public ConnectionThread(Socket peerSocket) throws IOException {
         if (DEBUG) {
-            System.out.println("[TCP] New connection established");
+            System.out.println("[TCP] New connection established on "+peerSocket.getInetAddress()+":"+peerSocket.getPort());
         }
 
         // create a new client and let it execute

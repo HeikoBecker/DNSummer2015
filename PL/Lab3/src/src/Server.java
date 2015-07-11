@@ -1,5 +1,3 @@
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
-
 import java.io.IOException;
 import java.net.Socket;
 
@@ -18,6 +16,7 @@ public class Server extends Peer {
         log("SRVR segment sent.");
 
         // TODO: tell the other server about all clients that connected to the local instance
+        Chat.getInstance().broadcastUsers(this);
     }
 
     @Override

@@ -21,7 +21,20 @@ public class Client extends Peer {
         this.websocket.setClient();
     }
 
-    public String getUserId() {
+    /*
+     * TODO: This constructor is used in the Chat Instance to register a "server" client which is announced by an arrv.
+     * We should rethink our logic for this.
+     * Maybe the server should "aggregate" the clients and each client must allow to "compare" a new hopCount against its own.
+     * Another alternative is to add a dummy client that prevents being "run"
+     */
+    public Client(String id, String userName, int hopCount) {
+		this.userId = id;
+		this.userName = userName;
+		this.hopCount = hopCount;
+		
+	}
+
+	public String getUserId() {
         return this.userId;
     }
 
@@ -128,6 +141,16 @@ public class Client extends Peer {
         return !((this.userId == null) ? (other.userId != null) : !this.userId.equals(other.userId));
     }
 
+    /*
+     * (non-Javadoc)
+     * @see Peer#log(java.lang.String)
+     * 
+     */
+    @Override
+    public String toString(){
+    	return "Client "+this.userName+", HOPS:"+this.hopCount; 
+    }
+    
     @Override
     protected void log(String msg) {
         if (DEBUG) {

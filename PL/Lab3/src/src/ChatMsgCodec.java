@@ -57,7 +57,10 @@ public class ChatMsgCodec {
             case "ARRV":
                 String userName = lines[1];
                 String description = lines[2];
-                int hopCount = Integer.parseInt(lines[3]);
+                int hopCount = 0;
+                if (lines.length == 4)
+                	hopCount = Integer.parseInt(lines[3]);
+                
                 return new ArrvChatMsg(id, userName, description, hopCount);
             case "LEFT":
                 throw new NotImplementedException();
