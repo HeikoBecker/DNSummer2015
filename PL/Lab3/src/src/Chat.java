@@ -176,6 +176,7 @@ public class Chat {
 		}
 		if (! this.broadcasted(msg.getId())){
 			for (Server remoteServer : this.federationServers){
+				//TODO: Format compliance?
 				remoteServer.emitMessage(msg, sendingClient.getUserId());
 			}
 		}
@@ -192,6 +193,7 @@ public class Chat {
 		}
 		if (! this.broadcasted(msg.getId())){
 			for (Server remoteServer : this.federationServers){
+				//TODO: Format compliance?
 				remoteServer.emitAcknowledgement(msg, sendingClient.getUserId());
 			}
 		}

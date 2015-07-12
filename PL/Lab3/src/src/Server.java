@@ -53,7 +53,7 @@ public class Server extends Peer {
 
     //TODO: Except for the flag, this method is a copy of the Clients emitMessage method
 	public void emitMessage(SendChatMsg msg, String userId) throws IOException {
-        this.websocket.emit(true, "SEND", msg.id, new String[]{userId, msg.getMessage()});
+        this.websocket.emit(true, "SEND", msg.id, new String[]{msg.getRecipient(),userId, msg.getMessage()});
         this.log("Broadcasted a message.");
 	}
 

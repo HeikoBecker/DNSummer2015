@@ -30,9 +30,8 @@ public class ChatMsgCodec {
                 String password = lines[2];
                 return new AuthChatMsg(id, name, password);
             case "SEND":
-                if (!isClient /* TODO: add this "&& lines.length != 4" */) {
-                    // TODO: implement SEND by server
-                    throw new NotImplementedException();
+                if (!isClient && lines.length != 4) {
+                    return new InvdMsg();
                 }
 
                 // A SEND message must have 3 lines, when sent by a client.
@@ -40,9 +39,15 @@ public class ChatMsgCodec {
                     return new InvdMsg();
                 }
 
-                String recipient = lines[1];
-                String message = lines[2];
-                return new SendChatMsg(id, recipient, message);
+            	String recipient = lines[1];
+                if (!isClient){
+                	String senderId = lines[2]; 
+                	String message = lines[3];
+                	return new RemoteSendChatMsg(id,recipient,senderId,message);
+                }else{
+                	String message = lines[2];
+                	return new SendChatMsg(id, recipient, message);
+                }
             case "ACKN":
                 if (!isClient /* TODO: add this "&& lines.length != 3" */) {
                     // TODO: implement ACKN by server
