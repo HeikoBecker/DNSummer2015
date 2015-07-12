@@ -11,7 +11,7 @@ public class Chat {
 	// maximal age in milliseconds, currently 5 minutes
 	private static final long MAXAGE = 5 * 1000;
 	private static Chat instance = null;
-	public static final int DEFAULT_PORT = 42014;
+	public static final int DEFAULT_PORT = 42015;
 
 	/*
 	 * Cleanup Task removing all messages that are older than MAXAGE minutes.
@@ -167,26 +167,33 @@ public class Chat {
 					storeMessage(msg.getId(), sendingClient.getUserId(),
 							receivingClient.getUserId());
 				}
-				// TODO: broadcast to others that are more than 1 hop away
 			}
 		} else {
 			LocalClient receivingClient = clients.get(recipientName);
 			receivingClient.emitSendChatMsg(msg, sendingClient.getUserId());
 			storeMessage(msg.getId(), sendingClient.getUserId(),
 					receivingClient.getUserId());
-			// TODO: broadcast to others that are more than 1 hop away
+		}
+		if (! this.broadcasted(msg.getId())){
+			for (Server remoteServer : this.federationServers){
+				remoteServer.emitMessage(msg, sendingClient.getUserId());
+			}
 		}
 	}
 
 	public synchronized void emitAcknowledgement(AcknChatMsg msg,
 			LocalClient sendingClient) throws IOException {
-		// TODO: broadcast to others that are more than 1 hop away
 		if (outstandingAcks.containsKey(msg.id)) {
 			String receiverId = sendingClient.getUserId();
 			LocalClient localClient = clients.get(outstandingAcks.get(msg.id)
 					.getSenderId());
 			localClient.emitAcknChatMsg(msg, receiverId);
 			removeMessage(msg.id, receiverId);
+		}
+		if (! this.broadcasted(msg.getId())){
+			for (Server remoteServer : this.federationServers){
+				remoteServer.emitAcknowledgement(msg, sendingClient.getUserId());
+			}
 		}
 	}
 

@@ -4,7 +4,7 @@ public class RemoteClient {
     private final int hopCount;
 
     /*
-     * TODO: This constructor is used in the Chat Instance to register a "server" client which is announced by an arrv.
+     * TODO: This constructor is used in the ArrvChatMsgs execute method to register a "server" client which is announced by an arrv.
      * We should rethink our logic for this.
      * Maybe the server should "aggregate" the clients and each client must allow to "compare" a new hopCount against its own.
      * Another alternative is to add a dummy client that prevents being "run"

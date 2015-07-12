@@ -1,5 +1,4 @@
 import java.io.IOException;
-import java.net.Socket;
 
 /*
  * A LocalClient encapsulates the associated port for the connection as well as the user information.

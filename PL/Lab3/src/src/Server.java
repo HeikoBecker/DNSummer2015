@@ -23,7 +23,7 @@ public class Server extends Peer {
         this.emit(true, "SRVR", "0");
         log("SRVR segment sent.");
 
-        // TODO: tell the other server about all clients that connected to the local instance
+        // tell the other server about all clients that connected to the local instance
         Chat.getInstance().advertiseCurrentUsers(this);
     }
 
@@ -51,6 +51,17 @@ public class Server extends Peer {
         this.emit(true, "LEFT", userId);
     }
 
+    //TODO: Except for the flag, this method is a copy of the Clients emitMessage method
+	public void emitMessage(SendChatMsg msg, String userId) throws IOException {
+        this.websocket.emit(true, "SEND", msg.id, new String[]{userId, msg.getMessage()});
+        this.log("Broadcasted a message.");
+	}
+
+	public void emitAcknowledgement(AcknChatMsg msg, String userId) throws IOException {
+        this.websocket.emit(true, "ACKN", msg.id, new String[]{userId});
+        this.log("Broadcasted an ack.");
+	}
+    
     public Collection<RemoteClient> getClients() {
         return clients.values();
     }
@@ -84,4 +95,5 @@ public class Server extends Peer {
 	public void registerClient(RemoteClient remoteClient) {
 		this.clients.put(remoteClient.getUserId(), remoteClient);
 	}
+
 }
