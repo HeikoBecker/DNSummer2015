@@ -66,7 +66,7 @@ public class Chat {
 	}
 
 	// ----------------- FEDERATION -----------------
-	public void addFederationServer(Server server) throws IOException {
+	public synchronized void addFederationServer(Server server) throws IOException {
 		federationServers.add(server);
 	}
 
@@ -90,7 +90,7 @@ public class Chat {
 			}
 		}
 		broadcastedMessages.put(arrvChatMsg.getId(),
-				new Date(System.currentTimeMillis()));
+                new Date(System.currentTimeMillis()));
 	}
 
 	/*
@@ -121,7 +121,7 @@ public class Chat {
 	 * @return True only if we can find a message corresponding to the given
 	 * @param ID, which means that we already saw this message
 	 */
-	public boolean broadcasted(String id) {
+	public synchronized boolean broadcasted(String id) {
 		return (this.broadcastedMessages.containsKey(id));
 	}
 
