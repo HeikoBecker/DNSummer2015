@@ -66,7 +66,6 @@ public class Chat {
 
     // ----------------- FEDERATION -----------------
     public void addFederationServer(Server server) throws IOException {
-    	log("New Server connected");
         federationServers.add(server);
     }
 

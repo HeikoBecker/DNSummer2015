@@ -8,7 +8,7 @@ import java.security.NoSuchAlgorithmException;
 public class Peer {
     // Network Level
     protected WebSocket websocket;
-    private int hopCount;//TODO: Does this field make sense here?
+    private int hopCount;
 
     public Peer() {
         websocket = null;

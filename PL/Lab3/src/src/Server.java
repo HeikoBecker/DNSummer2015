@@ -18,7 +18,6 @@ public class Server extends Peer {
         this.id = maxId++;
     }
 
-    @Override
     public void connect(String host) throws IOException, InterruptedException {
         this.websocket.executeHandshake(host);
         this.emit(true, "SRVR", "0");
