@@ -1,13 +1,21 @@
 import java.io.IOException;
 import java.net.Socket;
+import java.util.Collection;
+import java.util.HashMap;
 
 public class Server extends Peer {
+    private static int maxId = 0;
+    private int id;
+    private HashMap<String, RemoteClient> clients = new HashMap<>();
+
     public Server(Peer peer) {
         this.websocket = peer.websocket;
+        this.id = maxId++;
     }
 
     public Server(Socket socket) throws IOException {
         super(socket);
+        this.id = maxId++;
     }
 
     @Override
@@ -17,7 +25,7 @@ public class Server extends Peer {
         log("SRVR segment sent.");
 
         // TODO: tell the other server about all clients that connected to the local instance
-        Chat.getInstance().broadcastUsers(this);
+        Chat.getInstance().advertiseCurrentUsers(this);
     }
 
     @Override
@@ -29,14 +37,41 @@ public class Server extends Peer {
         this.websocket.close();
     }
 
-    public void sendArrv(Client newClient) throws IOException {
+    // TODO: merge these function together
+    public void sendArrv(ArrvChatMsg arrvChatMsg) throws IOException {
         log("Broadcast ARRV");
-        this.emit(true, "ARRV", newClient.getUserId(), new String[]{newClient.getUserName(), "", "0"});
+        this.emit(true, "ARRV", arrvChatMsg.getId(), new String[]{arrvChatMsg.getUserName(), "", ((arrvChatMsg.getHopCount() + 1) + "")});
+    }
+
+    public void sendArrv(String userId, String userName, String groupDescription, int hopCount) throws IOException {
+        log("Broadcast ARRV");
+        this.emit(true, "ARRV", userId, new String[]{userName, groupDescription, Integer.toString(hopCount) });
     }
 
     public void sendLeft(String userId) throws IOException {
         this.emit(true, "LEFT", userId);
     }
+
+    public Collection<RemoteClient> getClients() {
+        return clients.values();
+    }
+
+    /*
+  * Used to compare clients and check whether they are the same or not.
+  */
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final Server other = (Server) obj;
+
+        return this.id == other.id;
+    }
+
 
     // ----------------- DEBUGGING -----------------
     private final boolean DEBUG = true;

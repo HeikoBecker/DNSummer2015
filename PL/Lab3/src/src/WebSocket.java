@@ -42,7 +42,7 @@ public class WebSocket {
     }
 
     public void setClient() {
-        isClient = true;
+        this.isClient = true;
     }
 
     /*
@@ -66,7 +66,7 @@ public class WebSocket {
     }
 
     public Message getWebsocketMessage() throws IOException {
-        return parser.getWebsocketMessage(isClient);
+        return parser.getWebsocketMessage(this.isClient);
     }
 
 

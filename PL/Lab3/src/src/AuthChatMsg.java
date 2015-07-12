@@ -13,7 +13,7 @@ public class AuthChatMsg extends Message {
 
     public AuthChatMsg(String id, String name, String password) {
         this.Type = "dnChat-AUTH";
-        this.Id = id;
+        this.id = id;
         this.name = name;
 
         if (password.equals(groupPassword)) {
@@ -27,15 +27,15 @@ public class AuthChatMsg extends Message {
             peer.emit(false, "INVD", "0");
             peer.exit();
         } else if (!this.validPassword) {
-            peer.emit(false, "FAIL", this.Id, new String[]{"PASSWORD"});
-        } else if (Chat.getInstance().isUserIdTaken(this.Id)) {
+            peer.emit(false, "FAIL", this.id, new String[]{"PASSWORD"});
+        } else if (Chat.getInstance().isUserIdTaken(this.id)) {
             // We only check for existing userIds and not messageIds, following the reference implementation.
-            peer.emit(false, "FAIL", this.Id, new String[]{"NUMBER"});
+            peer.emit(false, "FAIL", this.id, new String[]{"NUMBER"});
         } else if (Chat.getInstance().isNameTaken(name)) {
-            peer.emit(false, "FAIL", this.Id, new String[]{"NAME"});
+            peer.emit(false, "FAIL", this.id, new String[]{"NAME"});
         } else {
-            peer.emit(false, "OKAY", this.Id);
-            peer.authenticate(this.Id, this.name);
+            peer.emit(false, "OKAY", this.id);
+            peer.authenticate(this.id, this.name);
         }
     }
 }

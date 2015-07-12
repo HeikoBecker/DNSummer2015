@@ -9,13 +9,13 @@ public class SendChatMsg extends Message {
 
     public SendChatMsg(String id, String recipient, String message) {
         this.Type = "dnChat-SEND";
-        this.Id = id;
+        this.id = id;
         this.recipient = recipient;
         this.message = message;
     }
 
     public String getId() {
-        return Id;
+        return id;
     }
 
     public String getRecipient() {
@@ -31,18 +31,18 @@ public class SendChatMsg extends Message {
         if (!peer.isAuthenticated()) {
             peer.emit(false, "INVD", "0");
             peer.exit();
-        } else if (Chat.getInstance().isMessageIdTaken(this.Id)) {
+        } else if (Chat.getInstance().isMessageIdTaken(this.id)) {
             // We only check for existing messageIds and not userIds, following the reference implementation.
-            peer.emit(false, "FAIL", this.Id, new String[]{"NUMBER"});
+            peer.emit(false, "FAIL", this.id, new String[]{"NUMBER"});
         } else if (this.message.length() > 384) {
             /*
              * Note: The length limitation to 384 bytes is derived by reversing the reference implementation.
              * https://dcms.cs.uni-saarland.de/dn/forum/viewtopic.php?f=3&t=124: Appropriate 300 is OK hence 
              * this should work
              */
-            peer.emit(false, "FAIL", this.Id, new String[]{"LENGTH"});
+            peer.emit(false, "FAIL", this.id, new String[]{"LENGTH"});
         } else {
-            peer.emit(false, "OKAY", this.Id);
+            peer.emit(false, "OKAY", this.id);
             peer.recvSendChatMsg(this);
         }
     }

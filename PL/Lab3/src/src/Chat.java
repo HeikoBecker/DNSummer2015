@@ -1,11 +1,5 @@
 import java.io.IOException;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Timer;
-import java.util.TimerTask;
-
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
+import java.util.*;
 
 /*
  * Global Chat Server instance.
@@ -41,13 +35,17 @@ public class Chat {
 
     }
 
+    // Directly Connected Clients
     // Client ID -> Client
-    private HashMap<String, Client> clients = new HashMap<>();
+    private HashMap<String, LocalClient> clients = new HashMap<>();
 
     // Message ID -> Collection of outstanding acknowledgements
     private HashMap<String, OutstandingAcknowledgements> outstandingAcks = new HashMap<>();
 
     private LinkedList<Server> federationServers = new LinkedList<>();
+
+    // Message ID -> Date of adding
+    private HashMap<String, Date> broadcastedMessages = new HashMap<>();
 
     private Timer timer;
 
@@ -72,39 +70,52 @@ public class Chat {
         federationServers.add(server);
     }
 
-    public synchronized void receiveArrvBroadcast(ArrvChatMsg arrvChatMsg, Peer peer) throws IOException {
-    	log("Received broadcast");
-        Client client = this.clients.get(arrvChatMsg.Id);
-        //The client is already registered and! we have found a cheaper route
-        if (client == null || client.getHopCount() > arrvChatMsg.getHopCount()){
-        	this.clients.remove(arrvChatMsg.Id);
-        	Client newClient = new Client(arrvChatMsg.Id, arrvChatMsg.getUserName(), arrvChatMsg.getHopCount());
-        	this.registerClient(newClient);
-        	log(newClient.toString() + " has registered");
+    public synchronized void receiveArrvBroadcast(ArrvChatMsg arrvChatMsg, Server sendingServer) throws IOException {
+        // Check if incoming message has been broadcast already
+        if(!broadcastedMessages.containsKey(arrvChatMsg.getId())) {
+            log("Received broadcast");
+
+            // Forward to local clients
+            for(LocalClient client : this.clients.values()) {
+                if(!arrvChatMsg.getId().equals(client.getUserId())) {
+                    client.emitArrvChatMsg(arrvChatMsg.getId(), arrvChatMsg.getUserName());
+                }
+            }
+            // Forward to other servers
+            for(Server remote : federationServers) {
+                if(!remote.equals(sendingServer)) {
+                    remote.sendArrv(arrvChatMsg);
+                }
+            }
+            broadcastedMessages.put(arrvChatMsg.getId(), new Date(System.currentTimeMillis()));
         }
     }
 
     /*
      * Synchronized sending of all registered users. Must be synchronized as we have no concurrent hashmap
      */
-    public synchronized void broadcastUsers(Server server) throws IOException{
-    	log("Broadcasting own registered users to new server");
+    public synchronized void advertiseCurrentUsers(Server server) throws IOException{
+    	log("Advertising own registered users to new server");
+
+        // Forward information about local clients
     	for (String id : this.clients.keySet()){
-    		Client client = this.clients.get(id);
-    		String [] lines = { client.getUserName()," Group 12", Integer.toString(client.getHopCount()+1)};
-    		server.emit(true, "ARRV", id, lines);
+    		LocalClient client = this.clients.get(id);
+            server.sendArrv(id, client.getUserName(), "Group 12", client.getHopCount()+1);
     	}
+
+        // Forward information about remote clients
+        for(Server remoteServer : federationServers) {
+            for(RemoteClient client : remoteServer.getClients()) {
+                server.sendArrv(client.getUserId(), client.getUserName(), "", client.getHopCount() + 1);
+            }
+        }
     }
-    
-    public void broadcastUser(){
-    	throw new NotImplementedException();
-    }
-    
+
     // ----------------- COLLISION CHECKS -----------------
 
     public synchronized boolean isNameTaken(String userName) {
         boolean result = false;
-        for (Client existingClient : clients.values()) {
+        for (LocalClient existingClient : clients.values()) {
             if (existingClient.getUserName().equals(userName)) {
                 result = true;
                 break;
@@ -121,16 +132,16 @@ public class Chat {
         return outstandingAcks.containsKey(messageId);
     }
 
-    public synchronized boolean isMessageIdOpenForAckn(String messageId, Client otherClient) {
+    public synchronized boolean isMessageIdOpenForAckn(String messageId, LocalClient otherClient) {
         return outstandingAcks.containsKey(messageId) && outstandingAcks.get(messageId).contains(otherClient.getUserId());
     }
 
     // ----------------- RELAYING MESSAGES TO OTHER CLIENTS -----------------
 
-    public synchronized void emitMessage(SendChatMsg msg, Client sendingClient) throws IOException {
+    public synchronized void emitMessage(SendChatMsg msg, LocalClient sendingClient) throws IOException {
         String recipientName = msg.getRecipient();
         if (recipientName.equals("*")) {
-            for (Client receivingClient : clients.values()) {
+            for (LocalClient receivingClient : clients.values()) {
                 if (!receivingClient.equals(sendingClient) && receivingClient.getHopCount() == 0) {
                     receivingClient.emitSendChatMsg(msg, sendingClient.getUserId());
                     storeMessage(msg.getId(), sendingClient.getUserId(), receivingClient.getUserId());
@@ -138,19 +149,20 @@ public class Chat {
                 // TODO: broadcast to others that are more than 1 hop away
             }
         } else {
-            Client receivingClient = clients.get(recipientName);
+            LocalClient receivingClient = clients.get(recipientName);
             receivingClient.emitSendChatMsg(msg, sendingClient.getUserId());
             storeMessage(msg.getId(), sendingClient.getUserId(), receivingClient.getUserId());
             // TODO: broadcast to others that are more than 1 hop away
         }
     }
 
-    public synchronized void emitAcknowledgement(AcknChatMsg msg, Client sendingClient) throws IOException {
+    public synchronized void emitAcknowledgement(AcknChatMsg msg, LocalClient sendingClient) throws IOException {
         // TODO: broadcast to others that are more than 1 hop away
-        if (outstandingAcks.containsKey(msg.Id)) {
+        if (outstandingAcks.containsKey(msg.id)) {
             String receiverId = sendingClient.getUserId();
-            clients.get(outstandingAcks.get(msg.Id).getSenderId()).emitAcknChatMsg(msg, receiverId);
-            removeMessage(msg.Id, receiverId);
+            LocalClient localClient = clients.get(outstandingAcks.get(msg.id).getSenderId());
+            localClient.emitAcknChatMsg(msg, receiverId);
+            removeMessage(msg.id, receiverId);
         }
     }
 
@@ -182,30 +194,29 @@ public class Chat {
     // ----------------- ENTER / LEAVE -----------------
 
     /*
-     * Add a client and tell all other client that she joined.
+     * Add a local client and tell all other client that she joined.
      * Inform the newly joined client about others in the room.
      */
-    public synchronized void registerClient(Client newClient) throws IOException {
-        for (Client existingClient : clients.values()) {
+    public synchronized void registerClient(LocalClient newClient) throws IOException {
+        log("Register Client: " + newClient.getUserId() + " " + newClient.getUserName());
+        for (LocalClient existingClient : clients.values()) {
             existingClient.emitArrvChatMsg(newClient);
             newClient.emitArrvChatMsg(existingClient);
         }
 
-        //TODO: This is no "controlled flooding".
-        //At this place, we should be sure that the client came not from this server
         for (Server server : federationServers) {
-            server.sendArrv(newClient);
+            server.sendArrv(newClient.getUserId(), newClient.getUserName(), "Group 12", 0);
         }
 
         clients.put(newClient.getUserId(), newClient);
     }
 
     /*
-     * Remove the client and tell all other clients that she left.
+     * Remove the local client and tell all other clients that she left.
      */
     public synchronized void unregisterClient(String userId) throws IOException {
         clients.remove(userId);
-        for (Client existingClient : clients.values()) {
+        for (LocalClient existingClient : clients.values()) {
             existingClient.emitLeftChatMsg(userId);
         }
 

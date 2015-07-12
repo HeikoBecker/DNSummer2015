@@ -1,14 +1,14 @@
 import java.io.IOException;
 
 public abstract class Message {
-    public String Id;
-    public String Type;
+    protected String id;
+    protected String Type;
 
     public Message() { }
 
     @Override
     public String toString() {
-        return Type + " " + Id;
+        return Type + " " + id;
     }
 
     /*
@@ -17,4 +17,7 @@ public abstract class Message {
      */
     public abstract void execute(Peer peer) throws IOException;
 
+    public String getId() {
+        return id;
+    }
 }

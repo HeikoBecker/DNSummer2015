@@ -24,7 +24,7 @@ public class ConnectionThread extends Thread {
             peer = new Server(peer);
             Chat.getInstance().addFederationServer((Server) peer);
         } else {
-            peer = new Client(peer);
+            peer = new LocalClient(peer);
         }
         msg.execute(peer);
     }

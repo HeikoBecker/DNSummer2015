@@ -7,7 +7,7 @@ public class AcknChatMsg extends Message {
 
     public AcknChatMsg(String id) {
         this.Type = "dnChat-ACKN";
-        this.Id = id;
+        this.id = id;
     }
 
     @Override
@@ -15,8 +15,8 @@ public class AcknChatMsg extends Message {
         if (!peer.isAuthenticated()) {
             peer.emit(false, "INVD", "0");
             peer.exit();
-        } else if (!Chat.getInstance().isMessageIdOpenForAckn(this.Id, (Client) peer)) {
-            peer.emit(false, "FAIL", this.Id, new String[]{"NUMBER"});
+        } else if (!Chat.getInstance().isMessageIdOpenForAckn(this.id, (LocalClient) peer)) {
+            peer.emit(false, "FAIL", this.id, new String[]{"NUMBER"});
         } else {
             peer.recvAcknChatMsg(this);
         }

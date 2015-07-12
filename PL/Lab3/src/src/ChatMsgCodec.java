@@ -22,8 +22,8 @@ public class ChatMsgCodec {
 
         switch (command) {
             case "AUTH":
-                // An AUTH message must have 3 lines and must be sent by a client.
-                if (!isClient || lines.length != 3) {
+                // An AUTH message must have 3 lines. It cannot be sent by a Server, but at this early stage, we don't know if it is a server or not.
+                if (lines.length != 3) {
                     return new InvdMsg();
                 }
                 String name = lines[1];

@@ -24,7 +24,7 @@ public class CloseConnMsg extends Message {
      */
     public CloseConnMsg() {
         this.Type = "ws-CLOSE";
-        this.Id = NOSTATUS + "";
+        this.id = NOSTATUS + "";
         this.reason = NOSTATUS;
     }
 

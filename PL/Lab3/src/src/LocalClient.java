@@ -2,37 +2,19 @@ import java.io.IOException;
 import java.net.Socket;
 
 /*
- * A Client encapsulates the associated port for the connection as well as the user information.
+ * A LocalClient encapsulates the associated port for the connection as well as the user information.
  */
-public class Client extends Peer {
+public class LocalClient extends Peer {
     // Chat Protocol Level
     private String userId = "";
     private String userName;
     private boolean isAuthenticated = false;
     private int hopCount = 0;
 
-    public Client(Socket clientSocket) throws IOException {
-        super(clientSocket);
-        this.websocket.setClient();
-    }
-
-    public Client(Peer peer) {
+    public LocalClient(Peer peer) {
         this.websocket = peer.websocket;
         this.websocket.setClient();
     }
-
-    /*
-     * TODO: This constructor is used in the Chat Instance to register a "server" client which is announced by an arrv.
-     * We should rethink our logic for this.
-     * Maybe the server should "aggregate" the clients and each client must allow to "compare" a new hopCount against its own.
-     * Another alternative is to add a dummy client that prevents being "run"
-     */
-    public Client(String id, String userName, int hopCount) {
-		this.userId = id;
-		this.userName = userName;
-		this.hopCount = hopCount;
-		
-	}
 
 	public String getUserId() {
         return this.userId;
@@ -77,7 +59,7 @@ public class Client extends Peer {
      * Emitting another client's message to the current client.
      */
     public void emitSendChatMsg(SendChatMsg msg, String senderId) throws IOException {
-        this.websocket.emit(false, "SEND", msg.Id, new String[]{senderId, msg.getMessage()});
+        this.websocket.emit(false, "SEND", msg.id, new String[]{senderId, msg.getMessage()});
         this.log("Received a message.");
     }
 
@@ -85,7 +67,7 @@ public class Client extends Peer {
      * Emitting another client's ackn message to the current client.
      */
     public void emitAcknChatMsg(AcknChatMsg msg, String senderId) throws IOException {
-        this.websocket.emit(false, "ACKN", msg.Id, new String[]{senderId});
+        this.websocket.emit(false, "ACKN", msg.id, new String[]{senderId});
         this.log("Received an ack.");
     }
 
@@ -93,8 +75,16 @@ public class Client extends Peer {
      * Emitting that another client arrived to the current client.
      * Sending an empty description string is ok, as stated here: https://dcms.cs.uni-saarland.de/dn/forum/viewtopic.php?f=3&t=132
      */
-    public void emitArrvChatMsg(Client otherClient) throws IOException {
-        this.websocket.emit(false, "ARRV", otherClient.getUserId(), new String[]{otherClient.getUserName(), ""});
+    public void emitArrvChatMsg(LocalClient otherClient) throws IOException {
+        emitArrvChatMsg(otherClient.getUserId(), otherClient.getUserName());
+    }
+
+    /*
+     * Emitting that another client arrived to the current client.
+     * Sending an empty description string is ok, as stated here: https://dcms.cs.uni-saarland.de/dn/forum/viewtopic.php?f=3&t=132
+     */
+    public void emitArrvChatMsg(String userId, String userName) throws IOException {
+        this.websocket.emit(false, "ARRV", userId, new String[]{ userName, ""});
         this.log("Received an arrv.");
     }
 
@@ -136,7 +126,7 @@ public class Client extends Peer {
         if (getClass() != obj.getClass()) {
             return false;
         }
-        final Client other = (Client) obj;
+        final LocalClient other = (LocalClient) obj;
 
         return !((this.userId == null) ? (other.userId != null) : !this.userId.equals(other.userId));
     }
@@ -148,7 +138,7 @@ public class Client extends Peer {
      */
     @Override
     public String toString(){
-    	return "Client "+this.userName+", HOPS:"+this.hopCount; 
+    	return "LocalClient "+this.userName+", HOPS:"+this.hopCount;
     }
     
     @Override

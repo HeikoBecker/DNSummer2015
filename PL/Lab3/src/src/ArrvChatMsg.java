@@ -7,7 +7,7 @@ public class ArrvChatMsg extends Message {
     private int hopCount;
 
     public ArrvChatMsg(String id, String userName, String description, int hopCount) {
-        this.Id = id;
+        this.id = id;
         this.userName = userName;
         this.description = description;
         this.hopCount = hopCount;
@@ -15,7 +15,7 @@ public class ArrvChatMsg extends Message {
 
     @Override
     public void execute(Peer peer) throws IOException {
-        Chat.getInstance().receiveArrvBroadcast(this, peer);
+        Chat.getInstance().receiveArrvBroadcast(this, (Server) peer);
     }
 
     public String getUserName() {
