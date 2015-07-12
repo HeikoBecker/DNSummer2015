@@ -20,9 +20,16 @@ public class ArrvChatMsg extends Message {
 
     @Override
     public void execute(Peer peer) throws IOException {
-    	Server sender = (Server) peer;
-        Chat.getInstance().receiveArrvBroadcast(this, sender);
-        sender.registerClient(new RemoteClient(this.id, this.userName, this.hopCount));
+    	Chat chat = Chat.getInstance();
+    	if (!chat.broadcasted(this.id)){
+        	Server sender = (Server) peer;
+    		chat.receiveArrvBroadcast(this, sender);
+    		// the RemoteClient should be added to the sending Server no matter how far away it is
+    		// otherwise we are not able to tell the presence of this user to local clients anymore
+            sender.registerClient(new RemoteClient(this.id, this.userName, this.hopCount));
+    	}else{
+    		//TODO: Maybe log, that there was a message received that has been broadcasted
+    	}
     }
 
     public String getUserName() {
