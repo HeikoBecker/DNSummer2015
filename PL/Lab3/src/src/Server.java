@@ -80,4 +80,8 @@ public class Server extends Peer {
             System.out.println("[S] " + msg);
         }
     }
+
+	public void registerClient(RemoteClient remoteClient) {
+		this.clients.put(remoteClient.getUserId(), remoteClient);
+	}
 }

@@ -1,5 +1,10 @@
 import java.io.IOException;
 
+/*
+ * This class is only used when a remote server sends an ARRV message.
+ * The ChatMsgCodec enforces this.
+ * Therefore we can cast the peer to a server in the execute method.
+ */
 public class ArrvChatMsg extends Message {
 
     private String userName;
@@ -15,7 +20,9 @@ public class ArrvChatMsg extends Message {
 
     @Override
     public void execute(Peer peer) throws IOException {
-        Chat.getInstance().receiveArrvBroadcast(this, (Server) peer);
+    	Server sender = (Server) peer;
+        Chat.getInstance().receiveArrvBroadcast(this, sender);
+        sender.registerClient(new RemoteClient(this.id, this.userName, this.hopCount));
     }
 
     public String getUserName() {
