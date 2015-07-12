@@ -81,6 +81,9 @@ public class Chat {
                     client.emitArrvChatMsg(arrvChatMsg.getId(), arrvChatMsg.getUserName());
                 }
             }
+
+            // TODO: the RemoteClient should be added to the sending Server if it is one hop away
+
             // Forward to other servers
             for(Server remote : federationServers) {
                 if(!remote.equals(sendingServer)) {
@@ -206,6 +209,10 @@ public class Chat {
 
         for (Server server : federationServers) {
             server.sendArrv(newClient.getUserId(), newClient.getUserName(), "Group 12", 0);
+
+            for(RemoteClient remoteClient : server.getClients()) {
+                newClient.emitArrvChatMsg(remoteClient.getUserId(), remoteClient.getUserName());
+            }
         }
 
         clients.put(newClient.getUserId(), newClient);
