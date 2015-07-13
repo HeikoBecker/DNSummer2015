@@ -23,7 +23,7 @@ public class CloseConnMsg extends Message {
      * 7.1.5 page 41
      */
     public CloseConnMsg() {
-        this.Type = "ws-CLOSE";
+        this.type = "ws-CLOSE";
         this.id = NOSTATUS + "";
         this.reason = NOSTATUS;
     }

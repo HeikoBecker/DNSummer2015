@@ -8,7 +8,6 @@ public class LocalClient extends Peer {
     private String userId = "";
     private String userName;
     private boolean isAuthenticated = false;
-    private int hopCount = 0;
 
     public LocalClient(Peer peer) {
         this.websocket = peer.websocket;
@@ -146,7 +145,7 @@ public class LocalClient extends Peer {
      */
     @Override
     public String toString(){
-    	return "LocalClient "+this.userName+", HOPS:"+this.hopCount;
+    	return "LocalClient "+this.userName;
     }
     
     @Override
@@ -155,13 +154,5 @@ public class LocalClient extends Peer {
             String userId = (this.userId.equals("")) ? "UNAUTH" : this.userId;
             System.out.println("[C-" + userId + "] " + msg);
         }
-    }
-
-    public int getHopCount() {
-        return hopCount;
-    }
-
-    public void setHopCount(int hopCount) {
-        this.hopCount = hopCount;
     }
 }

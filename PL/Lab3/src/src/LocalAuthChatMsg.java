@@ -12,7 +12,7 @@ public class LocalAuthChatMsg extends Message {
     private String name;
 
     public LocalAuthChatMsg(String id, String name, String password) {
-        this.Type = "dnChat-AUTH";
+        this.type = "dnChat-AUTH";
         this.id = id;
         this.name = name;
 

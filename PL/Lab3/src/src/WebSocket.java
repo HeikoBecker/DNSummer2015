@@ -42,6 +42,10 @@ public class WebSocket {
         }
     }
 
+    /*
+     * Setting a flag that indicates that this socket is connected to a client and not to a server.
+     * This affects parsing of incoming messages.
+     */
     public void setClient() {
         this.isClient = true;
     }
@@ -70,13 +74,15 @@ public class WebSocket {
         return parser.getWebsocketMessage(this.isClient);
     }
 
-
+    /*
+     * Upon opening of a TCP socket, the application awaits a HTTP handshake to initate chat communication.
+     */
     public boolean awaitHandshake() throws IOException, NoSuchAlgorithmException {
         log("Awaiting handshake.");
 
         HTTPMsg clientHandshake = parser.getHTTPMessage(false);
         PrintWriter pr = new PrintWriter(this.peerSocket.getOutputStream(), true);
-        if ((clientHandshake.isInvalid() && clientHandshake.isHostSet()) || !clientHandshake.Type.equals("Handshake")) {
+        if ((clientHandshake.isInvalid() && clientHandshake.isHostSet()) || !clientHandshake.type.equals("Handshake")) {
             String serverReply = createInvReply();
             pr.print(serverReply);
             pr.flush();
@@ -110,7 +116,6 @@ public class WebSocket {
                 + "Sec-WebSocket-Accept: " + WebSocket.getSecToken(clientHandshake.getWebSocketKey()) + "\r\n\r\n";
     }
 
-
     /*
      * The Sec-Websocket-Key is processed and converted as stated in RFC6455. Therefore it is concatenated,
      * the SHA-1 hash is taken and the resulting bytes are converted to base64.
@@ -124,6 +129,9 @@ public class WebSocket {
         return DatatypeConverter.printBase64Binary(cript.digest());
     }
 
+    /*
+     * When a server connects to another server, it has to execute a handshake, as implemented here.
+     */
     public void executeHandshake(String host) throws IOException {
         log("Sending handshake.");
         PrintWriter pr = new PrintWriter(this.peerSocket.getOutputStream(), true);
@@ -140,7 +148,8 @@ public class WebSocket {
         pr.flush();
 
         // used to read the response
-        HTTPMsg msg = parser.getHTTPMessage(true); // TODO: ensure that the peer responded correctly
+        HTTPMsg msg = parser.getHTTPMessage(true);
+        // TODO: ensure that the peer responded correctly
         log("Handshake completed.");
     }
 

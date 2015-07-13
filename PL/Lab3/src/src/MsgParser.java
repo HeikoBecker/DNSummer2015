@@ -75,7 +75,7 @@ public class MsgParser {
                     // must be exactly a upgrade to a websocket (RFC 6455 see 4.2.1
                     // 3.)
                     if (lines[1].equals("websocket")) {
-                        msg.Type = "Handshake";
+                        msg.type = "Handshake";
                     } else {
                         log("Invalid Upgrade");
                         msg.setInvalid();

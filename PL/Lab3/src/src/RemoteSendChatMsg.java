@@ -13,10 +13,6 @@ public class RemoteSendChatMsg extends LocalSendChatMsg {
 	@Override
 	public void execute(Peer peer) throws IOException {
 		if(!Chat.getInstance().broadcasted(id)) {
-			System.out.println("Received a remote message ");
-			//TODO: Make the method below accept any peer in Chat class
-			//Then we can reuse it also for broadcasting here
-			//Chat.getInstance().emitMessage(this, peer);
 			Chat.getInstance().emitMessage(this, this.senderId);
 		}
 	}

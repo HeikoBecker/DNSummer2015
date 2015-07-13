@@ -9,7 +9,7 @@ import java.net.UnknownHostException;
  * and a server.
  */
 public class ConnectionThread implements Runnable {
-    private final boolean DEBUG = true;
+    private final boolean DEBUG = false;
 
     private Peer peer;
 

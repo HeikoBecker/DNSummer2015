@@ -8,7 +8,7 @@ public class LocalSendChatMsg extends Message {
     private final String recipient;
 
     public LocalSendChatMsg(String id, String recipient, String message) {
-        this.Type = "dnChat-SEND";
+        this.type = "dnChat-SEND";
         this.id = id;
         this.recipient = recipient;
         this.message = message;

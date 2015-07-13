@@ -4,7 +4,7 @@ import java.io.IOException;
 public class PingConnMsg extends Message {
 
 	public PingConnMsg() {
-		this.Type = "ws-PING";
+		this.type = "ws-PING";
 	}
 
 	@Override

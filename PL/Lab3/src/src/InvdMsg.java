@@ -3,7 +3,7 @@ import java.io.IOException;
 public class InvdMsg extends Message {
 
     public InvdMsg() {
-        this.Type = "dnChat-INVD";
+        this.type = "dnChat-INVD";
     }
 
     @Override

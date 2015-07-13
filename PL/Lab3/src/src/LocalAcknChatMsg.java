@@ -6,7 +6,7 @@ import java.io.IOException;
 public class LocalAcknChatMsg extends Message {
 
     public LocalAcknChatMsg(String id) {
-        this.Type = "dnChat-ACKN";
+        this.type = "dnChat-ACKN";
         this.id = id;
     }
 

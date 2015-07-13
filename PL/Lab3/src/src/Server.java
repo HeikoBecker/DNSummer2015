@@ -22,7 +22,6 @@ public class Server extends Peer {
         this.websocket.executeHandshake(host);
         this.emit(true, "SRVR", "0");
         log("SRVR segment sent.");
-
         // tell the other server about all clients that connected to the local instance
         Chat.getInstance().advertiseCurrentUsers(this);
     }
@@ -30,51 +29,67 @@ public class Server extends Peer {
     @Override
     public void exit() {
         log("SERVER EXITING");
-
         // TODO: ensure proper clean-up, by removing all entries entered by this instance
-
         this.websocket.close();
     }
 
-    // TODO: merge these function together
-    public void sendArrv(RemoteArrvChatMsg arrvChatMsg) throws IOException {
-        log("Broadcast ARRV");
-        this.emit(true, "ARRV", arrvChatMsg.getId(), new String[]{arrvChatMsg.getUserName(), "", ((arrvChatMsg.getHopCount() + 1) + "")});
+
+
+
+    // TODO: merge these functions!
+    public void emitAckn(RemoteAcknChatMsg acknChatMsg) throws IOException {
+        this.emit(true, "ACKN", acknChatMsg.getId(), new String[]{acknChatMsg.getAcknUserId(), acknChatMsg.getSenderUserId()});
+        this.log("Forward an ACKN.");
     }
 
-    public void sendArrv(String userId, String userName, String groupDescription, int hopCount) throws IOException {
-        log("Broadcast ARRV");
+    public void emitAckn(LocalAcknChatMsg msg, String acknUserId, String senderUserId) throws IOException {
+        this.emit(true, "ACKN", msg.id, new String[]{acknUserId, senderUserId});
+        this.log("Forward an ACKN.");
+    }
+
+    /*
+     * Forward a SEND message to this server.
+     */
+    public void emitSend(LocalSendChatMsg msg, String senderId) throws IOException {
+        this.emit(true, "SEND", msg.id, new String[]{msg.getRecipient(), senderId, msg.getMessage()});
+        this.log("Forward a SEND.");
+    }
+
+    /*
+     * Forward a ARRV message to this server.
+     */
+    public void emitArrv(String userId, String userName, String groupDescription, int hopCount) throws IOException {
+        log("Forward an ARRV: " + userId + " (" + userName + ", " + groupDescription + ", " + hopCount + ")");
         this.emit(true, "ARRV", userId, new String[]{userName, groupDescription, Integer.toString(hopCount)});
     }
 
-    public void sendAckn(RemoteAcknChatMsg acknChatMsg) throws IOException {
-        log("Broadcast ACKN");
-        this.emit(true, "ACKN", acknChatMsg.getId(), new String[]{acknChatMsg.getAcknUserId(), acknChatMsg.getSenderUserId()});
-    }
-
-
-    public void sendLeft(String userId) throws IOException {
+    /*
+     * Forward a LEFT message to this server.
+     */
+    public void emitLeft(String userId) throws IOException {
         this.emit(true, "LEFT", userId);
+        this.log("Forward a LEFT.");
     }
 
-    //TODO: Except for the flag, this method is a copy of the Clients emitMessage method
-    public void emitMessage(LocalSendChatMsg msg, String senderId) throws IOException {
-        this.websocket.emit(true, "SEND", msg.id, new String[]{msg.getRecipient(), senderId, msg.getMessage()});
-        this.log("Broadcasted a message.");
+    /*
+     * The following methods are used to handle the remote clients connected to a server.
+     */
+    public void registerClient(RemoteClient remoteClient) {
+        this.clients.put(remoteClient.getUserId(), remoteClient);
     }
 
-    public void emitAcknowledgement(LocalAcknChatMsg msg, String acknUserId, String senderUserId) throws IOException {
-        this.websocket.emit(true, "ACKN", msg.id, new String[]{acknUserId, senderUserId});
-        this.log("Broadcasted an ack.");
+    public RemoteClient getClient(String clientId) {
+        return clients.get(clientId);
     }
 
     public LinkedList<RemoteClient> getClients() {
         return new LinkedList<>(clients.values());
     }
 
+
     /*
-  * Used to compare clients and check whether they are the same or not.
-  */
+     * Used to compare clients and check whether they are the same or not.
+     */
     @Override
     public boolean equals(Object obj) {
         if (obj == null) {
@@ -96,9 +111,5 @@ public class Server extends Peer {
         if (DEBUG) {
             System.out.println("[S] " + msg);
         }
-    }
-
-    public void registerClient(RemoteClient remoteClient) {
-        this.clients.put(remoteClient.getUserId(), remoteClient);
     }
 }

@@ -8,7 +8,6 @@ import java.security.NoSuchAlgorithmException;
 public class Peer {
     // Network Level
     protected WebSocket websocket;
-    private int hopCount;
 
     public Peer() {
         websocket = null;

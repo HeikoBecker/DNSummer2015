@@ -4,7 +4,7 @@ import java.io.IOException;
 public class PongConnMsg extends Message {
 
     public PongConnMsg() {
-        this.Type = "ws-PONG";
+        this.type = "ws-PONG";
     }
 
     @Override

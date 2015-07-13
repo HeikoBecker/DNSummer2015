@@ -67,6 +67,9 @@ public class FrameFactory {
         return (byte) (FIN + OPCode);
     }
 
+    /*
+     * Message are split, extended by masking information, masked and then returned.
+     */
     private static byte[] mask(byte[] originalMessage) {
         byte[] transformedMessage = new byte[originalMessage.length+4]; // The 4 additional bytes are used to store the masking key.
         int payloadField = originalMessage[1] & 0b01111111; // The payload value in the second byte.

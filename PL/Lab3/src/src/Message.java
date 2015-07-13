@@ -2,13 +2,13 @@ import java.io.IOException;
 
 public abstract class Message {
     protected String id;
-    protected String Type;
+    protected String type;
 
     public Message() { }
 
     @Override
     public String toString() {
-        return Type + " " + id;
+        return type + " " + id;
     }
 
     /*

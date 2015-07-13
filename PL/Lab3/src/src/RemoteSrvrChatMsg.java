@@ -3,7 +3,7 @@ import java.io.IOException;
 public class RemoteSrvrChatMsg extends Message {
 
     public RemoteSrvrChatMsg() {
-        this.Type = "dnChat-SRVR";
+        this.type = "dnChat-SRVR";
     }
 
     @Override

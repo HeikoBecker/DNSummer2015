@@ -7,7 +7,7 @@ import java.util.LinkedList;
 public class OutstandingAcknowledgements {
     private String senderId;
     private LinkedList<String> recipientIds;
-	private long creationTime;;
+    private long creationTime;
 
     public OutstandingAcknowledgements(String senderId, long creationTime) {
         this.senderId = senderId;
@@ -35,7 +35,7 @@ public class OutstandingAcknowledgements {
         return recipientIds.size();
     }
 
-	public long getAge() {
-		return this.creationTime;
-	}
+    public long getAge() {
+        return this.creationTime;
+    }
 }

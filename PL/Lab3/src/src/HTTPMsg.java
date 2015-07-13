@@ -10,7 +10,7 @@ public class HTTPMsg extends Message {
 	private boolean invalid;
 
 	public HTTPMsg(){
-		this.Type = "http-Handshake";
+		this.type = "http-Handshake";
 		this.invalid = false;
 		this.hostSet = false;
 		this.isCorrectProtocol = false;		
