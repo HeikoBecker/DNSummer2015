@@ -44,12 +44,12 @@ public class Server extends Peer {
 
     public void sendArrv(String userId, String userName, String groupDescription, int hopCount) throws IOException {
         log("Broadcast ARRV");
-        this.emit(true, "ARRV", userId, new String[]{userName, groupDescription, Integer.toString(hopCount) });
+        this.emit(true, "ARRV", userId, new String[]{userName, groupDescription, Integer.toString(hopCount)});
     }
 
     public void sendAckn(RemoteAcknChatMsg acknChatMsg) throws IOException {
         log("Broadcast ACKN");
-        this.emit(true, "ACKN", acknChatMsg.getId(), new String[] { acknChatMsg.getAcknUserId(), acknChatMsg.getSenderUserId() });
+        this.emit(true, "ACKN", acknChatMsg.getId(), new String[]{acknChatMsg.getAcknUserId(), acknChatMsg.getSenderUserId()});
     }
 
 
@@ -58,16 +58,16 @@ public class Server extends Peer {
     }
 
     //TODO: Except for the flag, this method is a copy of the Clients emitMessage method
-	public void emitMessage(LocalSendChatMsg msg, String userId) throws IOException {
-        this.websocket.emit(true, "SEND", msg.id, new String[]{msg.getRecipient(),userId, msg.getMessage()});
+    public void emitMessage(LocalSendChatMsg msg, String senderId) throws IOException {
+        this.websocket.emit(true, "SEND", msg.id, new String[]{msg.getRecipient(), senderId, msg.getMessage()});
         this.log("Broadcasted a message.");
-	}
+    }
 
-	public void emitAcknowledgement(LocalAcknChatMsg msg, String acknUserId, String senderUserId) throws IOException {
+    public void emitAcknowledgement(LocalAcknChatMsg msg, String acknUserId, String senderUserId) throws IOException {
         this.websocket.emit(true, "ACKN", msg.id, new String[]{acknUserId, senderUserId});
         this.log("Broadcasted an ack.");
-	}
-    
+    }
+
     public LinkedList<RemoteClient> getClients() {
         return new LinkedList<>(clients.values());
     }
@@ -98,7 +98,7 @@ public class Server extends Peer {
         }
     }
 
-	public void registerClient(RemoteClient remoteClient) {
-		this.clients.put(remoteClient.getUserId(), remoteClient);
-	}
+    public void registerClient(RemoteClient remoteClient) {
+        this.clients.put(remoteClient.getUserId(), remoteClient);
+    }
 }

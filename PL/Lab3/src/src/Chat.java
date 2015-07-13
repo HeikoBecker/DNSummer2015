@@ -158,6 +158,7 @@ public class Chat {
 	// ----------------- COLLISION CHECKS -----------------
 
 	public synchronized boolean isNameTaken(String userName) {
+        // TODO: also check remote clients
 		boolean result = false;
 		for (LocalClient existingClient : clients.values()) {
 			if (existingClient.getUserName().equals(userName)) {
@@ -169,7 +170,8 @@ public class Chat {
 	}
 
 	public synchronized boolean isUserIdTaken(String userId) {
-		return clients.containsKey(userId);
+        // TODO: also check remote clients
+        return clients.containsKey(userId);
 	}
 
 	public synchronized boolean isMessageIdTaken(String messageId) {
@@ -187,8 +189,9 @@ public class Chat {
 
 	public synchronized void emitMessage(LocalSendChatMsg msg,
 			String senderId) throws IOException {
-		String recipientName = msg.getRecipient();
-        if (recipientName.equals("*")) {
+		String recipient = msg.getRecipient();
+
+        if (recipient.equals("*")) {
 			for (LocalClient receivingClient : clients.values()) {
 				if (!receivingClient.getUserId().equals(senderId)
                         && receivingClient.getHopCount() == 0) {
@@ -202,19 +205,19 @@ public class Chat {
                 remoteServer.emitMessage(msg, senderId);
             }
 		} else {
-			LocalClient receivingClient = clients.get(recipientName);
+			LocalClient receivingClient = clients.get(recipient);
             if(receivingClient != null) {
                 receivingClient.emitSendChatMsg(msg, senderId);
                 storeMessage(msg.getId(), senderId, receivingClient.getUserId());
             } else {
-                // TODO: find the recipients ID and then find the best hop
-                throw new NotImplementedException();
+                Server remote = findBestNextHopForClient(recipient);
+                remote.emitMessage(msg, senderId);
             }
 		}
 		broadcastedMessages.put(msg.getId(), new Date(System.currentTimeMillis()));
 	}
 
-	public synchronized void emitAcknowledgement(LocalAcknChatMsg msg,
+    public synchronized void emitAcknowledgement(LocalAcknChatMsg msg,
 			LocalClient sendingClient) throws IOException {
 		if (outstandingAcks.containsKey(msg.id)) {
 			String acknUserId = sendingClient.getUserId();
