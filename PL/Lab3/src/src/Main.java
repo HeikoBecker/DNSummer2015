@@ -1,12 +1,14 @@
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.util.LinkedList;
 import java.util.Scanner;
 
 public class Main {
+    private static final boolean DEBUG = false;
+    private static LinkedList<Thread> openConnections = new LinkedList<>();
 
-
-    public static void main(String[] args) throws IOException, InterruptedException {
+    public static void main(String[] args) throws IOException {
         System.out.println("dnChat is getting started!");
         int listenPort = Chat.DEFAULT_PORT;
         if(args.length > 0) {
@@ -29,13 +31,17 @@ public class Main {
             }
         }
         wt.interrupt();
-        // TODO: close all connection threads to other servers
+
+        // TODO: close all connection threads to other servers; only works in one direction
+        for(Thread t : openConnections) {
+            t.interrupt();
+        }
 
         // Close Scanner to avoid resource leak
         sc.close();
     }
 
-    private static void connect(String line) throws IOException, InterruptedException {
+    private static void connect(String line) {
         String[] parts = line.split(" ");
         if(!(parts.length == 2 || parts.length == 3)) {
             System.out.println("Please enter a command of the form \"connect <host> [port]\".");
@@ -47,7 +53,15 @@ public class Main {
             connectPort = Integer.parseInt(parts[2]);
         }
 
-        ConnectionThread ct = new ConnectionThread(parts[1], connectPort);
-        ct.start();
+        try {
+            Thread ct = new Thread(new ConnectionThread(parts[1], connectPort));
+            ct.setDaemon(true);
+            openConnections.add(ct);
+            ct.start();
+        } catch (IOException e) {
+            if(DEBUG) {
+                e.printStackTrace();
+            }
+        }
     }
 }

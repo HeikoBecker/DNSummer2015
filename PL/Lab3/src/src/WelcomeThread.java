@@ -1,5 +1,6 @@
 import java.io.IOException;
 import java.net.ServerSocket;
+import java.util.LinkedList;
 
 /*
  * @class WelcomeThread
@@ -7,8 +8,10 @@ import java.net.ServerSocket;
  * handling thread for each request received on the bound server socket.
  */
 public class WelcomeThread implements Runnable {
-    private final boolean DEBUG = true;
+    private final boolean DEBUG = false;
     private int PORT = 42015; // using the dnChat protocol's default port.
+
+    private LinkedList<Thread> openConnections = new LinkedList<>();
 
     public WelcomeThread(int port) {
         this.PORT = port;
@@ -26,10 +29,14 @@ public class WelcomeThread implements Runnable {
             //Accept all incoming connections on the server socket.
             //socket.accept() blocks hence there is no busy wait
             while (true) {
-                ConnectionThread conn = new ConnectionThread(socket.accept());
+                Thread conn = new Thread(new ConnectionThread(socket.accept()));
+                openConnections.add(conn);
                 conn.start();
             }
         } catch (IOException e) {
+            for(Thread t : openConnections) {
+                t.interrupt();
+            }
             e.printStackTrace();
         }
     }

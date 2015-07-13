@@ -18,7 +18,7 @@ public class Server extends Peer {
         this.id = maxId++;
     }
 
-    public void connect(String host) throws IOException, InterruptedException {
+    public void connect(String host) throws IOException {
         this.websocket.executeHandshake(host);
         this.emit(true, "SRVR", "0");
         log("SRVR segment sent.");
@@ -28,7 +28,7 @@ public class Server extends Peer {
     }
 
     @Override
-    public void exit() throws IOException {
+    public void exit() {
         log("SERVER EXITING");
 
         // TODO: ensure proper clean-up, by removing all entries entered by this instance

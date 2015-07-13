@@ -43,9 +43,13 @@ public class LocalClient extends Peer {
     /*
      * When a client exits, other client should be informed and the socket should be shut down properly.
      */
-    public void exit() throws IOException {
+    public void exit()  {
         if (isAuthenticated) {
-            Chat.getInstance().unregisterClient(userId);
+            try {
+                Chat.getInstance().unregisterClient(userId);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
         this.log("Exited.");
         this.websocket.close();

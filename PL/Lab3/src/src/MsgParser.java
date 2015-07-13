@@ -43,7 +43,7 @@ public class MsgParser {
                 new DataInputStream(is)));
     }
 
-    public HTTPMsg getHTTPMessage(boolean isResponse) throws IOException, InterruptedException {
+    public HTTPMsg getHTTPMessage(boolean isResponse) throws IOException {
         String input;
         String[] lines;
         HTTPMsg msg = new HTTPMsg();

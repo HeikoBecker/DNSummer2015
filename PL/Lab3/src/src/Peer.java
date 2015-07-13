@@ -27,7 +27,7 @@ public class Peer {
                 }
                 return websocketMessage;
             }
-        } catch (SocketException | NoSuchAlgorithmException | InterruptedException e) {
+        } catch (SocketException | NoSuchAlgorithmException e) {
             System.out.println(e.getMessage());
         }
         return new CloseConnMsg();
@@ -78,11 +78,11 @@ public class Peer {
         throw new NotImplementedException();
     }
 
-    public void connect(String host) throws IOException, InterruptedException {
+    public void connect(String host) throws IOException {
         throw new NotImplementedException();
     }
 
-    public void exit() throws IOException {
+    public void exit() {
         throw new NotImplementedException();
     }
 

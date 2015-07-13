@@ -36,6 +36,7 @@ public class WebSocket {
                 peerSocket.shutdownOutput();
                 peerSocket.close();
             } catch (IOException e) {
+                System.out.println("Connection already closed.");
                 e.printStackTrace();
             }
         }
@@ -70,7 +71,7 @@ public class WebSocket {
     }
 
 
-    public boolean awaitHandshake() throws IOException, NoSuchAlgorithmException, InterruptedException {
+    public boolean awaitHandshake() throws IOException, NoSuchAlgorithmException {
         log("Awaiting handshake.");
 
         HTTPMsg clientHandshake = parser.getHTTPMessage(false);
@@ -123,7 +124,7 @@ public class WebSocket {
         return DatatypeConverter.printBase64Binary(cript.digest());
     }
 
-    public void executeHandshake(String host) throws IOException, InterruptedException {
+    public void executeHandshake(String host) throws IOException {
         log("Sending handshake.");
         PrintWriter pr = new PrintWriter(this.peerSocket.getOutputStream(), true);
         byte[] nonce = new byte[16];
