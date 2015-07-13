@@ -14,7 +14,8 @@ public class WebSocket {
     private Socket peerSocket;
     MsgParser parser;
     private BufferedOutputStream bw;
-    private boolean isClient;
+    private boolean isWsClient = false;
+    private boolean isDnClient = false;
 
     public WebSocket(Socket peerSocket) throws IOException {
         try {
@@ -46,9 +47,11 @@ public class WebSocket {
      * Setting a flag that indicates that this socket is connected to a client and not to a server.
      * This affects parsing of incoming messages.
      */
-    public void setClient() {
-        this.isClient = true;
+    public void setDnClient() {
+        this.isDnClient = true;
     }
+
+    public void setWsClient() { this.isWsClient = true; }
 
     /*
      * Emitting a chat message, consisting of a command, an id and a list of additional lines.
@@ -71,7 +74,7 @@ public class WebSocket {
     }
 
     public Message getWebsocketMessage() throws IOException {
-        return parser.getWebsocketMessage(this.isClient);
+        return parser.getWebsocketMessage(this.isDnClient, !this.isWsClient);
     }
 
     /*

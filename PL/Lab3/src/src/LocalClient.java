@@ -11,7 +11,7 @@ public class LocalClient extends Peer {
 
     public LocalClient(Peer peer) {
         this.websocket = peer.websocket;
-        this.websocket.setClient();
+        this.websocket.setDnClient();
     }
 
 	public String getUserId() {

@@ -143,7 +143,7 @@ public class MsgParser {
         return msg;
     }
 
-    public Message getWebsocketMessage(boolean isClient) throws IOException {
+    public Message getWebsocketMessage(boolean isDnClient, boolean isWsClient) throws IOException {
         int count = 0;
         int c;
         Integer payloadlength = 125;
@@ -168,7 +168,7 @@ public class MsgParser {
                     // This is forbidden according to the RFC
                     // In this case we should cleanly close the connection.
                     boolean mask = (c & 0b10000000) == 0b10000000;
-                    if (!mask)
+                    if (isWsClient && !mask)
                     {
                         log("Client not setting mask bit.");
                         return new CloseConnMsg();
@@ -229,7 +229,7 @@ public class MsgParser {
                 return new CloseConnMsg(); // INV PAYLOAD DATA (Sec. 11.7, Page 64)
             case TEXT:
                 return ChatMsgCodec
-                        .decodeMessage(isClient, new String(payload, StandardCharsets.UTF_8));
+                        .decodeMessage(isDnClient, new String(payload, StandardCharsets.UTF_8));
             case CONNCLOSE:
                 return new CloseConnMsg();
             case PING:

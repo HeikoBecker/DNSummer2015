@@ -33,9 +33,6 @@ public class Server extends Peer {
         this.websocket.close();
     }
 
-
-
-
     // TODO: merge these functions!
     public void emitAckn(RemoteAcknChatMsg acknChatMsg) throws IOException {
         this.emit(true, "ACKN", acknChatMsg.getId(), new String[]{acknChatMsg.getAcknUserId(), acknChatMsg.getSenderUserId()});

@@ -35,6 +35,7 @@ public class ConnectionThread implements Runnable {
         try {
             socket.connect(new InetSocketAddress(host, connectPort), 5000);
             peer = new Server(socket);
+            peer.websocket.setWsClient();
             peer.connect(host);
             Chat.getInstance().addFederationServer((Server) peer);
         } catch (UnknownHostException e) {
