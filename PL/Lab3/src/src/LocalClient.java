@@ -70,6 +70,11 @@ public class LocalClient extends Peer {
         this.log("Received an ack.");
     }
 
+    public void emitAcknChatMsg(String messageId, String senderId) throws IOException {
+        this.websocket.emit(false, "ACKN", messageId, new String[]{senderId});
+        this.log("Received an ack.");
+    }
+
     /*
      * Emitting that another client arrived to the current client.
      * Sending an empty description string is ok, as stated here: https://dcms.cs.uni-saarland.de/dn/forum/viewtopic.php?f=3&t=132

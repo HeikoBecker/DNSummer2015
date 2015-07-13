@@ -47,6 +47,12 @@ public class Server extends Peer {
         this.emit(true, "ARRV", userId, new String[]{userName, groupDescription, Integer.toString(hopCount) });
     }
 
+    public void sendAckn(RemoteAcknChatMsg acknChatMsg) throws IOException {
+        log("Broadcast ACKN");
+        this.emit(true, "ACKN", acknChatMsg.getId(), new String[] { acknChatMsg.getAcknUserId(), acknChatMsg.getSenderUserId() });
+    }
+
+
     public void sendLeft(String userId) throws IOException {
         this.emit(true, "LEFT", userId);
     }
@@ -57,8 +63,8 @@ public class Server extends Peer {
         this.log("Broadcasted a message.");
 	}
 
-	public void emitAcknowledgement(AcknChatMsg msg, String userId) throws IOException {
-        this.websocket.emit(true, "ACKN", msg.id, new String[]{userId});
+	public void emitAcknowledgement(AcknChatMsg msg, String acknUserId, String senderUserId) throws IOException {
+        this.websocket.emit(true, "ACKN", msg.id, new String[]{acknUserId, senderUserId});
         this.log("Broadcasted an ack.");
 	}
     
@@ -95,5 +101,4 @@ public class Server extends Peer {
 	public void registerClient(RemoteClient remoteClient) {
 		this.clients.put(remoteClient.getUserId(), remoteClient);
 	}
-
 }

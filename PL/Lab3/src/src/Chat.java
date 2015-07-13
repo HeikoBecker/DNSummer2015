@@ -13,12 +13,12 @@ public class Chat {
 	private static Chat instance = null;
 	public static final int DEFAULT_PORT = 42015;
 
-	/*
-	 * Cleanup Task removing all messages that are older than MAXAGE minutes.
-	 * 
-	 * Here we derive from the specification as explained in
-	 * https://dcms.cs.uni-saarland.de/dn/forum/viewtopic.php?f=3&t=109
-	 */
+    /*
+     * Cleanup Task removing all messages that are older than MAXAGE minutes.
+     *
+     * Here we derive from the specification as explained in
+     * https://dcms.cs.uni-saarland.de/dn/forum/viewtopic.php?f=3&t=109
+     */
 	private class Cleaner extends TimerTask {
 
 		@Override
@@ -73,7 +73,7 @@ public class Chat {
 	public synchronized void receiveArrvBroadcast(ArrvChatMsg arrvChatMsg,
 			Server sendingServer) throws IOException {
 		// Check if incoming message has been broadcast already
-		log("Received broadcast");
+		log("Received ARRV broadcast");
 
 		// Forward to local clients
 		for (LocalClient client : this.clients.values()) {
@@ -93,7 +93,24 @@ public class Chat {
                 new Date(System.currentTimeMillis()));
 	}
 
-	/*
+    public void receiveAcknBroadcast(RemoteAcknChatMsg acknChatMsg, Server sendingServer) throws IOException {
+        log("Received ACKN broadcast");
+        for (LocalClient localClient : this.clients.values()) {
+            if(acknChatMsg.getSenderUserId().equals(localClient.getUserId())) {
+                localClient.emitAcknChatMsg(acknChatMsg.getId(), acknChatMsg.getAcknUserId());
+            }
+        }
+        for (Server remote : federationServers) {
+            if (!remote.equals(sendingServer)) {
+                remote.sendAckn(acknChatMsg);
+            }
+        }
+        broadcastedMessages.put(acknChatMsg.getId(),
+                new Date(System.currentTimeMillis()));
+    }
+
+
+    /*
 	 * Synchronized sending of all registered users. Must be synchronized as we
 	 * have no concurrent hashmap
 	 */
@@ -183,17 +200,22 @@ public class Chat {
 	public synchronized void emitAcknowledgement(AcknChatMsg msg,
 			LocalClient sendingClient) throws IOException {
 		if (outstandingAcks.containsKey(msg.id)) {
-			String receiverId = sendingClient.getUserId();
-			LocalClient localClient = clients.get(outstandingAcks.get(msg.id)
-					.getSenderId());
-			localClient.emitAcknChatMsg(msg, receiverId);
-			removeMessage(msg.id, receiverId);
-		}
-		if (! this.broadcasted(msg.getId())){
-			for (Server remoteServer : this.federationServers){
-				//TODO: Format compliance?
-				remoteServer.emitAcknowledgement(msg, sendingClient.getUserId());
-			}
+			String acknUserId = sendingClient.getUserId();
+            String senderId = outstandingAcks.get(msg.id).getSenderId();
+            LocalClient localClient = clients.get(senderId);
+            if(localClient != null) {
+                localClient.emitAcknChatMsg(msg, acknUserId);
+            } else {
+                String messageIdentifier = msg.getId() + '-' + acknUserId;
+                if(!broadcasted(messageIdentifier)) {
+                    // TODO: Actively look for the optimal server to send the ackn to.
+                    for (Server remoteServer : this.federationServers){
+                        remoteServer.emitAcknowledgement(msg, acknUserId, senderId);
+                    }
+                    broadcastedMessages.put(messageIdentifier, new Date(System.currentTimeMillis()));
+                }
+            }
+            removeMessage(msg.id, acknUserId);
 		}
 	}
 
