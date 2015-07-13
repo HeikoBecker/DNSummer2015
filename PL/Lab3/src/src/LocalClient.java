@@ -110,7 +110,7 @@ public class LocalClient extends Peer {
      */
     @Override
     public void recvSendChatMsg(SendChatMsg sendMsg) throws IOException {
-        Chat.getInstance().emitMessage(sendMsg, this);
+        Chat.getInstance().emitMessage(sendMsg, this.userId);
         this.log("Sent a message.");
     }
 

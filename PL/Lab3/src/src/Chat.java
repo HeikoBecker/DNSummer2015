@@ -156,30 +156,28 @@ public class Chat {
 	// ----------------- RELAYING MESSAGES TO OTHER CLIENTS -----------------
 
 	public synchronized void emitMessage(SendChatMsg msg,
-			LocalClient sendingClient) throws IOException {
+			String senderId) throws IOException {
 		String recipientName = msg.getRecipient();
-		if (recipientName.equals("*")) {
+        if (recipientName.equals("*")) {
 			for (LocalClient receivingClient : clients.values()) {
-				if (!receivingClient.equals(sendingClient)
-						&& receivingClient.getHopCount() == 0) {
-					receivingClient.emitSendChatMsg(msg,
-							sendingClient.getUserId());
-					storeMessage(msg.getId(), sendingClient.getUserId(),
+				if (!receivingClient.getUserId().equals(senderId)
+                        && receivingClient.getHopCount() == 0) {
+					receivingClient.emitSendChatMsg(msg, senderId);
+					storeMessage(msg.getId(), senderId,
 							receivingClient.getUserId());
 				}
 			}
 		} else {
 			LocalClient receivingClient = clients.get(recipientName);
-			receivingClient.emitSendChatMsg(msg, sendingClient.getUserId());
-			storeMessage(msg.getId(), sendingClient.getUserId(),
-					receivingClient.getUserId());
+			receivingClient.emitSendChatMsg(msg, senderId);
+			storeMessage(msg.getId(), senderId, receivingClient.getUserId());
 		}
-		if (! this.broadcasted(msg.getId())){
-			for (Server remoteServer : this.federationServers){
-				//TODO: Format compliance?
-				remoteServer.emitMessage(msg, sendingClient.getUserId());
-			}
+
+		for (Server remoteServer : this.federationServers){
+			//TODO: Format compliance?
+			remoteServer.emitMessage(msg, senderId);
 		}
+		broadcastedMessages.put(msg.getId(), new Date(System.currentTimeMillis()));
 	}
 
 	public synchronized void emitAcknowledgement(AcknChatMsg msg,
