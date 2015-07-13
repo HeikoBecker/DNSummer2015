@@ -20,7 +20,7 @@ public class ConnectionThread extends Thread {
         // create a new client and let it execute
         peer = new Peer(peerSocket);
         Message msg = peer.initialize();
-        if (msg.getClass() == SrvrChatMsg.class) {
+        if (msg.getClass() == RemoteSrvrChatMsg.class) {
             peer = new Server(peer);
             Chat.getInstance().addFederationServer((Server) peer);
         } else {

@@ -3,9 +3,9 @@ import java.io.IOException;
 /*
  *  High Level encapsulation of a single ACKN message.
  */
-public class AcknChatMsg extends Message {
+public class LocalAcknChatMsg extends Message {
 
-    public AcknChatMsg(String id) {
+    public LocalAcknChatMsg(String id) {
         this.Type = "dnChat-ACKN";
         this.id = id;
     }

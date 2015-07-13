@@ -4,14 +4,14 @@ import java.io.IOException;
  * High Level encapsulation of a single AUTH message.
  * Statically checks against group password.
  */
-public class AuthChatMsg extends Message {
+public class LocalAuthChatMsg extends Message {
     // We use our group password to authenticate users.
     private static final String groupPassword = "3YnnafwB";
 
     private boolean validPassword = false;
     private String name;
 
-    public AuthChatMsg(String id, String name, String password) {
+    public LocalAuthChatMsg(String id, String name, String password) {
         this.Type = "dnChat-AUTH";
         this.id = id;
         this.name = name;

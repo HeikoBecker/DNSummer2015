@@ -29,7 +29,7 @@ public class ChatMsgCodec {
                 } else {
                     String name = lines[1];
                     String password = lines[2];
-                    return new AuthChatMsg(id, name, password);
+                    return new LocalAuthChatMsg(id, name, password);
                 }
             case "SEND":
                 if (isClient) {
@@ -39,7 +39,7 @@ public class ChatMsgCodec {
                     }
                     String recipient = lines[1];
                     String message = lines[2];
-                    return new SendChatMsg(id, recipient, message);
+                    return new LocalSendChatMsg(id, recipient, message);
 
                 } else {
                     String recipient = lines[1];
@@ -55,7 +55,7 @@ public class ChatMsgCodec {
                     if (lines.length != 1) {
                         return new InvdMsg();
                     }
-                    return new AcknChatMsg(id);
+                    return new LocalAcknChatMsg(id);
                 } else {
                     if (lines.length != 3) {
                         return new InvdMsg();
@@ -68,7 +68,7 @@ public class ChatMsgCodec {
                 if (isClient) {
                     return new InvdMsg();
                 } else {
-                    return new SrvrChatMsg();
+                    return new RemoteSrvrChatMsg();
                 }
             case "ARRV":
                 if (isClient || lines.length != 4) {
@@ -77,7 +77,7 @@ public class ChatMsgCodec {
                     String userName = lines[1];
                     String description = lines[2];
                     int hopCount = Integer.parseInt(lines[3]);
-                    return new ArrvChatMsg(id, userName, description, hopCount);
+                    return new RemoteArrvChatMsg(id, userName, description, hopCount);
                 }
             case "LEFT":
                 if (isClient || lines.length != 0) {

@@ -1,6 +1,6 @@
 import java.io.IOException;
 
-public class RemoteAcknChatMsg extends AcknChatMsg {
+public class RemoteAcknChatMsg extends LocalAcknChatMsg {
 
     private String acknUserId;
     private String senderUserId;
@@ -13,7 +13,7 @@ public class RemoteAcknChatMsg extends AcknChatMsg {
 
 	@Override
 	public void execute(Peer peer) throws IOException {
-        Chat.getInstance().receiveAcknBroadcast(this, (Server) peer);
+        Chat.getInstance().receiveAcknForward(this);
 	}
 
     public String getAcknUserId() {

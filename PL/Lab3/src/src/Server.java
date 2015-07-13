@@ -1,7 +1,7 @@
 import java.io.IOException;
 import java.net.Socket;
-import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedList;
 
 public class Server extends Peer {
     private static int maxId = 0;
@@ -37,7 +37,7 @@ public class Server extends Peer {
     }
 
     // TODO: merge these function together
-    public void sendArrv(ArrvChatMsg arrvChatMsg) throws IOException {
+    public void sendArrv(RemoteArrvChatMsg arrvChatMsg) throws IOException {
         log("Broadcast ARRV");
         this.emit(true, "ARRV", arrvChatMsg.getId(), new String[]{arrvChatMsg.getUserName(), "", ((arrvChatMsg.getHopCount() + 1) + "")});
     }
@@ -58,18 +58,18 @@ public class Server extends Peer {
     }
 
     //TODO: Except for the flag, this method is a copy of the Clients emitMessage method
-	public void emitMessage(SendChatMsg msg, String userId) throws IOException {
+	public void emitMessage(LocalSendChatMsg msg, String userId) throws IOException {
         this.websocket.emit(true, "SEND", msg.id, new String[]{msg.getRecipient(),userId, msg.getMessage()});
         this.log("Broadcasted a message.");
 	}
 
-	public void emitAcknowledgement(AcknChatMsg msg, String acknUserId, String senderUserId) throws IOException {
+	public void emitAcknowledgement(LocalAcknChatMsg msg, String acknUserId, String senderUserId) throws IOException {
         this.websocket.emit(true, "ACKN", msg.id, new String[]{acknUserId, senderUserId});
         this.log("Broadcasted an ack.");
 	}
     
-    public Collection<RemoteClient> getClients() {
-        return clients.values();
+    public LinkedList<RemoteClient> getClients() {
+        return new LinkedList<>(clients.values());
     }
 
     /*

@@ -5,13 +5,13 @@ import java.io.IOException;
  * The ChatMsgCodec enforces this.
  * Therefore we can cast the peer to a server in the execute method.
  */
-public class ArrvChatMsg extends Message {
+public class RemoteArrvChatMsg extends Message {
 
     private String userName;
     private String description;
     private int hopCount;
 
-    public ArrvChatMsg(String id, String userName, String description, int hopCount) {
+    public RemoteArrvChatMsg(String id, String userName, String description, int hopCount) {
         this.id = id;
         this.userName = userName;
         this.description = description;

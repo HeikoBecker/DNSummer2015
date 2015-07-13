@@ -1,8 +1,8 @@
 import java.io.IOException;
 
-public class SrvrChatMsg extends Message {
+public class RemoteSrvrChatMsg extends Message {
 
-    public SrvrChatMsg() {
+    public RemoteSrvrChatMsg() {
         this.Type = "dnChat-SRVR";
     }
 

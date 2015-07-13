@@ -57,7 +57,7 @@ public class LocalClient extends Peer {
     /*
      * Emitting another client's message to the current client.
      */
-    public void emitSendChatMsg(SendChatMsg msg, String senderId) throws IOException {
+    public void emitSendChatMsg(LocalSendChatMsg msg, String senderId) throws IOException {
         this.websocket.emit(false, "SEND", msg.id, new String[]{senderId, msg.getMessage()});
         this.log("Received a message.");
     }
@@ -65,7 +65,7 @@ public class LocalClient extends Peer {
     /*
      * Emitting another client's ackn message to the current client.
      */
-    public void emitAcknChatMsg(AcknChatMsg msg, String senderId) throws IOException {
+    public void emitAcknChatMsg(LocalAcknChatMsg msg, String senderId) throws IOException {
         this.websocket.emit(false, "ACKN", msg.id, new String[]{senderId});
         this.log("Received an ack.");
     }
@@ -105,7 +105,7 @@ public class LocalClient extends Peer {
      * Current client sent an ackn message, which is sent to the other clients.
      */
     @Override
-    public void recvAcknChatMsg(AcknChatMsg acknMsg) throws IOException {
+    public void recvAcknChatMsg(LocalAcknChatMsg acknMsg) throws IOException {
         Chat.getInstance().emitAcknowledgement(acknMsg, this);
         this.log("Sent an ack.");
     }
@@ -114,7 +114,7 @@ public class LocalClient extends Peer {
      * Current client sent a message, which is sent to the other clients.
      */
     @Override
-    public void recvSendChatMsg(SendChatMsg sendMsg) throws IOException {
+    public void recvSendChatMsg(LocalSendChatMsg sendMsg) throws IOException {
         Chat.getInstance().emitMessage(sendMsg, this.userId);
         this.log("Sent a message.");
     }

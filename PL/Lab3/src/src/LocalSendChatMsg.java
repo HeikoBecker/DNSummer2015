@@ -3,11 +3,11 @@ import java.io.IOException;
 /*
  * High Level encapsulation of a single SEND message.
  */
-public class SendChatMsg extends Message {
+public class LocalSendChatMsg extends Message {
     private final String message;
     private final String recipient;
 
-    public SendChatMsg(String id, String recipient, String message) {
+    public LocalSendChatMsg(String id, String recipient, String message) {
         this.Type = "dnChat-SEND";
         this.id = id;
         this.recipient = recipient;

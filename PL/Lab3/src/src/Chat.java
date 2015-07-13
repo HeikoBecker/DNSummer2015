@@ -1,3 +1,5 @@
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
+
 import java.io.IOException;
 import java.util.*;
 
@@ -70,7 +72,7 @@ public class Chat {
 		federationServers.add(server);
 	}
 
-	public synchronized void receiveArrvBroadcast(ArrvChatMsg arrvChatMsg,
+	public synchronized void receiveArrvBroadcast(RemoteArrvChatMsg arrvChatMsg,
 			Server sendingServer) throws IOException {
 		// Check if incoming message has been broadcast already
 		log("Received ARRV broadcast");
@@ -93,20 +95,15 @@ public class Chat {
                 new Date(System.currentTimeMillis()));
 	}
 
-    public void receiveAcknBroadcast(RemoteAcknChatMsg acknChatMsg, Server sendingServer) throws IOException {
-        log("Received ACKN broadcast");
-        for (LocalClient localClient : this.clients.values()) {
-            if(acknChatMsg.getSenderUserId().equals(localClient.getUserId())) {
-                localClient.emitAcknChatMsg(acknChatMsg.getId(), acknChatMsg.getAcknUserId());
-            }
+    public void receiveAcknForward(RemoteAcknChatMsg acknChatMsg) throws IOException {
+        log("Received ACKN");
+        LocalClient localClient = clients.get(acknChatMsg.getSenderUserId());
+        if(localClient != null) {
+            localClient.emitAcknChatMsg(acknChatMsg.getId(), acknChatMsg.getAcknUserId());
+        } else {
+            Server remote = findBestNextHopForClient(acknChatMsg.getSenderUserId());
+            remote.sendAckn(acknChatMsg);
         }
-        for (Server remote : federationServers) {
-            if (!remote.equals(sendingServer)) {
-                remote.sendAckn(acknChatMsg);
-            }
-        }
-        broadcastedMessages.put(acknChatMsg.getId(),
-                new Date(System.currentTimeMillis()));
     }
 
 
@@ -142,6 +139,22 @@ public class Chat {
 		return (this.broadcastedMessages.containsKey(id));
 	}
 
+    public synchronized Server findBestNextHopForClient(String clientId) {
+        Server bestNextHop = null;
+        int bestHopDistance = 0;
+        for(Server remoteServer : federationServers) {
+            for(RemoteClient remoteClient : remoteServer.getClients()) {
+                if(remoteClient.getUserId().equals(clientId)) {
+                    if(bestNextHop == null || bestHopDistance > remoteClient.getHopCount()) {
+                        bestNextHop = remoteServer;
+                        bestHopDistance = remoteClient.getHopCount();
+                    }
+                }
+            }
+        }
+        return bestNextHop;
+    }
+
 	// ----------------- COLLISION CHECKS -----------------
 
 	public synchronized boolean isNameTaken(String userName) {
@@ -172,7 +185,7 @@ public class Chat {
 
 	// ----------------- RELAYING MESSAGES TO OTHER CLIENTS -----------------
 
-	public synchronized void emitMessage(SendChatMsg msg,
+	public synchronized void emitMessage(LocalSendChatMsg msg,
 			String senderId) throws IOException {
 		String recipientName = msg.getRecipient();
         if (recipientName.equals("*")) {
@@ -184,20 +197,24 @@ public class Chat {
 							receivingClient.getUserId());
 				}
 			}
+            // In this case, the message is broadcasted to all other servers.
+            for (Server remoteServer : this.federationServers){
+                remoteServer.emitMessage(msg, senderId);
+            }
 		} else {
 			LocalClient receivingClient = clients.get(recipientName);
-			receivingClient.emitSendChatMsg(msg, senderId);
-			storeMessage(msg.getId(), senderId, receivingClient.getUserId());
-		}
-
-		for (Server remoteServer : this.federationServers){
-			//TODO: Format compliance?
-			remoteServer.emitMessage(msg, senderId);
+            if(receivingClient != null) {
+                receivingClient.emitSendChatMsg(msg, senderId);
+                storeMessage(msg.getId(), senderId, receivingClient.getUserId());
+            } else {
+                // TODO: find the recipients ID and then find the best hop
+                throw new NotImplementedException();
+            }
 		}
 		broadcastedMessages.put(msg.getId(), new Date(System.currentTimeMillis()));
 	}
 
-	public synchronized void emitAcknowledgement(AcknChatMsg msg,
+	public synchronized void emitAcknowledgement(LocalAcknChatMsg msg,
 			LocalClient sendingClient) throws IOException {
 		if (outstandingAcks.containsKey(msg.id)) {
 			String acknUserId = sendingClient.getUserId();
@@ -206,14 +223,8 @@ public class Chat {
             if(localClient != null) {
                 localClient.emitAcknChatMsg(msg, acknUserId);
             } else {
-                String messageIdentifier = msg.getId() + '-' + acknUserId;
-                if(!broadcasted(messageIdentifier)) {
-                    // TODO: Actively look for the optimal server to send the ackn to.
-                    for (Server remoteServer : this.federationServers){
-                        remoteServer.emitAcknowledgement(msg, acknUserId, senderId);
-                    }
-                    broadcastedMessages.put(messageIdentifier, new Date(System.currentTimeMillis()));
-                }
+                Server remoteServer = findBestNextHopForClient(senderId);
+                remoteServer.emitAcknowledgement(msg, acknUserId, senderId);
             }
             removeMessage(msg.id, acknUserId);
 		}

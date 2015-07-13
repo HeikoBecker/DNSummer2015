@@ -70,11 +70,11 @@ public class Peer {
 
     // ----------------- RECEIVE METHODS -----------------
 
-    public void recvAcknChatMsg(AcknChatMsg acknMsg) throws IOException {
+    public void recvAcknChatMsg(LocalAcknChatMsg acknMsg) throws IOException {
         throw new NotImplementedException();
     }
 
-    public void recvSendChatMsg(SendChatMsg sendMsg) throws IOException {
+    public void recvSendChatMsg(LocalSendChatMsg sendMsg) throws IOException {
         throw new NotImplementedException();
     }
 

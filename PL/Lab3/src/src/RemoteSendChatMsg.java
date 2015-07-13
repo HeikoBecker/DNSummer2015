@@ -1,7 +1,7 @@
 import java.io.IOException;
 
 
-public class RemoteSendChatMsg extends SendChatMsg {
+public class RemoteSendChatMsg extends LocalSendChatMsg {
 	String senderId;
 
 	public RemoteSendChatMsg(String id, String recipient, String senderId,
