@@ -115,7 +115,7 @@ public class Chat {
         // Forward information about local clients
         for (String id : this.clients.keySet()) {
             LocalClient client = this.clients.get(id);
-            server.emitArrv(id, client.getUserName(), "Group 12", 1);
+            server.emitArrv(id, client.getUserName(), "Group 25", 1);
         }
 
         // Forward information about remote clients
@@ -273,7 +273,7 @@ public class Chat {
         }
 
         for (Server server : federationServers) {
-            server.emitArrv(newClient.getUserId(), newClient.getUserName(), "Group 12", 0);
+            server.emitArrv(newClient.getUserId(), newClient.getUserName(), "Group 25", 1);
 
             for (RemoteClient remoteClient : server.getClients()) {
                 newClient.emitArrvChatMsg(remoteClient.getUserId(), remoteClient.getUserName());
