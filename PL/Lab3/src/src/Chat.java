@@ -44,6 +44,7 @@ public class Chat {
 
     private LinkedList<Server> federationServers = new LinkedList<>();
 
+    // TODO: messages have to be removed again, as e.g. ARRV message have identical sequence numbers
     // Message ID -> Date of adding
     private HashMap<String, Date> broadcastedMessages = new HashMap<>();
 
@@ -70,30 +71,78 @@ public class Chat {
         federationServers.add(server);
     }
 
+    public synchronized void removeFederationServer(Server server) {
+        federationServers.remove(server);
+        for(RemoteClient client : server.getClients()) {
+            for(Server federationServer : federationServers) {
+                try {
+                    federationServer.emitLeft(client.getUserId());
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            for(LocalClient localClient : clients.values()) {
+                try {
+                    localClient.emitLeftChatMsg(localClient.getUserId());
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
     public synchronized void receiveArrv(RemoteArrvChatMsg arrvChatMsg,
                                          Server sendingServer) throws IOException {
         // Check if incoming message has been broadcast already
-        log("Received ARRV broadcast");
+        if (!broadcasted(arrvChatMsg.id + "-ARRV")) {
+            log("Received ARRV broadcast");
 
-        // Forward to local clients
-        for (LocalClient client : this.clients.values()) {
-            if (!arrvChatMsg.getId().equals(client.getUserId())) {
-                client.emitArrvChatMsg(arrvChatMsg.getId(),
-                        arrvChatMsg.getUserName());
+            // Forward to local clients
+            for (LocalClient client : this.clients.values()) {
+                if (!arrvChatMsg.getId().equals(client.getUserId())) {
+                    client.emitArrvChatMsg(arrvChatMsg.getId(),
+                            arrvChatMsg.getUserName());
+                }
             }
-        }
 
-        // Forward to other servers
-        for (Server remote : federationServers) {
-            if (!remote.equals(sendingServer)) {
-                remote.emitArrv(arrvChatMsg.getId(), arrvChatMsg.getUserName(), "", ((arrvChatMsg.getHopCount() + 1)));
+            // Forward to other servers
+            for (Server remote : federationServers) {
+                if (!remote.equals(sendingServer)) {
+                    remote.emitArrv(arrvChatMsg.getId(), arrvChatMsg.getUserName(), arrvChatMsg.getDescription(), ((arrvChatMsg.getHopCount() + 1)));
+                }
             }
+            broadcastedMessages.put(arrvChatMsg.getId() + "-ARRV",
+                    new Date(System.currentTimeMillis()));
+
+            // the RemoteClient should be added to the sending Server no matter how far away it is
+            // otherwise we are not able to tell the presence of this user to local clients anymore
+            // or increases in distance due to appearing/disappearing connections in the network
+            sendingServer.registerClient(arrvChatMsg);
         }
-        broadcastedMessages.put(arrvChatMsg.getId(),
-                new Date(System.currentTimeMillis()));
     }
 
-    public void receiveAckn(RemoteAcknChatMsg acknChatMsg) throws IOException {
+    public void receiveLeft(RemoteLeftChatMsg remoteLeftChatMsg, Server sendingServer) throws IOException {
+        if(!broadcasted(remoteLeftChatMsg.getId() + "-LEFT")) {
+            log("Received LEFT broadcast");
+            String leftUserId = remoteLeftChatMsg.getId();
+            for (LocalClient client : this.clients.values()) {
+                client.emitLeftChatMsg(leftUserId);
+            }
+
+            for (Server remote : federationServers) {
+                if (!remote.equals(sendingServer)) {
+                    remote.emitLeft(leftUserId);
+                }
+            }
+
+            sendingServer.unregisterClient(remoteLeftChatMsg.id);
+            broadcastedMessages.put(remoteLeftChatMsg.getId() + "-LEFT",
+                    new Date(System.currentTimeMillis()));
+
+        }
+    }
+
+    public synchronized void receiveAckn(RemoteAcknChatMsg acknChatMsg) throws IOException {
         log("Received ACKN");
         LocalClient localClient = clients.get(acknChatMsg.getSenderUserId());
         if (localClient != null) {
@@ -233,7 +282,7 @@ public class Chat {
     /*
      * A message is stored so future acknowledgements can be checked.
      */
-    private void storeMessage(String messageId, String senderId,
+    private synchronized void storeMessage(String messageId, String senderId,
                               String receiverId) {
         if (!outstandingAcks.containsKey(messageId)) {
             outstandingAcks.put(messageId, new OutstandingAcknowledgements(
@@ -250,7 +299,7 @@ public class Chat {
      * A message's id can be reused, when all clients have sent their
      * acknowledgement.
      */
-    private void removeMessage(String messageId, String receiverId) {
+    private synchronized void removeMessage(String messageId, String receiverId) {
         outstandingAcks.get(messageId).remove(receiverId);
         if (outstandingAcks.get(messageId).size() == 0) {
             outstandingAcks.remove(messageId);

@@ -41,7 +41,6 @@ public class Peer {
             }
             websocketMessage.execute(this);
         }
-        exit();
     }
 
     // ----------------- EMIT METHODS TO FORWARD TO SOCKET -----------------

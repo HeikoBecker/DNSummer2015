@@ -7,6 +7,7 @@ public class Server extends Peer {
     private static int maxId = 0;
     private int id;
     private HashMap<String, RemoteClient> clients = new HashMap<>();
+    private boolean exited = false;
 
     public Server(Peer peer) {
         this.websocket = peer.websocket;
@@ -28,10 +29,15 @@ public class Server extends Peer {
 
     @Override
     public void exit() {
-        log("SERVER EXITING");
-        // TODO: ensure proper clean-up, by removing all entries entered by this instance
-        this.websocket.close();
+        if(!exited) {
+            Chat.getInstance().removeFederationServer(this);
+
+            // TODO: ensure proper clean-up, by removing all entries entered by this instance
+            this.websocket.close();
+            exited = true;
+        }
     }
+
 
     // TODO: merge these functions!
     public void emitAckn(RemoteAcknChatMsg acknChatMsg) throws IOException {
@@ -71,9 +77,8 @@ public class Server extends Peer {
     /*
      * The following methods are used to handle the remote clients connected to a server.
      */
-    public void registerClient(RemoteClient remoteClient) {
-        this.clients.put(remoteClient.getUserId(), remoteClient);
-    }
+    public void registerClient(RemoteArrvChatMsg remoteClient) { this.clients.put(remoteClient.getId(), new RemoteClient(remoteClient.getId(), remoteClient.getUserName(), remoteClient.getDescription(), remoteClient.getHopCount())); }
+    public void unregisterClient(String id) { this.clients.remove(id); }
 
     public RemoteClient getClient(String clientId) {
         return clients.get(clientId);

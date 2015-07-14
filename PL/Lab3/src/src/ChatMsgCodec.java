@@ -1,5 +1,3 @@
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
-
 /*
  * Static methods to decode Client messages into high level objects
  * and encode high level objects into strings for sending.
@@ -80,11 +78,10 @@ public class ChatMsgCodec {
                     return new RemoteArrvChatMsg(id, userName, description, hopCount);
                 }
             case "LEFT":
-                if (isClient || lines.length != 0) {
+                if (isClient || lines.length != 1) {
                     return new InvdMsg();
                 } else {
-                    // TODO: implement LEFT by server
-                    throw new NotImplementedException();
+                    return new RemoteLeftChatMsg(id);
                 }
             default:
                 return new InvdMsg();

@@ -20,15 +20,7 @@ public class RemoteArrvChatMsg extends Message {
 
     @Override
     public void execute(Peer peer) throws IOException {
-        Chat chat = Chat.getInstance();
-        if (!chat.broadcasted(this.id)) {
-            Server sender = (Server) peer;
-            chat.receiveArrv(this, sender);
-            // the RemoteClient should be added to the sending Server no matter how far away it is
-            // otherwise we are not able to tell the presence of this user to local clients anymore
-            // or increases in distance due to appearing/disappearing connections in the network
-            sender.registerClient(new RemoteClient(this.id, this.userName, this.description, this.hopCount));
-        }
+        Chat.getInstance().receiveArrv(this, (Server) peer);
     }
 
     public String getUserName() {
@@ -37,5 +29,9 @@ public class RemoteArrvChatMsg extends Message {
 
     public int getHopCount() {
         return hopCount;
+    }
+
+    public String getDescription() {
+        return description;
     }
 }
