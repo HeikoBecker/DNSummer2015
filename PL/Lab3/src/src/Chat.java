@@ -74,6 +74,10 @@ public class Chat {
     public synchronized void removeFederationServer(Server server) {
         federationServers.remove(server);
         for(RemoteClient client : server.getClients()) {
+            // TODO: we should check whether there is still a connection to this user via another server. Then we should send new arrivals in case these users are still present
+
+
+            // TODO: think about advertising users only to those servers that we do not use for routing to them. POISONING
             for(Server federationServer : federationServers) {
                 try {
                     federationServer.emitLeft(client.getUserId());
@@ -83,7 +87,7 @@ public class Chat {
             }
             for(LocalClient localClient : clients.values()) {
                 try {
-                    localClient.emitLeftChatMsg(localClient.getUserId());
+                    localClient.emitLeftChatMsg(client.getUserId());
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
