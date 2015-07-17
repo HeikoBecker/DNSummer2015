@@ -35,7 +35,13 @@ public class Server extends Peer {
     @Override
     public void exit() {
         if(!exited) {
-            Chat.getInstance().removeFederationServer(this);
+            try {
+				Chat.getInstance().removeFederationServer(this);
+			} catch (IOException e) {
+				log("Could not unregister Server due to Network/IOError");
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 
             // TODO: ensure proper clean-up, by removing all entries entered by this instance
             this.websocket.close();
