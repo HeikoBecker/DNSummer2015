@@ -221,8 +221,17 @@ public class Chat {
     }
 
     public synchronized boolean isUserIdTaken(String userId) {
-        // TODO: also check remote clients
-        return clients.containsKey(userId);
+    	//check local clients first for complexity reasons
+    	boolean local = clients.containsKey(userId);
+    	if (local)
+    		return true;
+        // check remote clients
+    	for ( Server server: this.federationServers){
+    		if (server.getClient(userId) != null){
+    			return true;
+    		}
+    	}
+        return false;
     }
 
     public synchronized boolean isMessageIdTaken(String messageId) {
