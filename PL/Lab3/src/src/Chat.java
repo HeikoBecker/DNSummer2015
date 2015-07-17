@@ -209,13 +209,25 @@ public class Chat {
     // ----------------- COLLISION CHECKS -----------------
 
     public synchronized boolean isNameTaken(String userName) {
-        // TODO: also check remote clients
+    	//check local clients
         boolean result = false;
         for (LocalClient existingClient : clients.values()) {
             if (existingClient.getUserName().equals(userName)) {
                 result = true;
                 break;
             }
+        }
+        if (result)
+        	return true;
+        //check remote clients
+        for (Server server: this.federationServers){
+        	for(RemoteClient client: server.getClients()){
+        		if (client.getUserName().equals(userName))
+        			result = true;
+        			break;
+        	}
+        	if (result)
+        		break;
         }
         return result;
     }
