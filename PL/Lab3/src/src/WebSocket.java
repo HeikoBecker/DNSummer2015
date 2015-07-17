@@ -135,7 +135,7 @@ public class WebSocket {
     /*
      * When a server connects to another server, it has to execute a handshake, as implemented here.
      */
-    public void executeHandshake(String host) throws IOException {
+    public boolean executeHandshake(String host) throws IOException {
         log("Sending handshake.");
         PrintWriter pr = new PrintWriter(this.peerSocket.getOutputStream(), true);
         byte[] nonce = new byte[16];
@@ -153,7 +153,13 @@ public class WebSocket {
         // used to read the response
         HTTPMsg msg = parser.getHTTPMessage(true);
         // TODO: ensure that the peer responded correctly
-        log("Handshake completed.");
+        if (msg.isInvalid()){
+        	log("Handshake failure!");
+        	return false;
+        }else{
+        	log("Handshake completed.");
+        	return true;
+        }
     }
 
 

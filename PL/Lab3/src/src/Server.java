@@ -20,11 +20,16 @@ public class Server extends Peer {
     }
 
     public void connect(String host) throws IOException {
-        this.websocket.executeHandshake(host);
-        this.emit(true, "SRVR", "0");
-        log("SRVR segment sent.");
-        // tell the other server about all clients that connected to the local instance
-        Chat.getInstance().advertiseCurrentUsers(this);
+        if (this.websocket.executeHandshake(host)){
+        	this.emit(true, "SRVR", "0");
+        	log("SRVR segment sent.");
+        	//tell the other server about all clients that connected to the local instance
+        	Chat.getInstance().advertiseCurrentUsers(this);
+        }else{
+        	//close the websocket such that "run" will terminate
+        	this.websocket.close();
+        	this.exited = true;
+        }
     }
 
     @Override
@@ -136,5 +141,9 @@ public class Server extends Peer {
 	public void recvSendChatMsg(LocalSendChatMsg sendMsg) throws IOException {
 		// TODO Auto-generated method stub
 		
+	}
+
+	public boolean isFailed(){
+		return this.exited;
 	}
 }

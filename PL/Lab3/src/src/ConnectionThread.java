@@ -35,10 +35,15 @@ public class ConnectionThread implements Runnable {
         Socket socket = new Socket();
         try {
             socket.connect(new InetSocketAddress(host, connectPort), 5000);
-            peer = new Server(socket);
+            Server server = new Server(socket);
+            peer = server;
             peer.websocket.setWsClient();
             peer.connect(host);
-            Chat.getInstance().addFederationServer((Server) peer);
+            if (!server.isFailed())
+            	Chat.getInstance().addFederationServer((Server) peer);
+            //in the else case we would have to close the connection, but the connect method took care of this
+            //therefore "run" on the peer will terminate
+            //TODO: Notify server user somehow
         } catch (UnknownHostException e) {
             System.out.println("Failed to establish connection with " + host + ":" + connectPort + ". Unknown host.");
             throw new IOException();
@@ -51,7 +56,7 @@ public class ConnectionThread implements Runnable {
     @Override
     public void run() {
         try {
-            peer.run();
+        	peer.run();
         } catch (IOException e) {
             e.printStackTrace();
         } finally {

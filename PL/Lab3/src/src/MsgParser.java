@@ -26,6 +26,7 @@ public class MsgParser {
     private static final String UPG = "Upgrade";
     private static final String EMPTY = "";
     private static final String SPLIT = ": ";
+    private static final String SWITCHINGPROTO = "HTTP/1.1 101 Switching Protocols";
 
     public static final byte CONT = 0;
     public static final byte TEXT = 1;
@@ -55,6 +56,11 @@ public class MsgParser {
         if (!input.equals(MsgParser.GET) && !isResponse) {
             msg.setInvalid();
             return msg;
+        }
+        //based on RFC. First line MUST be a switching protocol
+        if(! input.equals(MsgParser.SWITCHINGPROTO) && isResponse){
+        	msg.setInvalid();
+        	return msg;
         }
         msg.setCorrectProtocol();
 
@@ -120,6 +126,7 @@ public class MsgParser {
                     }
                     break;
                 case SECWSACCEPT:
+                	//TODO: See issue #34, shouldn't this be checked for presence?
                     break;
                 //Optional, unchecked fields, ignored as stated in forum
                 case MsgParser.USRAGENT:
