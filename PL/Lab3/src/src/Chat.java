@@ -74,8 +74,20 @@ public class Chat {
     public synchronized void removeFederationServer(Server server) {
         federationServers.remove(server);
         for(RemoteClient client : server.getClients()) {
-            // TODO: we should check whether there is still a connection to this user via another server. Then we should send new arrivals in case these users are still present
-
+            // check whether there is still a connection to this user via another server. Then we should send new arrivals in case these users are still present
+        	//TODO: I abuse the isUserIdTaken method for checking wether the client is still
+        	//reachable, maybe make this a separate method or so
+        	if (this.isUserIdTaken(client.getUserId())){
+        		Server nextBestRoute = this.findBestNextHopForClient(client.getUserId());
+        		if (nextBestRoute == null){
+        			for(LocalClient localClient : this.clients.values()){
+        				if (localClient.getUserId().equals(client.getUserId())){
+        					//TODO: Can this case actually happen?
+        				}
+        			}
+        		}
+        		//TODO: emit new Arrive?
+        	}
 
             // TODO: think about advertising users only to those servers that we do not use for routing to them. POISONING
             for(Server federationServer : federationServers) {
@@ -143,6 +155,23 @@ public class Chat {
             broadcastedMessages.put(remoteLeftChatMsg.getId() + "-LEFT",
                     new Date(System.currentTimeMillis()));
 
+            //Check wether the user is still reachable, as the remote server may have lost connection to another server
+            //code copied from removeFederationServer method.
+            //Maybe refactor into one method!
+            // check whether there is still a connection to this user via another server. Then we should send new arrivals in case these users are still present
+        	//TODO: I abuse the isUserIdTaken method for checking wether the client is still
+        	//reachable, maybe make this a separate method or so
+        	if (this.isUserIdTaken(remoteLeftChatMsg.getId())){
+        		Server nextBestRoute = this.findBestNextHopForClient(remoteLeftChatMsg.getId());
+        		if (nextBestRoute == null){
+        			for(LocalClient localClient : this.clients.values()){
+        				if (localClient.getUserId().equals(remoteLeftChatMsg.getId())){
+        					//TODO: Can this case actually happen?
+        				}
+        			}
+        		}
+        		//TODO: emit new Arrive?
+        	}
         }
     }
 
