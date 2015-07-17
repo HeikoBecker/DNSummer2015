@@ -152,7 +152,6 @@ public class WebSocket {
 
         // used to read the response
         HTTPMsg msg = parser.getHTTPMessage(true);
-        // TODO: ensure that the peer responded correctly
         if (msg.isInvalid()){
         	log("Handshake failure!");
         	return false;
