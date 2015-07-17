@@ -114,4 +114,27 @@ public class Server extends Peer {
             System.out.println("[S] " + msg);
         }
     }
+
+	@Override
+	public void authenticate(String userId, String userName) throws IOException {
+		// TODO Auto-generated method stub	
+	}
+
+	@Override
+	public boolean isAuthenticated() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public void recvAcknChatMsg(LocalAcknChatMsg acknMsg) throws IOException {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void recvSendChatMsg(LocalSendChatMsg sendMsg) throws IOException {
+		// TODO Auto-generated method stub
+		
+	}
 }

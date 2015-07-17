@@ -19,7 +19,8 @@ public class ConnectionThread implements Runnable {
         }
 
         // create a new client and let it execute
-        peer = new Peer(peerSocket);
+        //TODO Clean the code logic up here
+        peer = new LocalClient(peerSocket);
         Message msg = peer.initialize();
         if (msg.getClass() == RemoteSrvrChatMsg.class) {
             peer = new Server(peer);

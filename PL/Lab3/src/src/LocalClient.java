@@ -1,4 +1,5 @@
 import java.io.IOException;
+import java.net.Socket;
 
 /*
  * A LocalClient encapsulates the associated port for the connection as well as the user information.
@@ -13,6 +14,10 @@ public class LocalClient extends Peer {
         this.websocket = peer.websocket;
         this.websocket.setDnClient();
     }
+
+	public LocalClient(Socket peerSocket) throws IOException {
+		super(peerSocket);
+	}
 
 	public String getUserId() {
         return this.userId;
@@ -137,6 +142,12 @@ public class LocalClient extends Peer {
 
         return !((this.userId == null) ? (other.userId != null) : !this.userId.equals(other.userId));
     }
+    
+	@Override
+	public void connect(String host) throws IOException {
+		// TODO Auto-generated method stub
+		
+	}
 
     /*
      * (non-Javadoc)
