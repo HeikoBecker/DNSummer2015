@@ -142,11 +142,6 @@ public class LocalClient extends Peer {
 
         return !((this.userId == null) ? (other.userId != null) : !this.userId.equals(other.userId));
     }
-    
-	@Override
-	public void connect(String host) throws IOException, InternalServerException {
-		throw new InternalServerException();
-	}
 
     /*
      * (non-Javadoc)
