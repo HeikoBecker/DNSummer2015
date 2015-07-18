@@ -39,7 +39,6 @@ public class Server extends Peer {
 				Chat.getInstance().removeFederationServer(this);
 			} catch (IOException e) {
 				log("Could not unregister Server due to Network/IOError");
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 
@@ -127,26 +126,23 @@ public class Server extends Peer {
     }
 
 	@Override
-	public void authenticate(String userId, String userName) throws IOException {
-		// TODO Auto-generated method stub	
+	public void authenticate(String userId, String userName) throws IOException, InternalServerException {
+		throw new InternalServerException();
 	}
 
 	@Override
-	public boolean isAuthenticated() {
-		// TODO Auto-generated method stub
-		return false;
+	public boolean isAuthenticated() throws InternalServerException {
+		throw new InternalServerException();
 	}
 
 	@Override
-	public void recvAcknChatMsg(LocalAcknChatMsg acknMsg) throws IOException {
-		// TODO Auto-generated method stub
-		
+	public void recvAcknChatMsg(LocalAcknChatMsg acknMsg) throws IOException, InternalServerException {
+		throw new InternalServerException();
 	}
 
 	@Override
 	public void recvSendChatMsg(LocalSendChatMsg sendMsg) throws IOException {
-		// TODO Auto-generated method stub
-		
+		throw new InternalServerException();
 	}
 
 	public boolean isFailed(){

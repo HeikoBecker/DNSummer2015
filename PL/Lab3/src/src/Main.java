@@ -28,10 +28,11 @@ public class Main {
                 connect(line);
             }
         }
+        //First stop accepting new connections
         wt.interrupt();
 
         // TODO: close all connection threads to other servers; only works in one direction
-        // TODO: We must send a left for each! user that we advertised a route 
+        // TODO: We must send a left for each! user that we advertised a route
         for(Thread t : openConnections) {
             t.interrupt();
         }

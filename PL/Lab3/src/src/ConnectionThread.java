@@ -20,7 +20,7 @@ public class ConnectionThread implements Runnable {
 
         // create a new client and let it execute
         //TODO Clean the code logic up here
-        peer = new LocalClient(peerSocket);
+        peer = new Peer(peerSocket);
         Message msg = peer.initialize();
         if (msg.getClass() == RemoteSrvrChatMsg.class) {
             peer = new Server(peer);
@@ -28,6 +28,7 @@ public class ConnectionThread implements Runnable {
         } else {
             peer = new LocalClient(peer);
         }
+        //First execute the message
         msg.execute(peer);
     }
 
