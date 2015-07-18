@@ -141,7 +141,7 @@ public class Server extends Peer {
 	}
 
 	@Override
-	public void recvSendChatMsg(LocalSendChatMsg sendMsg) throws IOException {
+	public void recvSendChatMsg(LocalSendChatMsg sendMsg) throws IOException, InternalServerException {
 		throw new InternalServerException();
 	}
 
