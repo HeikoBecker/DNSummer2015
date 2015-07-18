@@ -3,7 +3,7 @@ import java.net.Socket;
 import java.net.SocketException;
 import java.security.NoSuchAlgorithmException;
 
-public abstract class Peer {
+public class Peer {
 	// Network Level
 	protected WebSocket websocket;
 
@@ -26,6 +26,8 @@ public abstract class Peer {
 			}
 		} catch (SocketException | NoSuchAlgorithmException e) {
 			System.out.println(e.getMessage());
+		} catch (InternalServerException e) {
+			log("Internal Server Error. This means something is not correctly typed");
 		}
 		return new CloseConnMsg();
 	}
@@ -60,22 +62,33 @@ public abstract class Peer {
 	// These methods are abstract as a the separate peer instances/subclasses
 	// (LocalClient/Server) must override these methods
 
-	public abstract void authenticate(String userId, String userName)
-			throws IOException;
+	public void authenticate(String userId, String userName) throws IOException, InternalServerException{
+		throw new InternalServerException();
+	}
 
-	public abstract boolean isAuthenticated();
+	public boolean isAuthenticated() throws InternalServerException{
+		throw new InternalServerException();
+	}
 
 	// ----------------- RECEIVE METHODS -----------------
 	// Receiving methods must be abstract too. Otherwise a peer subclass could
 	// use this method which is not intended
 
-	public abstract void recvAcknChatMsg(LocalAcknChatMsg acknMsg) throws IOException;
+	public void recvAcknChatMsg(LocalAcknChatMsg acknMsg) throws IOException, InternalServerException{
+		throw new InternalServerException();
+	}
 
-	public abstract void recvSendChatMsg(LocalSendChatMsg sendMsg) throws IOException;
+	public void recvSendChatMsg(LocalSendChatMsg sendMsg) throws IOException, InternalServerException {
+		throw new InternalServerException();
+	}
 
-	public abstract void connect(String host) throws IOException;
+	public void connect(String host) throws IOException, InternalServerException{
+		throw new InternalServerException();
+	}
 
-	public abstract void exit();
+	public void exit() throws InternalServerException {
+		throw new InternalServerException();
+	}
 
 	// ----------------- DEBUGGING -----------------
 	protected final boolean DEBUG = false;

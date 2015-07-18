@@ -50,7 +50,9 @@ public class ConnectionThread implements Runnable {
         } catch (IOException e) {
             System.out.println("Failed to establish connection with " + host + ":" + connectPort);
             throw e;
-        }
+        } catch (InternalServerException e) {
+			System.out.println("Internal Server Error. Something went wrong with the internal typing.");
+		}
     }
 
     @Override
@@ -60,7 +62,11 @@ public class ConnectionThread implements Runnable {
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
-            peer.exit();
+            try {
+				peer.exit();
+			} catch (InternalServerException e) {
+				System.out.println("Internal Server Error. Something went wrong with the internal typing.");
+			}
         }
     }
 }

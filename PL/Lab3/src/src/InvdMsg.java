@@ -9,6 +9,10 @@ public class InvdMsg extends Message {
     @Override
     public void execute(Peer peer) throws IOException {
         peer.emit(false, "INVD", "0");
-        peer.exit();
+        try {
+			peer.exit();
+		} catch (InternalServerException e) {
+			System.out.println("Internal Server Error. Something went wrong with the internal typing.");
+		}
     }
 }

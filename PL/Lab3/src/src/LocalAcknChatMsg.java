@@ -12,13 +12,17 @@ public class LocalAcknChatMsg extends Message {
 
     @Override
     public void execute(Peer peer) throws IOException {
-        if (!peer.isAuthenticated()) {
-            peer.emit(false, "INVD", "0");
-            peer.exit();
-        } else if (!Chat.getInstance().isMessageIdOpenForAckn(this.id, (LocalClient) peer)) {
-            peer.emit(false, "FAIL", this.id, new String[]{"NUMBER"});
-        } else {
-            peer.recvAcknChatMsg(this);
-        }
+        try {
+			if (!peer.isAuthenticated()) {
+			    peer.emit(false, "INVD", "0");
+			    peer.exit();
+			} else if (!Chat.getInstance().isMessageIdOpenForAckn(this.id, (LocalClient) peer)) {
+			    peer.emit(false, "FAIL", this.id, new String[]{"NUMBER"});
+			} else {
+			    peer.recvAcknChatMsg(this);
+			}
+		} catch (InternalServerException e) {
+			System.out.println("Internal Server Error. Something went wrong with the internal typing.");
+		}
     }
 }

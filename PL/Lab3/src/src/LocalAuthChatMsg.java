@@ -23,19 +23,23 @@ public class LocalAuthChatMsg extends Message {
 
     @Override
     public void execute(Peer peer) throws IOException {
-        if (peer.isAuthenticated()) {
-            peer.emit(false, "INVD", "0");
-            peer.exit();
-        } else if (!this.validPassword) {
-            peer.emit(false, "FAIL", this.id, new String[]{"PASSWORD"});
-        } else if (Chat.getInstance().isUserIdTaken(this.id)) {
-            // We only check for existing userIds and not messageIds, following the reference implementation.
-            peer.emit(false, "FAIL", this.id, new String[]{"NUMBER"});
-        } else if (Chat.getInstance().isNameTaken(name)) {
-            peer.emit(false, "FAIL", this.id, new String[]{"NAME"});
-        } else {
-            peer.emit(false, "OKAY", this.id);
-            peer.authenticate(this.id, this.name);
-        }
+        try {
+			if (peer.isAuthenticated()) {
+			    peer.emit(false, "INVD", "0");
+			    peer.exit();
+			} else if (!this.validPassword) {
+			    peer.emit(false, "FAIL", this.id, new String[]{"PASSWORD"});
+			} else if (Chat.getInstance().isUserIdTaken(this.id)) {
+			    // We only check for existing userIds and not messageIds, following the reference implementation.
+			    peer.emit(false, "FAIL", this.id, new String[]{"NUMBER"});
+			} else if (Chat.getInstance().isNameTaken(name)) {
+			    peer.emit(false, "FAIL", this.id, new String[]{"NAME"});
+			} else {
+			    peer.emit(false, "OKAY", this.id);
+			    peer.authenticate(this.id, this.name);
+			}
+		} catch (InternalServerException e) {
+			System.out.println("Internal Server Error. Something went wrong with the internal typing.");
+		}
     }
 }
