@@ -144,9 +144,8 @@ public class LocalClient extends Peer {
     }
     
 	@Override
-	public void connect(String host) throws IOException {
-		// TODO Auto-generated method stub
-		
+	public void connect(String host) throws IOException, InternalServerException {
+		throw new InternalServerException();
 	}
 
     /*
