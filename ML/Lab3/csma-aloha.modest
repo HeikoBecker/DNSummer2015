@@ -11,14 +11,40 @@ int[4] maxSignals; // maxSignals[i] is the maximum number of transmissions that 
 /* Do not change anything between the start of the file and this line */
 
 // Properties
-// Insert your properties here
+clock t;
+property AllSent = Xmax(t | packetsSent == PACKETS);
 
 // Models the multiple access protocol of node i;
 // use send_start to start a transmission (but only if packetsToSend[i] > 0)
 // and send_stop to stop transmitting (but no sooner than 0.5 time units after send_start)
 process Node(int i)
 {
-	// Insert your code here
+    bool retransmit = false;
+    do {
+        :: when urgent (packetsToSend[i] > 0 && signals[i] == 0)
+            alt {
+                :: when urgent (retransmit)
+                    palt {
+                        :P:
+                            send_start;
+                            delay(1) send_stop
+                            {=
+                                retransmit = (maxSignals[i] > 1),
+                                packetsSent += (maxSignals[i] > 1) ? 0 : 1,
+                                packetsToSend[i] -= (maxSignals[i] > 1) ? 0 : 1
+                            =}
+                        :1-P:   delay(1) tau
+                    }
+                :: when urgent (!retransmit)
+                    send_start;
+                    delay(1) send_stop
+                    {=
+                        retransmit = (maxSignals[i] > 1),
+                        packetsSent += (maxSignals[i] > 1) ? 0 : 1,
+                        packetsToSend[i] -= (maxSignals[i] > 1) ? 0 : 1
+                    =}
+            }
+    }
 }
 
 /* Do not change anything between this line and the end of the file */
