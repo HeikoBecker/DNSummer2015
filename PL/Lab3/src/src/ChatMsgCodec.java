@@ -76,11 +76,13 @@ public class ChatMsgCodec {
                     String description = lines[2];
                     int hopCount = Integer.parseInt(lines[3]);
                     //new ARRV spec wants us to return a LEFT for hopCount = 16
-                    if (hopCount == 16)
-                    	return new RemoteLeftChatMsg(id);
+                    if (hopCount == 16) {
+                        return new RemoteLeftChatMsg(id);
+                    }
                     //in the else case, we have a "real" remote ARRV
-                    else
-                    	return new RemoteArrvChatMsg(id, userName, description, hopCount);
+                    else {
+                        return new RemoteArrvChatMsg(id, userName, description, hopCount);
+                    }
                 }
             case "LEFT":
                 if (isClient || lines.length != 1) {

@@ -73,7 +73,11 @@ public class Server extends Peer {
      */
     public void emitArrv(String userId, String userName, String groupDescription, int hopCount) throws IOException {
         log("Forward an ARRV: " + userId + " (" + userName + ", " + groupDescription + ", " + hopCount + ")");
-        this.emit(true, "ARRV", userId, new String[]{userName, groupDescription, Integer.toString(hopCount)});
+        if(hopCount >= 16) {
+            this.emit(true, "LEFT", userId);
+        } else {
+            this.emit(true, "ARRV", userId, new String[]{userName, groupDescription, Integer.toString(hopCount)});
+        }
     }
 
     /*
