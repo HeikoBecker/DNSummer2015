@@ -299,7 +299,7 @@ public class Chat {
 	public synchronized void emitMessage(LocalSendChatMsg msg, String senderId)
 			throws IOException {
 		String recipient = msg.getRecipient();
-
+        if(!broadcasted(msg.getId())) {
 		if (recipient.equals("*")) {
 			for (LocalClient receivingClient : clients.values()) {
 				if (!receivingClient.getUserId().equals(senderId)) {
@@ -325,6 +325,7 @@ public class Chat {
 		broadcastedMessages.put(msg.getId(),
 				new Date(System.currentTimeMillis()));
 	}
+    }
 
 	public synchronized void emitAcknowledgement(LocalAcknChatMsg msg,
 			LocalClient sendingClient) throws IOException {
