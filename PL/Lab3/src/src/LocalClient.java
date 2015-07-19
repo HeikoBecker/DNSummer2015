@@ -88,15 +88,15 @@ public class LocalClient extends Peer {
      * Sending an empty description string is ok, as stated here: https://dcms.cs.uni-saarland.de/dn/forum/viewtopic.php?f=3&t=132
      */
     public void emitArrvChatMsg(LocalClient otherClient) throws IOException {
-        emitArrvChatMsg(otherClient.getUserId(), otherClient.getUserName());
+        emitArrvChatMsg(otherClient.getUserId(), otherClient.getUserName(), "Group 25");
     }
 
     /*
      * Emitting that another client arrived to the current client.
      * Sending an empty description string is ok, as stated here: https://dcms.cs.uni-saarland.de/dn/forum/viewtopic.php?f=3&t=132
      */
-    public void emitArrvChatMsg(String userId, String userName) throws IOException {
-        this.websocket.emit(false, "ARRV", userId, new String[]{ userName, ""});
+    public void emitArrvChatMsg(String userId, String userName, String description) throws IOException {
+        this.websocket.emit(false, "ARRV", userId, new String[]{ userName, description});
         this.log("Received an arrv.");
     }
 

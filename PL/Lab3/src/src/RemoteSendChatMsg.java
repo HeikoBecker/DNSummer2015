@@ -12,8 +12,6 @@ public class RemoteSendChatMsg extends LocalSendChatMsg {
 
 	@Override
 	public void execute(Peer peer) throws IOException {
-		if(!Chat.getInstance().broadcasted(id)) {
-			Chat.getInstance().emitMessage(this, this.senderId);
-		}
+		Chat.getInstance().emitMessage(this, this.senderId);
 	}
 }

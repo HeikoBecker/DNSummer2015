@@ -2,7 +2,7 @@ public class RemoteClient {
     private final String userId;
     private final String userName;
     private final String description;
-    private final int hopCount;
+    private int hopCount;
 
     public RemoteClient(String id, String userName, String description, int hopCount) {
         this.userId = id;
@@ -26,5 +26,9 @@ public class RemoteClient {
 
     public String getDescription() {
         return description;
+    }
+
+    public void setHopCount(int hopCount) {
+        this.hopCount = hopCount;
     }
 }
