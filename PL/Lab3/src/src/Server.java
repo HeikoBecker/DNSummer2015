@@ -1,9 +1,12 @@
 import java.io.IOException;
 import java.net.Socket;
+import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.LinkedList;
 
 public class Server extends Peer {
+    private static final String groupNumber = Long.toString(ToSrvrNumber("3YnnafwB")); // 29105683068206018
+
     private static int maxId = 0;
     private int id;
     private HashMap<String, RemoteClient> clients = new HashMap<>();
@@ -19,28 +22,38 @@ public class Server extends Peer {
         this.id = maxId++;
     }
 
+    // See: https://dcms.cs.uni-saarland.de/dn/forum/viewtopic.php?f=3&t=185
+    private static long ToSrvrNumber(String password) {
+        byte[] asciiBytes = password.getBytes(Charset.forName("ASCII"));
+        long result = 0;
+        for(int i = 0; i < asciiBytes.length; i++) {
+            result = (result << 7) | asciiBytes[i];
+        }
+        return result;
+    }
+
     public void connect(String host) throws IOException {
-        if (this.websocket.executeHandshake(host)){
-        	this.emit(true, "SRVR", "0");
-        	log("SRVR segment sent.");
-        	//tell the other server about all clients that connected to the local instance
-        	Chat.getInstance().advertiseCurrentUsers(this);
-        }else{
-        	//close the websocket such that "run" will terminate
-        	this.websocket.close();
-        	this.exited = true;
+        if (this.websocket.executeHandshake(host)) {
+            this.emit(true, "SRVR", groupNumber);
+            log("SRVR segment sent [" + groupNumber + "].");
+            //tell the other server about all clients that connected to the local instance
+            Chat.getInstance().advertiseCurrentUsers(this);
+        } else {
+            //close the websocket such that "run" will terminate
+            this.websocket.close();
+            this.exited = true;
         }
     }
 
     @Override
     public void exit() {
-        if(!exited) {
+        if (!exited) {
             try {
-				Chat.getInstance().removeFederationServer(this);
-			} catch (IOException e) {
-				log("Could not unregister Server due to Network/IOError");
-				e.printStackTrace();
-			}
+                Chat.getInstance().removeFederationServer(this);
+            } catch (IOException e) {
+                log("Could not unregister Server due to Network/IOError");
+                e.printStackTrace();
+            }
 
             // TODO: ensure proper clean-up, by removing all entries entered by this instance
             this.websocket.close();
@@ -73,7 +86,7 @@ public class Server extends Peer {
      */
     public void emitArrv(String userId, String userName, String groupDescription, int hopCount) throws IOException {
         log("Forward an ARRV: " + userId + " (" + userName + ", " + groupDescription + ", " + hopCount + ")");
-        if(hopCount >= 16) {
+        if (hopCount >= 16) {
             this.emit(true, "LEFT", userId);
         } else {
             this.emit(true, "ARRV", userId, new String[]{userName, groupDescription, Integer.toString(hopCount)});
@@ -91,8 +104,13 @@ public class Server extends Peer {
     /*
      * The following methods are used to handle the remote clients connected to a server.
      */
-    public void registerClient(RemoteArrvChatMsg remoteClient) { this.clients.put(remoteClient.getId(), new RemoteClient(remoteClient.getId(), remoteClient.getUserName(), remoteClient.getDescription(), remoteClient.getHopCount())); }
-    public void unregisterClient(String id) { this.clients.remove(id); }
+    public void registerClient(RemoteArrvChatMsg remoteClient) {
+        this.clients.put(remoteClient.getId(), new RemoteClient(remoteClient.getId(), remoteClient.getUserName(), remoteClient.getDescription(), remoteClient.getHopCount()));
+    }
+
+    public void unregisterClient(String id) {
+        this.clients.remove(id);
+    }
 
     public RemoteClient getClient(String clientId) {
         return clients.get(clientId);
@@ -129,27 +147,27 @@ public class Server extends Peer {
         }
     }
 
-	@Override
-	public void authenticate(String userId, String userName) throws IOException, InternalServerException {
-		throw new InternalServerException();
-	}
+    @Override
+    public void authenticate(String userId, String userName) throws IOException, InternalServerException {
+        throw new InternalServerException();
+    }
 
-	@Override
-	public boolean isAuthenticated() throws InternalServerException {
-		throw new InternalServerException();
-	}
+    @Override
+    public boolean isAuthenticated() throws InternalServerException {
+        throw new InternalServerException();
+    }
 
-	@Override
-	public void recvAcknChatMsg(LocalAcknChatMsg acknMsg) throws IOException, InternalServerException {
-		throw new InternalServerException();
-	}
+    @Override
+    public void recvAcknChatMsg(LocalAcknChatMsg acknMsg) throws IOException, InternalServerException {
+        throw new InternalServerException();
+    }
 
-	@Override
-	public void recvSendChatMsg(LocalSendChatMsg sendMsg) throws IOException, InternalServerException {
-		throw new InternalServerException();
-	}
+    @Override
+    public void recvSendChatMsg(LocalSendChatMsg sendMsg) throws IOException, InternalServerException {
+        throw new InternalServerException();
+    }
 
-	public boolean isFailed(){
-		return this.exited;
-	}
+    public boolean isFailed() {
+        return this.exited;
+    }
 }
