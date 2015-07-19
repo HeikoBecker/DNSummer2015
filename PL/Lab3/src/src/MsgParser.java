@@ -58,9 +58,9 @@ public class MsgParser {
             return msg;
         }
         //based on RFC. First line MUST be a switching protocol
-        if(! input.equals(MsgParser.SWITCHINGPROTO) && isResponse){
-        	msg.setInvalid();
-        	return msg;
+        if (!input.equals(MsgParser.SWITCHINGPROTO) && isResponse) {
+            msg.setInvalid();
+            return msg;
         }
         msg.setCorrectProtocol();
 
@@ -126,7 +126,7 @@ public class MsgParser {
                     }
                     break;
                 case SECWSACCEPT:
-                	//TODO: See issue #34, shouldn't this be checked for presence?
+                    //TODO: See issue #34, shouldn't this be checked for presence?
                     break;
                 //Optional, unchecked fields, ignored as stated in forum
                 case MsgParser.USRAGENT:
@@ -157,9 +157,10 @@ public class MsgParser {
         byte[] maskingKey = new byte[4];
         int idx = 0;
         int opcode = -1;
+        int headerSize = (isWsClient) ?  5 : 1;
 
         byte[] payload = new byte[payloadlength];
-        while (count - 5 <= payloadlength && (c = is.read()) != -1) {
+        while (count - headerSize <= payloadlength && (c = is.read()) != -1) {
             count++;
             switch (count) {
                 case 1:
@@ -175,8 +176,7 @@ public class MsgParser {
                     // This is forbidden according to the RFC
                     // In this case we should cleanly close the connection.
                     boolean mask = (c & 0b10000000) == 0b10000000;
-                    if (isWsClient && !mask)
-                    {
+                    if (isWsClient && !mask) {
                         log("Client not setting mask bit.");
                         return new CloseConnMsg();
                     }
@@ -204,27 +204,51 @@ public class MsgParser {
                         // We deviate from the RFC as the application will only support message up to a length of 300,
                         // so there is no need to parse larger messsages.
                         // See https://dcms.cs.uni-saarland.de/dn/forum/viewtopic.php?f=3&t=124
-                        if(payloadlength < 0) {
+                        if (payloadlength < 0) {
                             payloadlength = Integer.MAX_VALUE;
                         }
                     }
                     payload = new byte[payloadlength];
                     break;
                 case 3:
-                    maskingKey[0] = (byte) c;
+                    if (isWsClient) {
+                        maskingKey[0] = (byte) c;
+                    } else {
+                        payload[idx] = (byte) ((byte) c);
+                        idx++;
+                    }
                     break;
                 case 4:
-                    maskingKey[1] = (byte) c;
+                    if (isWsClient) {
+                        maskingKey[1] = (byte) c;
+                    } else {
+                        payload[idx] = (byte) ((byte) c);
+                        idx++;
+                    }
                     break;
                 case 5:
-                    maskingKey[2] = (byte) c;
+                    if (isWsClient) {
+                        maskingKey[2] = (byte) c;
+                    } else {
+                        payload[idx] = (byte) ((byte) c);
+                        idx++;
+                    }
                     break;
                 case 6:
-                    maskingKey[3] = (byte) c;
+                    if (isWsClient) {
+                        maskingKey[3] = (byte) c;
+                    } else {
+                        payload[idx] = (byte) c;
+                        idx++;
+                    }
                     break;
                 default:
                     // Demask the payload as explained in the RFC
-                    payload[idx] = (byte) ((byte) c ^ maskingKey[idx % 4]);
+                    if (isWsClient) {
+                        payload[idx] = (byte) ((byte) c ^ maskingKey[idx % 4]);
+                    } else {
+                        payload[idx] = (byte) ((byte) c);
+                    }
                     idx++;
                     break;
             }
@@ -252,7 +276,7 @@ public class MsgParser {
     }
 
     // ----------------- DEBUGGING -----------------
-    private final boolean DEBUG = false;
+    private final boolean DEBUG = true;
 
     private void log(String msg) {
         if (DEBUG) {

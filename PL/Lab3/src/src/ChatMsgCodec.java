@@ -7,11 +7,14 @@ public class ChatMsgCodec {
         String[] lines = msg.split("\r\n");
         // A client message has at least one line.
         if (isClient && lines.length == 0) {
+            ChatMsgCodec.log("Not enough lines.");
             return new InvdMsg();
         }
         String[] header = lines[0].split(" ");
         // A message MUST contain a command and an id.
+        System.out.println(lines[0]);
         if (header.length != 2) {
+            ChatMsgCodec.log("Must have command and id.");
             return new InvdMsg();
         }
 
@@ -23,6 +26,7 @@ public class ChatMsgCodec {
                 // An AUTH message must have 3 lines. It cannot be sent by a Server,
                 // but at this early stage, we don't know if it is a server or not.
                 if (lines.length != 3) {
+                    log("AUTH must have 3 lines.");
                     return new InvdMsg();
                 } else {
                     String name = lines[1];
@@ -33,6 +37,7 @@ public class ChatMsgCodec {
                 if (isClient) {
                     // A SEND message must have 3 lines, when sent by a client.
                     if (lines.length != 3) {
+                        log("SEND must have 3 lines for clients.");
                         return new InvdMsg();
                     }
                     String recipient = lines[1];
@@ -42,6 +47,7 @@ public class ChatMsgCodec {
                 } else {
                     String recipient = lines[1];
                     if (lines.length != 4) {
+                        log("SEND must have 4 lines for servers.");
                         return new InvdMsg();
                     }
                     String senderId = lines[2];
@@ -51,11 +57,13 @@ public class ChatMsgCodec {
             case "ACKN":
                 if (isClient) {
                     if (lines.length != 1) {
+                        log("ACKN must have 1 line.");
                         return new InvdMsg();
                     }
                     return new LocalAcknChatMsg(id);
                 } else {
                     if (lines.length != 3) {
+                        log("ACKN must have 3 lines.");
                         return new InvdMsg();
                     }
                     String acknUserId = lines[1];
@@ -64,12 +72,14 @@ public class ChatMsgCodec {
                 }
             case "SRVR":
                 if (isClient) {
+                    log("Clients should not send SRVR.");
                     return new InvdMsg();
                 } else {
                     return new RemoteSrvrChatMsg();
                 }
             case "ARRV":
                 if (isClient || lines.length != 4) {
+                    log("ARRV must have 3 lines.");
                     return new InvdMsg();
                 } else {
                     String userName = lines[1];
@@ -86,11 +96,13 @@ public class ChatMsgCodec {
                 }
             case "LEFT":
                 if (isClient || lines.length != 1) {
+                    log("LEFT must have 1 line.");
                     return new InvdMsg();
                 } else {
                     return new RemoteLeftChatMsg(id);
                 }
             default:
+                log("Unknown command: " + command);
                 return new InvdMsg();
         }
     }
@@ -102,5 +114,15 @@ public class ChatMsgCodec {
             response += "\r\n" + lines[i];
         }
         return response;
+    }
+
+    // ----------------- DEBUGGING -----------------
+
+    protected static boolean DEBUG = true;
+
+    protected static void log(String msg) {
+        if (DEBUG) {
+            System.out.println("[CODEC] " + msg);
+        }
     }
 }
