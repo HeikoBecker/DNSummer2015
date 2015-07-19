@@ -84,7 +84,7 @@ public class Chat {
 
     public synchronized void receiveArrv(RemoteArrvChatMsg arrvChatMsg,
                                          Server sendingServer) throws IOException {
-        log("Received ARRV broadcast");
+        log("Received ARRV broadcast: " + arrvChatMsg.getUserName() + ", " + arrvChatMsg.getDescription() + ", " + arrvChatMsg.getHopCount() + ")");
 
         int shortestHopCount = findShortestHopCountForClient(arrvChatMsg.getId());
 
@@ -109,7 +109,7 @@ public class Chat {
 
     public void receiveLeft(RemoteLeftChatMsg remoteLeftChatMsg,
                             Server sendingServer) throws IOException {
-        log("Received LEFT broadcast");
+        log("Received LEFT broadcast: " + remoteLeftChatMsg.getId());
         int shortestHopCount = findShortestHopCountForClient(remoteLeftChatMsg.getId());
 
         // Check if this is a local client and ignore if it is.
@@ -338,22 +338,24 @@ public class Chat {
         log("Register Client: " + newClient.getUserId() + " "
                 + newClient.getUserName());
 
-		for (LocalClient existingClient : clients.values()) {
-			existingClient.emitArrvChatMsg(newClient);
-			newClient.emitArrvChatMsg(existingClient);
-		}
+
+        for (LocalClient existingClient : clients.values()) {
+            existingClient.emitArrvChatMsg(newClient);
+            newClient.emitArrvChatMsg(existingClient);
+        }
 
         LinkedList<String> announcedIds = new LinkedList<>();
-		for (Server server : federationServers) {
-			server.emitArrv(newClient.getUserId(), newClient.getUserName(),
-					"Group 25", 1);
+        for (Server server : federationServers) {
+            server.emitArrv(newClient.getUserId(), newClient.getUserName(),
+                    "Group 25", 1);
 
-			for (RemoteClient remoteClient : server.getClients()) {
-                if(!announcedIds.contains(remoteClient.getUserId())) {
+            for (RemoteClient remoteClient : server.getClients()) {
+                if (!announcedIds.contains(remoteClient.getUserId())) {
+                    announcedIds.push(remoteClient.getUserId());
                     newClient.emitArrvChatMsg(remoteClient.getUserId(), remoteClient.getUserName(), remoteClient.getDescription());
                 }
-			}
-		}
+            }
+        }
 
         clients.put(newClient.getUserId(), newClient);
     }
