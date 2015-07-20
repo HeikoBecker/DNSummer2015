@@ -21,14 +21,21 @@ public class Chat {
      * https://dcms.cs.uni-saarland.de/dn/forum/viewtopic.php?f=3&t=109
      */
     private class Cleaner extends TimerTask {
-
         @Override
         public void run() {
             synchronized (outstandingAcks) {
-                for (String id : outstandingAcks.keySet()) {
+                Set<String> messageIds = new HashSet<>(outstandingAcks.keySet());
+                for (String id : messageIds) {
                     OutstandingAcknowledgements acks = outstandingAcks.get(id);
                     if (acks.getAge() + MAXAGE < System.currentTimeMillis()) {
                         outstandingAcks.remove(id);
+                    }
+                }
+
+                messageIds = new HashSet<>(broadcastedMessages.keySet());
+                for(String id : messageIds) {
+                    if(broadcastedMessages.get(id).getTime() + MAXAGE < System.currentTimeMillis()) {
+                        broadcastedMessages.remove(id);
                     }
                 }
             }
@@ -45,7 +52,6 @@ public class Chat {
 
     private LinkedList<Server> federationServers = new LinkedList<>();
 
-    // TODO: messages have to be removed again, to comply with the outstanding acks.
     // Message ID -> Date of adding
     private HashMap<String, Date> broadcastedMessages = new HashMap<>();
 
