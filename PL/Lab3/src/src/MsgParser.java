@@ -125,7 +125,8 @@ public class MsgParser {
                         log("Invalid SecWSVersion");
                     }
                     break;
-                case SECWSACCEPT:
+                case MsgParser.SECWSACCEPT:
+
                     //TODO: See issue #34, shouldn't this be checked for presence?
                     break;
                 //Optional, unchecked fields, ignored as stated in forum

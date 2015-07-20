@@ -45,8 +45,7 @@ public class Chat {
 
     private LinkedList<Server> federationServers = new LinkedList<>();
 
-    // TODO: messages have to be removed again, as e.g. ARRV message have
-    // identical sequence numbers
+    // TODO: messages have to be removed again, to comply with the outstanding acks.
     // Message ID -> Date of adding
     private HashMap<String, Date> broadcastedMessages = new HashMap<>();
 
@@ -123,20 +122,9 @@ public class Chat {
         announceChangedForwardingTable(remoteLeftChatMsg.getId(), shortestHopCount);
     }
 
-    private int findShortestHopCountForClient(String id) {
-        if (clients.get(id) != null) {
-            return 0;
-        } else {
-            Server bestNextHopForClient = findBestNextHopForClient(id);
-            if (bestNextHopForClient != null) {
-                return bestNextHopForClient.getClient(id).getHopCount();
-            }
-        }
-        return MAX_HOP_COUNT;
-    }
 
 
-    public synchronized void receiveAckn(RemoteAcknChatMsg acknChatMsg)
+    public synchronized void receiveAckn(RemoteAcknChatMsg acknChatMsg, Server sendingServer)
             throws IOException {
         log("Received ACKN");
         LocalClient localClient = clients.get(acknChatMsg.getSenderUserId());
@@ -146,7 +134,11 @@ public class Chat {
         } else {
             Server remote = findBestNextHopForClient(acknChatMsg
                     .getSenderUserId());
-            remote.emitAckn(acknChatMsg);
+            if(remote != null) {
+                remote.emitAckn(acknChatMsg, acknChatMsg.getAcknUserId(), acknChatMsg.getSenderUserId());
+            } else {
+                // TODO: what to do in this case?
+            }
         }
     }
 
@@ -165,7 +157,6 @@ public class Chat {
             LocalClient client = this.clients.get(id);
             server.emitArrv(id, client.getUserName(), "Group 25", 1);
         }
-
 
         // Forward information about remote clients
         for (Server remoteServer : federationServers) {
@@ -200,6 +191,18 @@ public class Chat {
             }
         }
         return bestNextHop;
+    }
+
+    private int findShortestHopCountForClient(String id) {
+        if (clients.get(id) != null) {
+            return 0;
+        } else {
+            Server bestNextHopForClient = findBestNextHopForClient(id);
+            if (bestNextHopForClient != null) {
+                return bestNextHopForClient.getClient(id).getHopCount();
+            }
+        }
+        return MAX_HOP_COUNT;
     }
 
     // ----------------- COLLISION CHECKS -----------------

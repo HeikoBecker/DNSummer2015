@@ -62,13 +62,6 @@ public class Server extends Peer {
         }
     }
 
-
-    // TODO: merge these functions!
-    public void emitAckn(RemoteAcknChatMsg acknChatMsg) throws IOException {
-        this.emit(true, "ACKN", acknChatMsg.getId(), new String[]{acknChatMsg.getAcknUserId(), acknChatMsg.getSenderUserId()});
-        this.log("Forward an ACKN.");
-    }
-
     public void emitAckn(LocalAcknChatMsg msg, String acknUserId, String senderUserId) throws IOException {
         this.emit(true, "ACKN", msg.id, new String[]{ acknUserId, senderUserId});
         this.log("Forward an ACKN.");
