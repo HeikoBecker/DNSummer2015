@@ -8,6 +8,12 @@ public class RemoteSrvrChatMsg extends Message {
 
     @Override
     public void execute(Peer peer) throws IOException {
-        Chat.getInstance().advertiseCurrentUsers((Server) peer);
+        Server server = (Server) peer;
+        if(!server.hasAdvertisedUsers()) {
+            Chat.getInstance().advertiseCurrentUsers(server);
+        } else {
+            System.out.println("Received multiple SRVR messages.");
+            peer.emit(false, "INVD", "0");
+        }
     }
 }

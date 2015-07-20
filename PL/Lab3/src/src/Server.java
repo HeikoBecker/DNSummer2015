@@ -11,6 +11,7 @@ public class Server extends Peer {
     private int id;
     private HashMap<String, RemoteClient> clients = new HashMap<>();
     private boolean exited = false;
+    private boolean advertisedUsers = false;
 
     public Server(Peer peer) {
         this.websocket = peer.websocket;
@@ -69,7 +70,7 @@ public class Server extends Peer {
     }
 
     public void emitAckn(LocalAcknChatMsg msg, String acknUserId, String senderUserId) throws IOException {
-        this.emit(true, "ACKN", msg.id, new String[]{acknUserId, senderUserId});
+        this.emit(true, "ACKN", msg.id, new String[]{ acknUserId, senderUserId});
         this.log("Forward an ACKN.");
     }
 
@@ -139,7 +140,7 @@ public class Server extends Peer {
 
 
     // ----------------- DEBUGGING -----------------
-    private final boolean DEBUG = true;
+    private final boolean DEBUG = false;
 
     protected void log(String msg) {
         if (DEBUG) {
@@ -169,5 +170,13 @@ public class Server extends Peer {
 
     public boolean isFailed() {
         return this.exited;
+    }
+
+    public void advertisedUsers() {
+        this.advertisedUsers = true;
+    }
+
+    public boolean hasAdvertisedUsers() {
+        return advertisedUsers;
     }
 }

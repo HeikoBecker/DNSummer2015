@@ -178,6 +178,8 @@ public class Chat {
                 }
             }
         }
+
+        server.advertisedUsers();
     }
 
     /*

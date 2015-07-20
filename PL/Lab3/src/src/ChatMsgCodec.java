@@ -12,7 +12,6 @@ public class ChatMsgCodec {
         }
         String[] header = lines[0].split(" ");
         // A message MUST contain a command and an id.
-        System.out.println(lines[0]);
         if (header.length != 2) {
             ChatMsgCodec.log("Must have command and id.");
             return new InvdMsg();
@@ -103,6 +102,7 @@ public class ChatMsgCodec {
                 }
             default:
                 log("Unknown command: " + command);
+            case "INVD":
                 return new InvdMsg();
         }
     }
