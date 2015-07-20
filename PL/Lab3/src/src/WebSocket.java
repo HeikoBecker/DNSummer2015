@@ -36,8 +36,9 @@ public class WebSocket {
                 peerSocket.shutdownInput();
                 peerSocket.shutdownOutput();
                 peerSocket.close();
-            } catch (IOException e) {
-                System.out.println("Connection already closed.");
+            } catch (IOException ignored) {
+            } finally {
+                System.out.println("Connection closed.");
             }
         }
     }
