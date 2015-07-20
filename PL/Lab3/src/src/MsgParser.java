@@ -151,108 +151,100 @@ public class MsgParser {
     }
 
     public Message getWebsocketMessage(boolean isDnClient, boolean isWsClient) throws IOException {
-        int count = 0;
         int c;
-        Integer payloadlength = 125;
-        byte[] maskingKey = new byte[4];
-        int idx = 0;
         int opcode = -1;
-        int headerSize = (isWsClient) ?  5 : 1;
 
-        byte[] payload = new byte[payloadlength];
-        while (count - headerSize <= payloadlength && (c = is.read()) != -1) {
-            count++;
-            switch (count) {
-                case 1:
-                    opcode = c & 0x0F;
-                    //Check wether FIN bit is set.
-                    //If not, close connection as we do not support fragmentation
-                    boolean fin = (c & 0b10000000) == 0b10000000;
-                    if (!fin)
-                        return new CloseConnMsg();
-                    break;
-                case 2:
-                    // check if mask bit is not set. Then the client tries to send unmasked data.
-                    // This is forbidden according to the RFC
-                    // In this case we should cleanly close the connection.
-                    boolean mask = (c & 0b10000000) == 0b10000000;
-                    if (isWsClient && !mask) {
-                        log("Client not setting mask bit.");
-                        return new CloseConnMsg();
-                    }
-                    //otherwise continue
-                    payloadlength = c & 0b01111111;
-                    // T126 --> 7+16 bits (as unsigned integer?)
-                    // Unsigned done
-                    // with:https://stackoverflow.com/questions/9854166/declaring-an-unsigned-int-in-java
-                    if (payloadlength == 126) {
-                        c = is.read();
-                        payloadlength = c << 8;
-                        c = is.read();
-                        payloadlength = payloadlength | c;
-                    } else if (payloadlength == 127) {
-                        // 127 --> 7+64 bits (as unsigned int)
-                        c = is.read();
-                        payloadlength = c << 32;
-                        c = is.read();
-                        payloadlength = payloadlength | (c << 16);
-                        c = is.read();
-                        payloadlength = payloadlength | (c << 8);
-                        c = is.read();
-                        payloadlength = payloadlength | c;
+        boolean isMasking = false;
+        byte[] maskingKey = new byte[4];
 
-                        // We deviate from the RFC as the application will only support message up to a length of 300,
-                        // so there is no need to parse larger messsages.
-                        // See https://dcms.cs.uni-saarland.de/dn/forum/viewtopic.php?f=3&t=124
-                        if (payloadlength < 0) {
-                            payloadlength = Integer.MAX_VALUE;
-                        }
-                    }
-                    payload = new byte[payloadlength];
-                    break;
-                case 3:
-                    if (isWsClient) {
-                        maskingKey[0] = (byte) c;
-                    } else {
-                        payload[idx] = (byte) ((byte) c);
-                        idx++;
-                    }
-                    break;
-                case 4:
-                    if (isWsClient) {
-                        maskingKey[1] = (byte) c;
-                    } else {
-                        payload[idx] = (byte) ((byte) c);
-                        idx++;
-                    }
-                    break;
-                case 5:
-                    if (isWsClient) {
-                        maskingKey[2] = (byte) c;
-                    } else {
-                        payload[idx] = (byte) ((byte) c);
-                        idx++;
-                    }
-                    break;
-                case 6:
-                    if (isWsClient) {
-                        maskingKey[3] = (byte) c;
-                    } else {
-                        payload[idx] = (byte) c;
-                        idx++;
-                    }
-                    break;
-                default:
-                    // Demask the payload as explained in the RFC
-                    if (isWsClient) {
-                        payload[idx] = (byte) ((byte) c ^ maskingKey[idx % 4]);
-                    } else {
-                        payload[idx] = (byte) ((byte) c);
-                    }
-                    idx++;
-                    break;
+        Integer payloadLength = 0;
+        byte[] payload = new byte[0];
+
+        // Read Byte 0
+        if((c = is.read()) != -1) {
+            opcode = c & 0x0F;
+            //Check wether FIN bit is set.
+            //If not, close connection as we do not support fragmentation
+            boolean fin = (c & 0b10000000) == 0b10000000;
+            if (!fin)
+                return new CloseConnMsg();
+        } else {
+            log("There was nothing more to read.s");
+            return new CloseConnMsg();
+        }
+
+        // Read Byte 1
+        if((c = is.read()) != -1) {
+            // check if mask bit is not set. Then the client tries to send unmasked data.
+            // This is forbidden according to the RFC
+            // In this case we should cleanly close the connection.
+            isMasking = (c & 0b10000000) == 0b10000000;
+
+            if (isWsClient && !isMasking) {
+                log("Client not setting mask bit.");
+                return new CloseConnMsg();
+            }
+
+            //otherwise continue
+            payloadLength = c & 0b01111111;
+            // T126 --> 7+16 bits (as unsigned integer?)
+            // Unsigned done
+            // with:https://stackoverflow.com/questions/9854166/declaring-an-unsigned-int-in-java
+            if (payloadLength == 126) {
+                c = is.read();
+                payloadLength = c << 8;
+                c = is.read();
+                payloadLength = payloadLength | c;
+            } else if (payloadLength == 127) {
+                // 127 --> 7+64 bits (as unsigned int)
+                c = is.read();
+                payloadLength = c << 32;
+                c = is.read();
+                payloadLength = payloadLength | (c << 16);
+                c = is.read();
+                payloadLength = payloadLength | (c << 8);
+                c = is.read();
+                payloadLength = payloadLength | c;
+
+                // We deviate from the RFC as the application will only support message up to a length of 300,
+                // so there is no need to parse larger messsages.
+                // See https://dcms.cs.uni-saarland.de/dn/forum/viewtopic.php?f=3&t=124
+                if (payloadLength < 0) {
+                    payloadLength = Integer.MAX_VALUE;
+                }
+            }
+            payload = new byte[payloadLength];
+        } else {
+            log("There was nothing more to read.s");
+            return new CloseConnMsg();
+        }
+
+        // Read (optional) 4 masking Bytes
+        if(isMasking) {
+            for(int i = 0; i < 4; i++) {
+                if((c = is.read()) != -1) {
+                    maskingKey[i] = (byte) c;
+                } else {
+                    log("There was nothing more to read.s");
+                    return new CloseConnMsg();
+                }
             }
         }
+
+        // Read Payload Bytes
+        for (int i = 0; i < payloadLength; i++) {
+            if((c = is.read()) != -1) {
+                if(isMasking) {
+                    payload[i] = (byte) ((byte) c ^ maskingKey[i % 4]);
+                } else {
+                    payload[i] = (byte) c;
+                }
+            } else {
+                log("There was nothing more to read.s");
+                return new CloseConnMsg();
+            }
+        }
+
         switch (opcode) {
             // Continuation Frame according to RFC (opcode is 0, Page 32++)
             // Cleanly close conn in this case
@@ -276,7 +268,7 @@ public class MsgParser {
     }
 
     // ----------------- DEBUGGING -----------------
-    private final boolean DEBUG = true;
+    private final boolean DEBUG = false;
 
     private void log(String msg) {
         if (DEBUG) {

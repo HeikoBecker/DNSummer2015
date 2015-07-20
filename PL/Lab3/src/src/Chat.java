@@ -411,7 +411,7 @@ public class Chat {
 
     // ----------------- DEBUGGING -----------------
 
-    protected boolean DEBUG = true;
+    protected boolean DEBUG = false;
 
     protected void log(String msg) {
         if (DEBUG) {
