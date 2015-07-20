@@ -1,0 +1,1 @@
+modes csma-aloha.modest -E "PACKETS=10,P=0.35"
