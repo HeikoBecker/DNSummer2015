@@ -1,1 +1,11 @@
-modes csma-aloha.modest -E "PACKETS=10,P=0.35"
+# ----------- CSMA ALOHA -----------
+
+
+# ----------- CSMA/CD ALOHA -----------
+
+
+# ----------- CSMA BEB -----------
+
+
+
+# ----------- CSMA/CD ALOHA -----------

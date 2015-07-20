@@ -1,0 +1,17 @@
+# ----------- CSMA ALOHA (0.35) -----------
+
+Query: modes csma-aloha.modest -E "PACKETS=100,P=0.35" --max-run-length 100000
+
+Result: 271.24273 Time Units
+
+# ----------- CSMA ALOHA (0.25) -----------
+
+Query: modes csma-aloha.modest -E "PACKETS=100,P=0.25" --max-run-length 100000
+
+Result: 230.81724 Time Units
+
+# ----------- CSMA ALOHA (0.15) -----------
+
+Query: modes csma-aloha.modest -E "PACKETS=100,P=0.15" --max-run-length 100000
+
+Result: 207.5618 Time Units

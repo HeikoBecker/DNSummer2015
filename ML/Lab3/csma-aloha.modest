@@ -26,7 +26,7 @@ process Node(int i)
                 :: when urgent (retransmit)
                     palt {
                         :P:
-                            send_start;
+                            urgent send_start;
                             delay(1) send_stop
                             {=
                                 retransmit = (maxSignals[i] > 1),
