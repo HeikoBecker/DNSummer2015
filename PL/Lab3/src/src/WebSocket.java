@@ -38,7 +38,6 @@ public class WebSocket {
                 peerSocket.close();
             } catch (IOException e) {
                 System.out.println("Connection already closed.");
-                e.printStackTrace();
             }
         }
     }

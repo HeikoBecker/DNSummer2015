@@ -42,10 +42,13 @@ public class ConnectionThread implements Runnable {
             peer.websocket.setWsClient();
             peer.connect(host);
             if (!server.isFailed())
-            	Chat.getInstance().addFederationServer((Server) peer);
-            //in the else case we would have to close the connection, but the connect method took care of this
-            //therefore "run" on the peer will terminate
-            //TODO: Notify server user somehow
+            {
+                Chat.getInstance().addFederationServer((Server) peer);
+            } else {
+                System.out.println("Failed to establish connection with " + host + ":" + connectPort + ". Handshake did not succeed.");
+                //in the else case we would have to close the connection, but the connect method took care of this
+                //therefore "run" on the peer will terminate
+            }
         } catch (UnknownHostException e) {
             System.out.println("Failed to establish connection with " + host + ":" + connectPort + ". Unknown host.");
             throw new IOException();
@@ -61,8 +64,8 @@ public class ConnectionThread implements Runnable {
     public void run() {
         try {
         	peer.run();
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (IOException ignored) {
+            // As we will then close the connect anyways, we can ignore this.
         } finally {
             try {
 				peer.exit();

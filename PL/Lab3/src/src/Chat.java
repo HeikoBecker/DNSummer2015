@@ -128,11 +128,10 @@ public class Chat {
         announceChangedForwardingTable(remoteLeftChatMsg.getId(), shortestHopCount);
     }
 
-
-
-    public synchronized void receiveAckn(RemoteAcknChatMsg acknChatMsg, Server sendingServer)
+    public synchronized void receiveAckn(RemoteAcknChatMsg acknChatMsg)
             throws IOException {
         log("Received ACKN");
+
         LocalClient localClient = clients.get(acknChatMsg.getSenderUserId());
         if (localClient != null) {
             localClient.emitAcknChatMsg(acknChatMsg.getId(),
@@ -142,8 +141,6 @@ public class Chat {
                     .getSenderUserId());
             if(remote != null) {
                 remote.emitAckn(acknChatMsg, acknChatMsg.getAcknUserId(), acknChatMsg.getSenderUserId());
-            } else {
-                // TODO: what to do in this case?
             }
         }
     }
@@ -331,8 +328,8 @@ public class Chat {
      * A message's id can be reused, when all clients have sent their
      * acknowledgement.
      */
-    private synchronized void removeMessage(String messageId, String receiverId) {
-        outstandingAcks.get(messageId).remove(receiverId);
+    private synchronized void removeMessage(String messageId, String acknUserId) {
+        outstandingAcks.get(messageId).remove(acknUserId);
         if (outstandingAcks.get(messageId).size() == 0) {
             outstandingAcks.remove(messageId);
         }

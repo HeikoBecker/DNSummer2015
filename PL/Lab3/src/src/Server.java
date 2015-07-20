@@ -56,7 +56,6 @@ public class Server extends Peer {
                 e.printStackTrace();
             }
 
-            // TODO: ensure proper clean-up, by removing all entries entered by this instance
             this.websocket.close();
             exited = true;
         }

@@ -13,7 +13,7 @@ public class RemoteAcknChatMsg extends LocalAcknChatMsg {
 
 	@Override
 	public void execute(Peer peer) throws IOException {
-        Chat.getInstance().receiveAckn(this, (Server) peer);
+        Chat.getInstance().receiveAckn(this);
 	}
 
     public String getAcknUserId() {
