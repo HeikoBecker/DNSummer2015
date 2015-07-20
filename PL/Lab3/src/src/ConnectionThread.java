@@ -24,8 +24,10 @@ public class ConnectionThread implements Runnable {
         if (msg.getClass() == RemoteSrvrChatMsg.class) {
             peer = new Server(peer);
             Chat.getInstance().addFederationServer((Server) peer);
-        } else {
+        } else if(msg.getClass() == LocalAuthChatMsg.class) {
             peer = new LocalClient(peer);
+        } else {
+            peer.emit(false, "INVD", "0");
         }
         //First execute the message
         msg.execute(peer);
