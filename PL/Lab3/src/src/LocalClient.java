@@ -66,7 +66,7 @@ public class LocalClient extends Peer {
      * Emitting another client's message to the current client.
      */
     public void emitSendChatMsg(LocalSendChatMsg msg, String senderId) throws IOException {
-        this.websocket.emit(false, "SEND", msg.id, new String[]{senderId, msg.getMessage()});
+        this.emit(false, "SEND", msg.id, new String[]{senderId, msg.getMessage()});
         this.log("Received a message.");
     }
 
@@ -74,12 +74,12 @@ public class LocalClient extends Peer {
      * Emitting another client's ackn message to the current client.
      */
     public void emitAcknChatMsg(LocalAcknChatMsg msg, String senderId) throws IOException {
-        this.websocket.emit(false, "ACKN", msg.id, new String[]{senderId});
+        this.emit(false, "ACKN", msg.id, new String[]{senderId});
         this.log("Received an ack.");
     }
 
     public void emitAcknChatMsg(String messageId, String senderId) throws IOException {
-        this.websocket.emit(false, "ACKN", messageId, new String[]{senderId});
+        this.emit(false, "ACKN", messageId, new String[]{senderId});
         this.log("Received an ack.");
     }
 
@@ -96,7 +96,7 @@ public class LocalClient extends Peer {
      * Sending an empty description string is ok, as stated here: https://dcms.cs.uni-saarland.de/dn/forum/viewtopic.php?f=3&t=132
      */
     public void emitArrvChatMsg(String userId, String userName, String description) throws IOException {
-        this.websocket.emit(false, "ARRV", userId, new String[]{ userName, description});
+        this.emit(false, "ARRV", userId, new String[]{ userName, description});
         this.log("Received an arrv.");
     }
 
@@ -104,7 +104,7 @@ public class LocalClient extends Peer {
      * Emitting that another client left to the current client.
      */
     public void emitLeftChatMsg(String otherClient) throws IOException {
-        this.websocket.emit(false, "LEFT", otherClient, new String[]{});
+        this.emit(false, "LEFT", otherClient, new String[]{});
         this.log("Received a left.");
     }
 
