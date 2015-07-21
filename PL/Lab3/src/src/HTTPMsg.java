@@ -8,12 +8,15 @@ public class HTTPMsg extends Message {
     private boolean isCorrectProtocol;
 	public boolean hostSet;
 	private boolean invalid;
+	private boolean UpgradeField;
+	private boolean ConnectionField;
+	private String encodedNonce;
 
 	public HTTPMsg(){
 		this.type = "http-Handshake";
 		this.invalid = false;
 		this.hostSet = false;
-		this.isCorrectProtocol = false;		
+		this.isCorrectProtocol = false;
 	}
 	
     @Override
@@ -35,6 +38,10 @@ public class HTTPMsg extends Message {
 		return this.WebSocketKey;
 	}
 	
+	public boolean hasValidFields(){
+		return UpgradeField && ConnectionField;
+	}
+	
 	public boolean isInvalid(){
 		return invalid || !isCorrectProtocol;
 	}
@@ -50,4 +57,20 @@ public class HTTPMsg extends Message {
     public void setCorrectProtocol() {
         isCorrectProtocol = true;
     }
+
+	public void setUpgrade(boolean b) {
+		this.UpgradeField = b;
+	}
+
+	public void setConnection(boolean b) {
+		this.ConnectionField = b;
+	}
+
+	public void setEncodedNonce(String encNonce) {
+		this.encodedNonce = encNonce;
+	}
+
+	public String getEncodedNonce() {
+		return this.encodedNonce;
+	}
 }

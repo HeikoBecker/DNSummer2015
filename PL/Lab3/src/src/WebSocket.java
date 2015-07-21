@@ -1,9 +1,11 @@
 import javax.xml.bind.DatatypeConverter;
+
 import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Random;
@@ -85,7 +87,7 @@ public class WebSocket {
 
         HTTPMsg clientHandshake = parser.getHTTPMessage(false);
         PrintWriter pr = new PrintWriter(this.peerSocket.getOutputStream(), true);
-        if ((clientHandshake.isInvalid() && clientHandshake.isHostSet()) || !clientHandshake.type.equals("Handshake")) {
+        if ((clientHandshake.isInvalid() && clientHandshake.isHostSet()) || !clientHandshake.hasValidFields() ||  !clientHandshake.type.equals("Handshake")) {
             String serverReply = createInvReply();
             pr.print(serverReply);
             pr.flush();
@@ -150,9 +152,21 @@ public class WebSocket {
         pr.print(handshake);
         pr.flush();
 
+        String reqAnswer = "";
+		try {
+			reqAnswer = WebSocket.getSecToken(encodedNonce);
+		} catch (NoSuchAlgorithmException e) {
+			log("Could not produce SHA-1 Token for comparison. This may result in failures.");
+		}
         // used to read the response
         HTTPMsg msg = parser.getHTTPMessage(true);
         if (msg.isInvalid()){
+        	log ("Invalid Msg");
+        	return false;
+        }else if(!msg.hasValidFields()){
+        	log ("Invalid Fields");
+        	return false;
+        }else if(!reqAnswer.equals(msg.getEncodedNonce())){
         	log("Handshake failure!");
         	return false;
         }else{

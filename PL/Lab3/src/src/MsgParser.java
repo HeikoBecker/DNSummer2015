@@ -69,6 +69,7 @@ public class MsgParser {
             if (msg.isInvalid())
                 break;
             input = inputBuffer.readLine();
+            log(input);
             lines = input.split(MsgParser.SPLIT);
             String key = lines[0];
             switch (key) {
@@ -82,6 +83,7 @@ public class MsgParser {
                     // 3.)
                     if (lines[1].equals("websocket")) {
                         msg.type = "Handshake";
+                        msg.setUpgrade(true);
                     } else {
                         log("Invalid Upgrade");
                         msg.setInvalid();
@@ -114,6 +116,8 @@ public class MsgParser {
                     if (!ok) {
                         msg.setInvalid();
                         log("Invalid Connection Request: " + lines[1]);
+                    }else{
+                    	msg.setConnection(true);
                     }
                     break;
                 //Sec-WebSocket-Version - required field, must be 13 (4.2.1 6.)
@@ -126,8 +130,10 @@ public class MsgParser {
                     }
                     break;
                 case MsgParser.SECWSACCEPT:
-
-                    //TODO: See issue #34, shouldn't this be checked for presence?
+                	if(lines.length == 2){
+                		log("Found encoded nonce "+lines[1]);
+                		msg.setEncodedNonce(lines[1]);
+                	}
                     break;
                 //Optional, unchecked fields, ignored as stated in forum
                 case MsgParser.USRAGENT:
