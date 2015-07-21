@@ -86,7 +86,7 @@ public class WebSocket {
 
         HTTPMsg clientHandshake = parser.getHTTPMessage(false);
         PrintWriter pr = new PrintWriter(this.peerSocket.getOutputStream(), true);
-        if ((clientHandshake.isInvalid() && clientHandshake.isHostSet()) || !clientHandshake.hasValidFields() ||  !clientHandshake.type.equals("Handshake")) {
+        if (clientHandshake.isInvalid() || !clientHandshake.isHostSet() || !clientHandshake.hasValidFields() ||  !clientHandshake.type.equals("Handshake")) {
             String serverReply = createInvReply();
             pr.print(serverReply);
             pr.flush();
