@@ -87,7 +87,8 @@ public class Peer {
 	}
 
 	public void exit() throws InternalServerException {
-		throw new InternalServerException();
+		//for the case where a client did not yet authenticate
+		this.websocket.close();
 	}
 
 	// ----------------- DEBUGGING -----------------
