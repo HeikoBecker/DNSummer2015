@@ -14,6 +14,11 @@ public class Chat {
     private static Chat instance = null;
     public static final int DEFAULT_PORT = 42015;
 
+    public void stopTimer() {
+        if(timer != null)
+            timer.cancel();
+    }
+
     /*
      * Cleanup Task removing all messages that are older than MAXAGE minutes.
      *

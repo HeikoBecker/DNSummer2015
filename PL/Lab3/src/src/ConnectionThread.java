@@ -74,4 +74,8 @@ public class ConnectionThread implements Runnable {
 			}
         }
     }
+
+    public void exit() throws InternalServerException {
+        this.peer.exit();
+    }
 }

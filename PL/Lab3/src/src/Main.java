@@ -5,6 +5,7 @@ import java.util.Scanner;
 public class Main {
     private static final boolean DEBUG = false;
     private static LinkedList<Thread> openConnections = new LinkedList<>();
+    private static LinkedList<ConnectionThread> openConnectionThreads = new LinkedList<>();
 
     public static void main(String[] args) throws IOException {
         System.out.println("dnChat is getting started!");
@@ -13,9 +14,9 @@ public class Main {
             listenPort = Integer.parseInt(args[0]);
         }
 
-        Thread wt = new Thread(new WelcomeThread(listenPort));
-        wt.setDaemon(true);
-        wt.start();
+        WelcomeThread wt = new WelcomeThread(listenPort);
+        Thread t = new Thread(wt);
+        t.start();
         System.out.println("Type in \"exit\" to stop the server or \"connect <host> [port]\" to connect to another server.");
 
         Scanner sc = new Scanner(System.in);
@@ -29,12 +30,22 @@ public class Main {
             }
         }
         //First stop accepting new connections
-        wt.interrupt();
+        wt.exit();
+        t.interrupt();
 
-        // TODO: close all connection threads to other servers; only works in one direction
-        for(Thread t : openConnections) {
-            t.interrupt();
+        for(ConnectionThread ct : openConnectionThreads) {
+            try {
+                ct.exit();
+            } catch (InternalServerException e) {
+                e.printStackTrace();
+            }
         }
+
+        for(Thread th : openConnections) {
+            th.interrupt();
+        }
+
+        Chat.getInstance().stopTimer();
 
         // Close Scanner to avoid resource leak
         sc.close();
@@ -53,10 +64,11 @@ public class Main {
         }
 
         try {
-            Thread ct = new Thread(new ConnectionThread(parts[1], connectPort));
-            ct.setDaemon(true);
-            openConnections.add(ct);
-            ct.start();
+            ConnectionThread ct = new ConnectionThread(parts[1], connectPort);
+            Thread t = new Thread(ct);
+            openConnections.add(t);
+            openConnectionThreads.add(ct);
+            t.start();
         } catch (IOException e) {
             if(DEBUG) {
                 e.printStackTrace();

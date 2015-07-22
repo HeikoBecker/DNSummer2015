@@ -12,6 +12,8 @@ public class WelcomeThread implements Runnable {
     private int PORT = 42015; // using the dnChat protocol's default port.
 
     private LinkedList<Thread> openConnections = new LinkedList<>();
+    private LinkedList<ConnectionThread> openConnectionThreads = new LinkedList<>();
+    private ServerSocket socket;
 
     public WelcomeThread(int port) {
         this.PORT = port;
@@ -21,7 +23,7 @@ public class WelcomeThread implements Runnable {
     public void run() {
         try {
             //First create the server port
-            ServerSocket socket = new ServerSocket(PORT);
+            socket = new ServerSocket(PORT);
             if (DEBUG) {
                 System.out.println("[TCP] Welcome Socket bound on port " + PORT + ".");
             }
@@ -29,15 +31,33 @@ public class WelcomeThread implements Runnable {
             //Accept all incoming connections on the server socket.
             //socket.accept() blocks hence there is no busy wait
             while (true) {
-                Thread conn = new Thread(new ConnectionThread(socket.accept()));
-                openConnections.add(conn);
-                conn.start();
+                ConnectionThread ct = new ConnectionThread(socket.accept());
+                Thread t = new Thread(ct);
+                openConnections.add(t);
+                openConnectionThreads.add(ct);
+                t.start();
             }
         } catch (IOException e) {
+            for(ConnectionThread t: openConnectionThreads) {
+                try {
+                    t.exit();
+                } catch (InternalServerException e1) {
+                    e1.printStackTrace();
+                }
+            }
             for(Thread t : openConnections) {
                 t.interrupt();
             }
-            e.printStackTrace();
+        }
+    }
+
+    public void exit() {
+        if(socket != null) {
+            try {
+                socket.close();
+            } catch (IOException e) {
+                System.out.println("COULD NOT CLOSE");
+            }
         }
     }
 }
