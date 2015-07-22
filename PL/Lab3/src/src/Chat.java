@@ -117,7 +117,7 @@ public class Chat {
         announceChangedForwardingTable(arrvChatMsg.getId(), shortestHopCount);
     }
 
-    public void receiveLeft(RemoteLeftChatMsg remoteLeftChatMsg,
+    public synchronized void receiveLeft(RemoteLeftChatMsg remoteLeftChatMsg,
                             Server sendingServer) throws IOException {
         log("Received LEFT broadcast: " + remoteLeftChatMsg.getId());
         int shortestHopCount = findShortestHopCountForClient(remoteLeftChatMsg.getId());
@@ -201,7 +201,7 @@ public class Chat {
         return bestNextHop;
     }
 
-    private int findShortestHopCountForClient(String id) {
+    private synchronized int findShortestHopCountForClient(String id) {
         if (clients.get(id) != null) {
             return 0;
         } else {
@@ -387,7 +387,7 @@ public class Chat {
         }
     }
 
-    private void announceChangedForwardingTable(String clientId, int previousHopCount) throws IOException {
+    private synchronized void announceChangedForwardingTable(String clientId, int previousHopCount) throws IOException {
         boolean left = false;
         int newShortestHopCount = MAX_HOP_COUNT;
         RemoteClient bestRemoteClient = null;
