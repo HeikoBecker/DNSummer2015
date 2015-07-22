@@ -396,7 +396,8 @@ public class Chat {
             left = previousHopCount < MAX_HOP_COUNT;
         } else {
             bestRemoteClient = bestNextHopForClient.getClient(clientId);
-            newShortestHopCount = bestRemoteClient.getHopCount();
+            if (bestRemoteClient != null)
+            	newShortestHopCount = bestRemoteClient.getHopCount();
         }
 
         if (left || (newShortestHopCount != previousHopCount && bestRemoteClient != null)) {
