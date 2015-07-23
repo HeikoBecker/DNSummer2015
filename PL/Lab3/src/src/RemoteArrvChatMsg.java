@@ -15,7 +15,7 @@ public class RemoteArrvChatMsg extends Message {
         this.id = id;
         this.userName = userName;
         this.description = description;
-        this.hopCount = hopCount;
+        this.hopCount = hopCount + 1;
     }
 
     @Override

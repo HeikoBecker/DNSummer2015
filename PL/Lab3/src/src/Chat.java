@@ -15,7 +15,7 @@ public class Chat {
     public static final int DEFAULT_PORT = 42015;
 
     public void stopTimer() {
-        if(timer != null)
+        if (timer != null)
             timer.cancel();
     }
 
@@ -38,8 +38,8 @@ public class Chat {
                 }
 
                 messageIds = new HashSet<>(broadcastedMessages.keySet());
-                for(String id : messageIds) {
-                    if(broadcastedMessages.get(id).getTime() + MAXAGE < System.currentTimeMillis()) {
+                for (String id : messageIds) {
+                    if (broadcastedMessages.get(id).getTime() + MAXAGE < System.currentTimeMillis()) {
                         broadcastedMessages.remove(id);
                     }
                 }
@@ -118,7 +118,7 @@ public class Chat {
     }
 
     public synchronized void receiveLeft(RemoteLeftChatMsg remoteLeftChatMsg,
-                            Server sendingServer) throws IOException {
+                                         Server sendingServer) throws IOException {
         log("Received LEFT broadcast: " + remoteLeftChatMsg.getId());
         int shortestHopCount = findShortestHopCountForClient(remoteLeftChatMsg.getId());
 
@@ -144,7 +144,7 @@ public class Chat {
         } else {
             Server remote = findBestNextHopForClient(acknChatMsg
                     .getSenderUserId());
-            if(remote != null) {
+            if (remote != null) {
                 remote.emitAckn(acknChatMsg, acknChatMsg.getAcknUserId(), acknChatMsg.getSenderUserId());
             }
         }
@@ -163,7 +163,7 @@ public class Chat {
         for (String id : this.clients.keySet()) {
             announcedIds.push(id);
             LocalClient client = this.clients.get(id);
-            server.emitArrv(id, client.getUserName(), "Group 25", 1);
+            server.emitArrv(id, client.getUserName(), "Group 25", 0);
         }
 
         // Forward information about remote clients
@@ -173,7 +173,7 @@ public class Chat {
                 if (!announcedIds.contains(remoteClientId)) {
                     announcedIds.push(remoteClientId);
                     server.emitArrv(remoteClientId, client.getUserName(),
-                            client.getDescription(), findShortestHopCountForClient(remoteClientId) + 1);
+                            client.getDescription(), findShortestHopCountForClient(remoteClientId));
                 }
             }
         }
@@ -187,12 +187,11 @@ public class Chat {
      */
     public synchronized Server findBestNextHopForClient(String clientId) {
         Server bestNextHop = null;
-        int bestHopDistance = 0;
+        int bestHopDistance = MAX_HOP_COUNT;
         for (Server remoteServer : federationServers) {
             RemoteClient remoteClient = remoteServer.getClient(clientId);
             if (remoteClient != null) {
-                if (bestNextHop == null
-                        || bestHopDistance > remoteClient.getHopCount()) {
+                if (bestHopDistance > remoteClient.getHopCount()) {
                     bestNextHop = remoteServer;
                     bestHopDistance = remoteClient.getHopCount();
                 }
@@ -289,7 +288,9 @@ public class Chat {
                     storeMessage(msg.getId(), senderId, receivingClient.getUserId());
                 } else {
                     Server remote = findBestNextHopForClient(recipient);
-                    remote.emitSend(msg, senderId);
+                    if (remote != null) {
+                        remote.emitSend(msg, senderId);
+                    }
                 }
             }
             broadcastedMessages.put(msg.getId(),
@@ -307,7 +308,9 @@ public class Chat {
                 localClient.emitAcknChatMsg(msg, acknUserId);
             } else {
                 Server remoteServer = findBestNextHopForClient(senderId);
-                remoteServer.emitAckn(msg, acknUserId, senderId);
+                if (remoteServer != null) {
+                    remoteServer.emitAckn(msg, acknUserId, senderId);
+                }
             }
             removeMessage(msg.id, acknUserId);
         }
@@ -359,8 +362,7 @@ public class Chat {
 
         LinkedList<String> announcedIds = new LinkedList<>();
         for (Server server : federationServers) {
-            server.emitArrv(newClient.getUserId(), newClient.getUserName(),
-                    "Group 25", 1);
+            server.emitArrv(newClient.getUserId(), newClient.getUserName(), "Group 25", 0);
 
             for (RemoteClient remoteClient : server.getClients()) {
                 if (!announcedIds.contains(remoteClient.getUserId())) {
@@ -397,7 +399,7 @@ public class Chat {
         } else {
             bestRemoteClient = bestNextHopForClient.getClient(clientId);
             if (bestRemoteClient != null)
-            	newShortestHopCount = bestRemoteClient.getHopCount();
+                newShortestHopCount = bestRemoteClient.getHopCount();
         }
 
         if (left || (newShortestHopCount != previousHopCount && bestRemoteClient != null)) {
@@ -417,7 +419,7 @@ public class Chat {
                     remote.emitArrv(clientId,
                             bestRemoteClient.getUserName(),
                             bestRemoteClient.getDescription(),
-                            newShortestHopCount + 1);
+                            newShortestHopCount);
                 }
             }
         }
