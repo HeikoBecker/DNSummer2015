@@ -7,3 +7,7 @@ The Chat Server can be started with the command:
 java Main
 
 Afterwards, the DN chat server runs on the port 42015 and can be closed by typing `exit` and pressing Enter.
+
+You can also specify a port number as the 2nd argument to java to bind the server on a port that is not 42015. E.g.
+
+java Main 42016
