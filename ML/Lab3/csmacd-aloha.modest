@@ -19,11 +19,31 @@ property AllSent = Xmax(t | packetsSent == PACKETS);
 // and send_stop to stop transmitting (but no sooner than 0.5 time units after send_start)
 process Node(int i)
 {
+    bool retransmit = false;
     do {
-        :: when urgent(packetsToSend[i] > 0)
-            send_start {= packetsToSend[i]-- =};
-            delay(1) 
-            send_stop {= packetsSent++ =}
+        :: when urgent (packetsToSend[i] > 0 && signals[i] == 0)
+            alt {
+                :: when urgent (retransmit)
+                    palt {
+                        :P:
+                            urgent send_start;
+                            delay(1) send_stop
+                            {=
+                                retransmit = (maxSignals[i] > 1),
+                                packetsSent += (maxSignals[i] > 1) ? 0 : 1,
+                                packetsToSend[i] -= (maxSignals[i] > 1) ? 0 : 1
+                            =}
+                        :1-P:   delay(1) tau
+                    }
+                :: when urgent (!retransmit)
+                    send_start;
+                    delay(1) send_stop
+                    {=
+                        retransmit = (maxSignals[i] > 1),
+                        packetsSent += (maxSignals[i] > 1) ? 0 : 1,
+                        packetsToSend[i] -= (maxSignals[i] > 1) ? 0 : 1
+                    =}
+            }
     }
 }
 

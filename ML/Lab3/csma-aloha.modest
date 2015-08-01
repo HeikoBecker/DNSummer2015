@@ -29,9 +29,9 @@ process Node(int i)
                             urgent send_start;
                             delay(1) send_stop
                             {=
-                                retransmit = (maxSignals[i] > 1),
-                                packetsSent += (maxSignals[i] > 1) ? 0 : 1,
-                                packetsToSend[i] -= (maxSignals[i] > 1) ? 0 : 1
+                                retransmit = (signals[i] > 1),
+                                packetsSent += (signals[i] > 1) ? 0 : 1,
+                                packetsToSend[i] -= (signals[i] > 1) ? 0 : 1
                             =}
                         :1-P:   delay(1) tau
                     }
@@ -39,9 +39,9 @@ process Node(int i)
                     send_start;
                     delay(1) send_stop
                     {=
-                        retransmit = (maxSignals[i] > 1),
-                        packetsSent += (maxSignals[i] > 1) ? 0 : 1,
-                        packetsToSend[i] -= (maxSignals[i] > 1) ? 0 : 1
+                        retransmit = (signals[i] > 1),
+                        packetsSent += (signals[i] > 1) ? 0 : 1,
+                        packetsToSend[i] -= (signals[i] > 1) ? 0 : 1
                     =}
             }
     }
