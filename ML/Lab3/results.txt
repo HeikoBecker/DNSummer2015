@@ -1,17 +1,31 @@
-# ----------- CSMA ALOHA (0.35) -----------
+# ----------- Measurements -----------
 
-Query: modes csma-aloha.modest -E "PACKETS=100,P=0.35" --max-run-length 100000
+Variant -> Time | Aloha (0.35) | Aloha (0.25) | Aloha (0.15) | BEB          |
+----------------+--------------+--------------+--------------+--------------+
+CSMA/CA         |      272.484 |      229.189 |      206.816 |      232.021 |
+CSMA/CD         |      118.026 |      119.552 |      126.899 |      131.140 |
 
-Result: 271.24273 Time Units
 
-# ----------- CSMA ALOHA (0.25) -----------
+# ----------- Evaluation -----------
 
-Query: modes csma-aloha.modest -E "PACKETS=100,P=0.25" --max-run-length 100000
+The result is that CSMA/CD ALOHA performs best, especially with a P value of 0.35.
 
-Result: 230.81724 Time Units
+The results can be explained as follows:
+CSMA/CD is typically better than CSMA/CA, because transmissions can be cancelled earlier.
+This means that less time is wasted transmitting remainders of packets that will any ways not be used.
+The P value for ALOHA should be low for CSMA/CA, as this ensure that there are less collisions.
+For CMSA/CD, the P value should be higher, which makes sense as collisions are not that problematic as in CSMA/CA, so it is more important to retransmit faster (with higher probability).
+For BEB, it is also true that CA performs better than CD, due to the reasons mentioned above.
 
-# ----------- CSMA ALOHA (0.15) -----------
+The result is that ALOHA can perform better than BEB, when choosing an appropriate value for P.
+To judge whether there is a reason to prefer BEB over ALOHA in practice, we consider the assumptions ALOHA has:
 
-Query: modes csma-aloha.modest -E "PACKETS=100,P=0.15" --max-run-length 100000
+* The probability value has to be chosen in prior and significantly influences the results.
+* The backoff time is the transmission time of one packet or multiples of one packet transmission time.
 
-Result: 207.5618 Time Units
+First, in BEB there is no need to chose a probability value, optimize it for the given scenario and synchronize it between participants.
+Second, BEB uses flexible retransmission times that evolve exponentially. This makes no assumptions about the transmission time of one packet.
+Consequently, participants can sent packets of different sizes and if there are frequent collisions with a longer packet, all participants will backoff far enough to allow the collision-free transmission of this packet. In ALOHA, this could also be achieved eventually, but would take longer, as the nodes do not consider the number of collisions.
+
+Furthermore, having different numbers nodes that are differently spaced could require to tweak the P value, as the likelihood of collisions decreases or increases.
+BEB might not find the optimal solution for this, but nevertheless it can adapt to these settings by choosing backoff times that are dependent on the number of collisions.
