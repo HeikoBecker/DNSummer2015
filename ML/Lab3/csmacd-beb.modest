@@ -1,5 +1,4 @@
 ﻿const int PACKETS; // total number of packets to send in one simulation run
-const real P; // probability p for the Aloha variants
 
 patient action send_start, send_stop;
 
@@ -20,29 +19,28 @@ property AllSent = Xmax(t | packetsSent == PACKETS);
 process Node(int i)
 {
     bool retransmit = false;
-    int maxBackoff = 0;
+    bool sending = false;
+    clock t;
+    int maxBackoff = 2;
+    real waitTime = 0;
     do {
-        :: when urgent (packetsToSend[i] > 0 && signals[i] == 0)
-            alt {
-                :: when urgent (retransmit)
-                    delay(Uniform(0, maxBackoff)) send_start;
-                    delay(1) send_stop
-                    {=
-                        retransmit = (maxSignals[i] > 1),
-                        maxBackoff = (maxSignals[i] > 1) ? maxBackoff*2 : 0,
-                        packetsSent += (maxSignals[i] > 1) ? 0 : 1,
-                        packetsToSend[i] -= (maxSignals[i] > 1) ? 0 : 1
-                    =}
-                :: when urgent (!retransmit)
-                    send_start;
-                    delay(1) send_stop
-                    {=
-                        retransmit = (maxSignals[i] > 1),
-                        maxBackoff = (maxSignals[i] > 1) ? 2 : 0,
-                        packetsSent += (maxSignals[i] > 1) ? 0 : 1,
-                        packetsToSend[i] -= (maxSignals[i] > 1) ? 0 : 1
-                    =}
-            }
+        :: when urgent (packetsToSend[i] > 0
+            && signals[i] == 0 
+            && (!sending)
+            && (!retransmit || (retransmit && t >= waitTime))
+        )
+            send_start {= sending = true, t = 0 =}
+        :: when urgent (sending && (t >= 1.0 || maxSignals[i] >= 1)) 
+            send_stop
+            {=
+                sending = false,
+                t = 0,
+                retransmit = (maxSignals[i] > 1),
+                maxBackoff = (maxSignals[i] > 1) ? maxBackoff * 2 : 2,
+                waitTime = (maxSignals[i] > 1) ? Uniform(0,maxBackoff - 1) : 0.0,
+                packetsSent += (maxSignals[i] > 1) ? 0 : 1,
+                packetsToSend[i] -= (maxSignals[i] > 1) ? 0 : 1
+            =}
     }
 }
 
