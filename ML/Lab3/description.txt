@@ -1,16 +1,46 @@
 # ----------- CSMA ALOHA -----------
 
+For CSMA Alohoa, we differentiated between wether decided that the two cases where the node may actually do something are
+    a) when there is something to send and the channel is idle and we are not in sending state ourself 
+and 
+    b) when the node is sending and 1 time unit has passed, such that we need to stop sending.
+    In b) we then check after finishing the whole transmission wether a collision occured with (maxSignals[i] > 1)
+Case a) is split up in two cases:
+    1) We need to do a retransmit
+    2) We do not do a retransmit
+Case 1) uses a probabilistic case distinction as noted in the project description such that only with probability P a retransmission is done
 
 # ----------- CSMA/CD ALOHA -----------
 
-0.5 due to sheet
-
+The sending part (part a)) of CSMA/CD Aloha is the same as the one for CMSA Aloha, as this part handles sending and 
+retransmissions which obviously must be the same (both use Aloha).
+Part b) is different from CSMA in the way that we modified the condition to stop sending.
+Instead of checking wether a collision occured, after finishing the transmission, we can check it while sending.
+We need to add that the timer is > 0.5 due to the specification from the project description. 
+But as soon as t >= 0.5, we allow to stop sending as soon as a collision is sensed.
 
 # ----------- CSMA BEB -----------
 
+The transmission part (part b) of CSMA BEB is similar to the one of CSMA Aloha.
+Only due to the fact that we do BEB here, we need to add two additional variable assignments.
+Otherwise behavior is the same as for part b) of CMSA Aloha.
+The first assignment is that when a collision occured, we need to multiply our maximum waiting time by 2 to get the next power of 2, as described in the algorithm for BEB.
+The second one is randomly choosing uniformly distributed a waitingTime in the range between the "old" maximum backoff time and 0.
+
+The sending part (part a) ) is not split up as for Aloha. 
+Instead we ensure that we are not doing a retransmit or that we have waited sufficient time (using the clock) in the guarding
+when statement. 
+All other parts of the condition stay the same.
+For consistency, we should not be sending, there should be noone else sending and we must have packets to send.
 
 
 # ----------- CSMA/CD ALOHA -----------
 
+This model is a combination of the code of CSMA BEB anf CSMA/CD Aloha.
 
-0.5 due to sheet
+We add as for CSMA BEB, the two assignments of the maximum backoff time and the random waiting time.
+Furthermore, we modify the conditions guarding the sending as for CSMA BEB 
+
+ As for CSMA/CD Aloha, we have a condition guarding the stopping of the transmission that is able to stop sending as soon as we sense a collision and 0.5 time units waiting time have passed.
+
+
