@@ -2,8 +2,8 @@
 
 Variant -> Time | Aloha (0.35) | Aloha (0.25) | Aloha (0.15) | BEB          |
 ----------------+--------------+--------------+--------------+--------------+
-CSMA/CA         |      272.484 |      229.189 |      206.816 |      232.021 |
-CSMA/CD         |      118.026 |      119.552 |      126.899 |      131.140 |
+CSMA            |      272.484 |      229.189 |      206.816 |      236.211 |
+CSMA/CD         |      190.175 |      184.784 |      186.181 |      217.490 |
 
 
 # ----------- Evaluation -----------
@@ -11,10 +11,10 @@ CSMA/CD         |      118.026 |      119.552 |      126.899 |      131.140 |
 The result is that CSMA/CD ALOHA performs best, especially with a P value of 0.35.
 
 The results can be explained as follows:
-CSMA/CD is typically better than CSMA/CA, because transmissions can be cancelled earlier.
+CSMA/CD is typically better than CSMA, because transmissions can be cancelled earlier.
 This means that less time is wasted transmitting remainders of packets that will any ways not be used.
-The P value for ALOHA should be low for CSMA/CA, as this ensure that there are less collisions.
-For CMSA/CD, the P value should be higher, which makes sense as collisions are not that problematic as in CSMA/CA, so it is more important to retransmit faster (with higher probability).
+The P value for ALOHA should be low for CSMA, as this ensure that there are less collisions.
+For CMSA/CD, the P value should be higher, which makes sense as collisions are not that problematic as in CSMA, so it is more important to retransmit faster (with higher probability).
 For BEB, it is also true that CA performs better than CD, due to the reasons mentioned above.
 
 The result is that ALOHA can perform better than BEB, when choosing an appropriate value for P.

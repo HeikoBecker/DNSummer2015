@@ -3,9 +3,14 @@
 
 # ----------- CSMA/CD ALOHA -----------
 
+0.5 due to sheet
+
 
 # ----------- CSMA BEB -----------
 
 
 
 # ----------- CSMA/CD ALOHA -----------
+
+
+0.5 due to sheet

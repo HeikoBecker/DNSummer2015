@@ -3,24 +3,24 @@ csma-aloha.modest: info: Partitioned distribution cannot be used with CI or ACI 
 csma-aloha.modest: warning: The CI evaluation method is not yet implemented, using a fixed number of runs instead.
 Analysis results for csma-aloha.modest
 Experiment PACKETS=100, P=0.35
-Total time: 52.4 s
+Total time: 49.5 s
 
 + Property AllSent
-  Mean: 272.484820176177
+  Mean: 273.405808529317
   Runs: 1000
-  Time: 51.6 s
+  Time: 49.0 s
 
 "CSMA ALOHA 0.25" 
 csma-aloha.modest: info: Partitioned distribution cannot be used with CI or ACI evaluation unless the number of simulation runs is specified, using YMER-style distribution instead.
 csma-aloha.modest: warning: The CI evaluation method is not yet implemented, using a fixed number of runs instead.
 Analysis results for csma-aloha.modest
 Experiment PACKETS=100, P=0.25
-Total time: 35.3 s
+Total time: 37.0 s
 
 + Property AllSent
-  Mean: 229.189137454832
+  Mean: 227.779813273049
   Runs: 1000
-  Time: 34.9 s
+  Time: 36.4 s
 
 "CSMA ALOHA 0.15" 
 csma-aloha.modest: info: Partitioned distribution cannot be used with CI or ACI evaluation unless the number of simulation runs is specified, using YMER-style distribution instead.
@@ -30,67 +30,67 @@ Experiment PACKETS=100, P=0.15
 Total time: 28.2 s
 
 + Property AllSent
-  Mean: 206.816763259783
+  Mean: 208.2623537473
   Runs: 1000
-  Time: 27.6 s
+  Time: 27.7 s
 
 "CSMA/CD ALOHA 0.35" 
 csmacd-aloha.modest: info: Partitioned distribution cannot be used with CI or ACI evaluation unless the number of simulation runs is specified, using YMER-style distribution instead.
 csmacd-aloha.modest: warning: The CI evaluation method is not yet implemented, using a fixed number of runs instead.
 Analysis results for csmacd-aloha.modest
 Experiment PACKETS=100, P=0.35
-Total time: 27.2 s
+Total time: 42.0 s
 
 + Property AllSent
-  Mean: 118.026680970339
+  Mean: 190.175080455946
   Runs: 1000
-  Time: 26.8 s
+  Time: 41.3 s
 
 "CSMA/CD ALOHA 0.25" 
 csmacd-aloha.modest: info: Partitioned distribution cannot be used with CI or ACI evaluation unless the number of simulation runs is specified, using YMER-style distribution instead.
 csmacd-aloha.modest: warning: The CI evaluation method is not yet implemented, using a fixed number of runs instead.
 Analysis results for csmacd-aloha.modest
 Experiment PACKETS=100, P=0.25
-Total time: 23.4 s
+Total time: 33.9 s
 
 + Property AllSent
-  Mean: 119.552489073135
+  Mean: 184.78483154036
   Runs: 1000
-  Time: 22.9 s
+  Time: 33.5 s
 
 "CSMA/CD ALOHA 0.15" 
 csmacd-aloha.modest: info: Partitioned distribution cannot be used with CI or ACI evaluation unless the number of simulation runs is specified, using YMER-style distribution instead.
 csmacd-aloha.modest: warning: The CI evaluation method is not yet implemented, using a fixed number of runs instead.
 Analysis results for csmacd-aloha.modest
 Experiment PACKETS=100, P=0.15
-Total time: 19.3 s
+Total time: 29.3 s
 
 + Property AllSent
-  Mean: 126.899466453225
+  Mean: 186.181935660198
   Runs: 1000
-  Time: 18.9 s
+  Time: 28.8 s
 
 "CSMA BEB" 
 csma-beb.modest: info: Partitioned distribution cannot be used with CI or ACI evaluation unless the number of simulation runs is specified, using YMER-style distribution instead.
 csma-beb.modest: warning: The CI evaluation method is not yet implemented, using a fixed number of runs instead.
 Analysis results for csma-beb.modest
 Experiment PACKETS=100
-Total time: 20.3 s
+Total time: 19.0 s
 
 + Property AllSent
-  Mean: 232.021015436224
+  Mean: 236.21155310804
   Runs: 1000
-  Time: 19.9 s
+  Time: 18.7 s
 
 "CSMA/CD BEB" 
 csmacd-beb.modest: info: Partitioned distribution cannot be used with CI or ACI evaluation unless the number of simulation runs is specified, using YMER-style distribution instead.
 csmacd-beb.modest: warning: The CI evaluation method is not yet implemented, using a fixed number of runs instead.
 Analysis results for csmacd-beb.modest
 Experiment PACKETS=100
-Total time: 20.2 s
+Total time: 21.9 s
 
 + Property AllSent
-  Mean: 131.140643965825
+  Mean: 217.4905228387
   Runs: 1000
-  Time: 19.9 s
+  Time: 21.5 s
 
