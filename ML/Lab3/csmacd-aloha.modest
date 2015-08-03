@@ -33,7 +33,7 @@ process Node(int i)
                 :: when urgent (!retransmit)
                     send_start {= sending = true, t = 0 =}
             }
-        :: when urgent (sending && t >= 0.5 && (t >= 1.0 || maxSignals[i] >= 1))
+        :: when urgent (sending && t >= 0.5 && (t >= 1.0 || maxSignals[i] > 1))
             send_stop
             {=
                 sending = false,
