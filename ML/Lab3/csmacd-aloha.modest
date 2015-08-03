@@ -19,27 +19,34 @@ property AllSent = Xmax(t | packetsSent == PACKETS);
 // and send_stop to stop transmitting (but no sooner than 0.5 time units after send_start)
 process Node(int i)
 {
-    bool retransmit = false;
-    bool sending = false;
-    clock t;
+    bool retransmit = false; //to safe wether we need to retransmit
+    bool sending = false; // to safe wether we are currently in "sending" state
+    clock t; //for time based actions (sending the send_stop after 1 time unit)
     do {
+        // if there are packets to send and we do not sense anyone else sending, and are not sending ourself
         :: when urgent (packetsToSend[i] > 0 && signals[i] == 0 && !sending)
             alt {
+                // if we are retransmitting
                 :: when urgent (retransmit)
+                    //probabilistic alternativ as given in the problem description for Aloa
                     palt {
-                        :P:     urgent send_start {= sending = true, t = 0 =}
-                        :1-P:   delay(1) tau
+                        :P:     urgent send_start {= sending = true, t = 0 =} //if we do the retransmit, then safe sending state and reset timer
+                        :1-P:   delay(1) tau    //otherwise delay, tau for "delaying retransmit"
                     }
+                // if not retransmitting start sending
                 :: when urgent (!retransmit)
-                    send_start {= sending = true, t = 0 =}
+                    send_start {= sending = true, t = 0 =} //safe sending state and reset timer
             }
+        // if we are sending, the timer is greater than 0.5 (as specified in the project description)
+        // and either we are "finished sending" as sufficient time has passed, or we sense that there is a collion
         :: when urgent (sending && t >= 0.5 && (t >= 1.0 || maxSignals[i] > 1))
-            send_stop
+            send_stop //stop sending and
             {=
-                sending = false,
-                retransmit = (maxSignals[i] > 1),
-                packetsSent += (maxSignals[i] > 1) ? 0 : 1,
-                packetsToSend[i] -= (maxSignals[i] > 1) ? 0 : 1
+                sending = false, //safe that we are not sending
+                //note that condition must always be maxSignals[i] > 1 as modest does not have "imperative semantics" and uses the "old" value of retransmit for the right hand sides in this block
+                retransmit = (maxSignals[i] > 1),   //a retransmit is necessary if there was a collision while sending
+                packetsSent += (maxSignals[i] > 1) ? 0 : 1, //increment the send packets if there was no collision
+                packetsToSend[i] -= (maxSignals[i] > 1) ? 0 : 1 // decrement packets that need to be send under the same condition
             =}
     }
 }
