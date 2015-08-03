@@ -1,5 +1,5 @@
 ﻿const int PACKETS; // total number of packets to send in one simulation run
-const real P; // probability p for the Aloha variants
+const real P =0.35; // probability p for the Aloha variants
 
 patient action send_start, send_stop;
 
@@ -22,21 +22,17 @@ process Node(int i)
     bool retransmit = false; //to safe wether we need to retransmit
     bool sending = false; // to safe wether we are currently in "sending" state
     clock t; //for time based actions (sending the send_stop after 1 time unit)
+    real silentSlots = 0;
     do {
         // if there are packets to send and we do not sense anyone else sending, and are not sending ourself
-        :: when urgent (packetsToSend[i] > 0 && signals[i] == 0 && !sending)
-            alt {
-                // if we are retransmitting
-                :: when urgent (retransmit)
+        :: when urgent (packetsToSend[i] > 0 && signals[i] == 0 && !sending && retransmit && silentSlots == 0)
                     //probabilistic alternativ as given in the problem description for Aloa
-                    palt {
-                        :P:     urgent send_start {= sending = true, t = 0 =} //if we do the retransmit, then safe sending state and reset timer
-                        :1-P:   delay(1) tau    //otherwise delay, tau for "delaying retransmit"
-                    }
+                        urgent send_start {= sending = true, t = 0 =} //if we do the retransmit, then safe sending state and reset timer
+		  :: when urgent (packetsToSend[i] > 0 && signals[i] == 0 && !sending && retransmit && silentSlots > 0)
+					 		delay(1) tau {= silentSlots -=1 =}    //otherwise delay, tau for "delaying retransmit"
                 // if not retransmitting start sending
-                :: when urgent (!retransmit)
-                    send_start {= sending = true, t = 0 =} //safe sending state and reset timer
-            }
+        :: when urgent (packetsToSend[i] > 0 && signals[i] == 0 && !sending&& !retransmit)
+                    urgent send_start {= sending = true, t = 0 =} //safe sending state and reset timer
         //if we are sending and one time unit has passed
         :: when urgent (sending && t >= 1.0) 
             send_stop //stop sending and
@@ -45,7 +41,8 @@ process Node(int i)
                 //note that condition must always be maxSignals[i] > 1 as modest does not have "imperative semantics" and uses the "old" value of retransmit for the right hand sides in this block
                 retransmit = (maxSignals[i] > 1),   //a retransmit is necessary if there was a collision while sending
                 packetsSent += (maxSignals[i] > 1) ? 0 : 1, //increment the send packets if there was no collision
-                packetsToSend[i] -= (maxSignals[i] > 1) ? 0 : 1 // decrement packets that need to be send under the same condition
+                packetsToSend[i] -= (maxSignals[i] > 1) ? 0 : 1, // decrement packets that need to be send under the same condition
+                silentSlots = Geometric(P)
             =}
     }
 }
