@@ -1,0 +1,96 @@
+"CSMA ALOHA 0.35" 
+csma-aloha.modest: info: Partitioned distribution cannot be used with CI or ACI evaluation unless the number of simulation runs is specified, using YMER-style distribution instead.
+csma-aloha.modest: warning: The CI evaluation method is not yet implemented, using a fixed number of runs instead.
+Analysis results for csma-aloha.modest
+Experiment PACKETS=100, P=0.35
+Total time: 33.2 s
+
++ Property AllSent
+  Mean: 242.340853122435
+  Runs: 1000
+  Time: 32.3 s
+
+"CSMA ALOHA 0.25" 
+csma-aloha.modest: info: Partitioned distribution cannot be used with CI or ACI evaluation unless the number of simulation runs is specified, using YMER-style distribution instead.
+csma-aloha.modest: warning: The CI evaluation method is not yet implemented, using a fixed number of runs instead.
+Analysis results for csma-aloha.modest
+Experiment PACKETS=100, P=0.25
+Total time: 26.2 s
+
++ Property AllSent
+  Mean: 222.557292225743
+  Runs: 1000
+  Time: 25.5 s
+
+"CSMA ALOHA 0.15" 
+csma-aloha.modest: info: Partitioned distribution cannot be used with CI or ACI evaluation unless the number of simulation runs is specified, using YMER-style distribution instead.
+csma-aloha.modest: warning: The CI evaluation method is not yet implemented, using a fixed number of runs instead.
+Analysis results for csma-aloha.modest
+Experiment PACKETS=100, P=0.15
+Total time: 23.2 s
+
++ Property AllSent
+  Mean: 206.86494727174
+  Runs: 1000
+  Time: 22.6 s
+
+"CSMA/CD ALOHA 0.35" 
+csmacd-aloha.modest: info: Partitioned distribution cannot be used with CI or ACI evaluation unless the number of simulation runs is specified, using YMER-style distribution instead.
+csmacd-aloha.modest: warning: The CI evaluation method is not yet implemented, using a fixed number of runs instead.
+Analysis results for csmacd-aloha.modest
+Experiment PACKETS=100, P=0.35
+Total time: 34.4 s
+
++ Property AllSent
+  Mean: 210.965397095334
+  Runs: 1000
+  Time: 33.8 s
+
+"CSMA/CD ALOHA 0.25" 
+csmacd-aloha.modest: info: Partitioned distribution cannot be used with CI or ACI evaluation unless the number of simulation runs is specified, using YMER-style distribution instead.
+csmacd-aloha.modest: warning: The CI evaluation method is not yet implemented, using a fixed number of runs instead.
+Analysis results for csmacd-aloha.modest
+Experiment PACKETS=100, P=0.25
+Total time: 29.8 s
+
++ Property AllSent
+  Mean: 200.328036559541
+  Runs: 1000
+  Time: 28.9 s
+
+"CSMA/CD ALOHA 0.15" 
+csmacd-aloha.modest: info: Partitioned distribution cannot be used with CI or ACI evaluation unless the number of simulation runs is specified, using YMER-style distribution instead.
+csmacd-aloha.modest: warning: The CI evaluation method is not yet implemented, using a fixed number of runs instead.
+Analysis results for csmacd-aloha.modest
+Experiment PACKETS=100, P=0.15
+Total time: 21.4 s
+
++ Property AllSent
+  Mean: 195.63443925093
+  Runs: 1000
+  Time: 20.8 s
+
+"CSMA BEB" 
+csma-beb.modest: info: Partitioned distribution cannot be used with CI or ACI evaluation unless the number of simulation runs is specified, using YMER-style distribution instead.
+csma-beb.modest: warning: The CI evaluation method is not yet implemented, using a fixed number of runs instead.
+Analysis results for csma-beb.modest
+Experiment PACKETS=100
+Total time: 21.5 s
+
++ Property AllSent
+  Mean: 230.095212191379
+  Runs: 1000
+  Time: 21.0 s
+
+"CSMA/CD BEB" 
+csmacd-beb.modest: info: Partitioned distribution cannot be used with CI or ACI evaluation unless the number of simulation runs is specified, using YMER-style distribution instead.
+csmacd-beb.modest: warning: The CI evaluation method is not yet implemented, using a fixed number of runs instead.
+Analysis results for csmacd-beb.modest
+Experiment PACKETS=100
+Total time: 21.4 s
+
++ Property AllSent
+  Mean: 219.727992324853
+  Runs: 1000
+  Time: 20.8 s
+

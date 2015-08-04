@@ -1,0 +1,41 @@
+For all models we could use the same skeleton, where we differentiate inside a do loop, whether we are sending and need to stop
+or whether we are not sending and can start a transmission.
+The transmission initialization code is always the same.
+We need to ensure that we are not sending currently, there are no other nodes sending and there are packets to send.
+Furthermore we either should not be in the need of doing a retransmit or if we need to, sufficient time must have 
+passed such that we have waited long enough.
+The only difference for each model lies in the generation of the backoff times (last 1 or two lines of the second when block) (Aloha vs. BEB)
+and the condition for collision detection (when guard of the second when statement) (CSMA vs. CSMA/CD).
+For each protocol we detail why we chose which condition and backoff time computation.
+
+# ----------- CSMA ALOHA -----------
+
+The backoff time for ALOHA is the Geometric Distribution of the model parameter P, as this gives us the number
+of time units we would have waited based on the probability P, as hinted in the project description.
+
+The CSMA collision detection can only happen after finishing the transmission, hence we require, that a full time
+unit has passed and then check whether a collision occurred.(maxSignals[i] > 1)
+
+# ----------- CSMA/CD ALOHA -----------
+
+We use again as before the Geometric Distribution.
+
+The CSMA/CD collision detection can happen as soon as there is a collision sensed, even during the transmission.
+We must ensure that t >= 0.5, due to the delay specifications from the sheet.
+After this minimal time, as soon as a collision is sensed, we abort the transmission.
+This is done as in the algorithm for CSMA/CD.
+
+# ----------- CSMA BEB -----------
+
+The backoff time computation for BEB consists of two assignments.
+The first assignment is that when a collision occurred, we need to multiply our maximum waiting time by 2 to get the next power of 2, as described in the algorithm for BEB.
+The second one is randomly choosing uniformly distributed a waitingTime in the range between the "old" maximum backoff time and 0.
+At first glance, the implementation might look wrong, but due to parallel assignments of Modest, it is still correct.
+
+We do again CSMA collision detection as for CSMA ALOHA.
+
+# ----------- CSMA/CD BEB -----------
+
+As for CSMA BEB we do the same backoff computation.
+
+As for CSMA/CD ALOHA, we use the same guard for retransmission.

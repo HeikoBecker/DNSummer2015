@@ -1,0 +1,98 @@
+﻿const int PACKETS; // total number of packets to send in one simulation run
+
+patient action send_start, send_stop;
+
+int packetsSent; // have each node increment this variable whenever it has sent a packet successfully (i.e. 1 time unit without collision)
+int[4] packetsToSend; // packetsToSend[i] is the number of packets available to send by node i; have node i decrement it as necessary (e.g. whenever it has successfully sent a packet)
+int[4] signals; // signals[i] is the number of transmissions currently being sensed at node i (i.e. signals[i] > 1 means that there is a collision); the value must only be changed by the SharedMedium process
+int[4] maxSignals; // maxSignals[i] is the maximum number of transmissions that have been sensed at node i since the start of the last transmission (to detect, at the end of a transmission, whether a collision occurred during the transmission); the value must only be changed by the SharedMedium process
+
+/* Do not change anything between the start of the file and this line */
+
+// Properties
+clock t;
+property AllSent = Xmax(t | packetsSent == PACKETS);
+
+// Models the multiple access protocol of node i;
+// use send_start to start a transmission (but only if packetsToSend[i] > 0)
+// and send_stop to stop transmitting (but no sooner than 0.5 time units after send_start)
+process Node(int i)
+{
+    bool retransmit = false; //to save whether we need to retransmit
+    bool sending = false; // to save whether we are currently in "sending" state
+    clock t; //for time based actions (sending the send_stop after 1 time unit)
+    int maxBackoff = 2; //first round of sending --> maxBackoff = 2^1 = 2
+    real waitTime = 0; //waiting time 
+    do {
+        //if there are packets to send
+        :: when urgent (packetsToSend[i] > 0
+            && signals[i] == 0  //and nobody else is sending
+            && (!sending)       //and we are not already sending
+            && (!retransmit || (retransmit && t >= waitTime)) // and we either do no retransmit or! we need to retransmit and we have waited long enough
+        )
+            send_start {= sending = true, t = 0 =} //save sending state and reset timer
+
+        // if we are sending, the timer is greater than 0.5 (as specified in the project description)
+        // and either we are "finished sending" as sufficient time has passed, or we sense that there is a collision
+        :: when urgent (sending && t >= 0.5 && (t >= 1.0 || maxSignals[i] > 1))
+            send_stop //stop sending and
+            {=
+                t = 0, //reset the clock
+                sending = false, //save that we are not sending
+                //note that condition must always be maxSignals[i] > 1 as modest does not have "imperative semantics" and uses the "old" value of retransmit for the right hand sides in this block
+                retransmit = (maxSignals[i] > 1),   //a retransmit is necessary if there was a collision while sending
+                packetsSent += (maxSignals[i] > 1) ? 0 : 1, //increment the send packets if there was no collision
+                packetsToSend[i] -= (maxSignals[i] > 1) ? 0 : 1, // decrement packets that need to be send under the same condition
+                maxBackoff = (maxSignals[i] > 1) ? maxBackoff * 2 : 2, //maxBackOf must be incremented if there was a collision, otherwise start from 0
+                waitTime = (maxSignals[i] > 1) ? Uniform(0,maxBackoff - 1) : 0.0 //The waiting time is uniformly distributed between 0 and the maxBackoff - 1 (as in L21, Slide 23) otherwise the waiting time is 0
+            =}
+    }
+}
+
+/* Do not change anything between this line and the end of the file */
+
+// Models the upper layers of all nodes in one process
+process UpperLayers(int remainingPackets)
+{
+	when urgent(remainingPackets > 0) {= packetsToSend[DiscreteUniform(0, 3)]++, remainingPackets-- =};
+	delay(Exponential(1)) tau;
+	UpperLayers(remainingPackets)
+}
+
+// Models the physical-layer influence by node i; note the signal propagation time of up to 0.2 time units
+process SharedMedium(int i)
+{
+	clock c;
+	clock c1; real x1;
+	clock c2; real x2;
+	
+	par {
+	::	do {
+		when urgent(c1 >= x1) send_start {= c = 0, c1 = 0, x1 = Uniform(0.025, 0.05), maxSignals[i] = 0 =};
+		when urgent(c1 >= x1) {= signals[(i + 0) % 4]++, maxSignals[(i + 0) % 4] = max(maxSignals[(i + 0) % 4], signals[(i + 0) % 4] + 1), c1 = 0, x1 = Uniform(0.025, 0.05) =};
+		when urgent(c1 >= x1) {= signals[(i + 1) % 4]++, maxSignals[(i + 1) % 4] = max(maxSignals[(i + 1) % 4], signals[(i + 1) % 4] + 1), c1 = 0, x1 = Uniform(0.025, 0.05) =};
+		when urgent(c1 >= x1) {= signals[(i + 2) % 4]++, maxSignals[(i + 2) % 4] = max(maxSignals[(i + 2) % 4], signals[(i + 2) % 4] + 1), c1 = 0, x1 = Uniform(0.025, 0.05) =};
+		when urgent(c1 >= x1) {= signals[(i + 3) % 4]++, maxSignals[(i + 3) % 4] = max(maxSignals[(i + 3) % 4], signals[(i + 3) % 4] + 1), c1 = 0, x1 = Uniform(0.025, 0.05) =}
+		}
+	::	do {
+		when urgent(c >= 0.5) send_stop {= c2 = 0, x2 = Uniform(0.025, 0.05) =};
+		when urgent(c2 >= x2) {= signals[(i + 0) % 4]--, c2 = 0, x2 = Uniform(0.025, 0.05) =};
+		when urgent(c2 >= x2) {= signals[(i + 1) % 4]--, c2 = 0, x2 = Uniform(0.025, 0.05) =};
+		when urgent(c2 >= x2) {= signals[(i + 2) % 4]--, c2 = 0, x2 = Uniform(0.025, 0.05) =};
+		when urgent(c2 >= x2) {= signals[(i + 3) % 4]-- =}
+		}
+	}
+}
+
+patient action send_start_0, send_stop_0, send_start_1, send_stop_1, send_start_2, send_stop_2, send_start_3, send_stop_3;
+par {
+::	UpperLayers(PACKETS)
+::	relabel { send_start, send_stop } by { send_start_0, send_stop_0 } Node(0)
+::	relabel { send_start, send_stop } by { send_start_0, send_stop_0 } SharedMedium(0)
+::	relabel { send_start, send_stop } by { send_start_1, send_stop_1 } Node(1)
+::	relabel { send_start, send_stop } by { send_start_1, send_stop_1 } SharedMedium(1)
+::	relabel { send_start, send_stop } by { send_start_2, send_stop_2 } Node(2)
+::	relabel { send_start, send_stop } by { send_start_2, send_stop_2 } SharedMedium(2)
+::	relabel { send_start, send_stop } by { send_start_3, send_stop_3 } Node(3)
+::	relabel { send_start, send_stop } by { send_start_3, send_stop_3 } SharedMedium(3)
+}
