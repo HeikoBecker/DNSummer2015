@@ -30,4 +30,4 @@ In ALOHA, this could also be achieved eventually, but would take longer, as the 
 
 Furthermore, having different numbers nodes that are differently spaced could require to tweak the P value, as the likelihood of collisions decreases or increases.
 BEB might not find the optimal solution for this, but nevertheless it can adapt to these settings by choosing backoff times that are dependent on the number of collisions.
-Taking all this into account one could see BEB as more dynamic as ALOHA, as it can easiert react to high network congestions, respectively single occasional conflicts.
+Taking all this into account one could see BEB that is more dynamic as ALOHA, as it can easier react to high network congestions, respectively single occasional conflicts.
