@@ -19,27 +19,26 @@ property AllSent = Xmax(t | packetsSent == PACKETS);
 // and send_stop to stop transmitting (but no sooner than 0.5 time units after send_start)
 process Node(int i)
 {
-    bool retransmit = false; //to safe wether we need to retransmit
-    bool sending = false; // to safe wether we are currently in "sending" state
-    clock t; //for time based actions (sending the send_stop after 1 time unit)
+    bool retransmit = false; //to save whether we need to retransmit
+    bool sending = false; // to save whether we are currently in "sending" state
+    clock t; // for time based actions (sending the send_stop after 1 time unit)
     real waitTime = 0;
     do {
         //if there are packets to send
         :: when urgent (packetsToSend[i] > 0
-            && signals[i] == 0  //and noone else is sending
-            && (!sending)       //and we are not sending
+            && signals[i] == 0  // and nobody else is sending
+            && (!sending)       // and we are not already sending
             && (!retransmit || (retransmit && t >= waitTime)) // and we either do no retransmit or! we need to retransmit and we have waited long enough
         )
-            send_start {= sending = true, t = 0 =} //start sending, safe sending state and reset timer
+            send_start {= sending = true, t = 0 =} // start sending, save sending state and reset timer
 
-        //if we are sending and one time unit has passed meaning that the transmission is
-        //finished
+        //if we are sending and one time unit has passed meaning that the transmission is finished
         :: when urgent (sending && t >= 1.0) 
             send_stop //stop sending and
             {=
                 t = 0, // reset the clock
-                sending = false, //safe that we are not sending
-                //note that condition must always be maxSignals[i] > 1 as modest does not have "imperative semantics" and uses the "old" value of retransmit for the right hand sides in this block
+                sending = false, //save that we are not sending
+                // note that condition must always be maxSignals[i] > 1 as modest does not have "imperative semantics" and uses the "old" value of retransmit for the right hand sides in this block
                 retransmit = (maxSignals[i] > 1),   //a retransmit is necessary if there was a collision while sending
                 packetsSent += (maxSignals[i] > 1) ? 0 : 1, //increment the send packets if there was no collision
                 packetsToSend[i] -= (maxSignals[i] > 1) ? 0 : 1, // decrement packets that need to be send under the same condition
