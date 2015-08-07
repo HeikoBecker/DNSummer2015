@@ -42,8 +42,8 @@ process Node(int i)
                 retransmit = (maxSignals[i] > 1),   //a retransmit is necessary if there was a collision while sending
                 packetsSent += (maxSignals[i] > 1) ? 0 : 1, //increment the send packets if there was no collision
                 packetsToSend[i] -= (maxSignals[i] > 1) ? 0 : 1, // decrement packets that need to be send under the same condition
-                maxBackoff = (maxSignals[i] > 1) ? maxBackoff * 2 : 2, //maxBackOff must be incremented if there was a collision, otherwise start from 0
-                waitTime = (maxSignals[i] > 1) ? Uniform(0,maxBackoff - 1) : 0.0 //The waiting time is uniformly distributed between 0 and the maxBackoff - 1 (as in L21, Slide 23) otherwise the waiting time is 0
+                maxBackoff = (maxSignals[i] > 1) ? maxBackoff * 2 : 2, //maxBackOf must be incremented if there was a collision, otherwise start from 0
+                waitTime = (maxSignals[i] > 1) ? DiscreteUniform(0,maxBackoff - 1) : 0.0 //The waiting time is uniformly distributed between 0 and the maxBackoff - 1 (as in L21, Slide 23) otherwise the waiting time is 0
             =}
     }
 }
